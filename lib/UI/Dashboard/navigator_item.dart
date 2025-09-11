@@ -11,6 +11,6 @@ class NavigatorItem {
 }
 
 List<NavigatorItem> navigatorItems = [
-  NavigatorItem(Icons.home_outlined, 0, const HomePage()),
+  NavigatorItem(Icons.home_outlined, 0, HomePage()),
   NavigatorItem(Icons.shopping_cart_outlined, 1, const OrderPage()),
 ];

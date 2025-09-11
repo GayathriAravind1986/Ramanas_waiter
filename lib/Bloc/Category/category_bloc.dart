@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ramanas_waiter/Api/apiProvider.dart';
+import 'package:ramanas_waiter/UI/Landing/Home/home_screen.dart';
 
 abstract class FoodCategoryEvent {}
 
@@ -12,28 +13,28 @@ class FoodProductItem extends FoodCategoryEvent {
   FoodProductItem(this.catId, this.searchKey, this.searchCode);
 }
 
-// class AddToBilling extends FoodCategoryEvent {
-//   List<Map<String, dynamic>> billingItems;
-//   bool? isDiscount;
-//   final OrderType? orderType;
-//   AddToBilling(this.billingItems, this.isDiscount, this.orderType);
-// }
+class AddToBilling extends FoodCategoryEvent {
+  List<Map<String, dynamic>> billingItems;
+  bool? isDiscount;
+  final OrderType? orderType;
+  AddToBilling(this.billingItems, this.isDiscount, this.orderType);
+}
 
-// class GenerateOrder extends FoodCategoryEvent {
-//   final String orderPayloadJson;
-//   GenerateOrder(this.orderPayloadJson);
-// }
-//
-// class UpdateOrder extends FoodCategoryEvent {
-//   final String orderPayloadJson;
-//   String? orderId;
-//   UpdateOrder(this.orderPayloadJson, this.orderId);
-// }
-//
-// class TableDine extends FoodCategoryEvent {}
-//
-// class WaiterDine extends FoodCategoryEvent {}
-//
+class GenerateOrder extends FoodCategoryEvent {
+  final String orderPayloadJson;
+  GenerateOrder(this.orderPayloadJson);
+}
+
+class UpdateOrder extends FoodCategoryEvent {
+  final String orderPayloadJson;
+  String? orderId;
+  UpdateOrder(this.orderPayloadJson, this.orderId);
+}
+
+class TableDine extends FoodCategoryEvent {}
+
+class WaiterDine extends FoodCategoryEvent {}
+
 class StockDetails extends FoodCategoryEvent {}
 
 class FoodCategoryBloc extends Bloc<FoodCategoryEvent, dynamic> {
@@ -58,60 +59,60 @@ class FoodCategoryBloc extends Bloc<FoodCategoryEvent, dynamic> {
             emit(error);
           });
     });
-    // on<AddToBilling>((event, emit) async {
-    //   await ApiProvider()
-    //       .postAddToBillingAPI(
-    //         event.billingItems,
-    //         event.isDiscount,
-    //         event.orderType?.apiValue,
-    //       )
-    //       .then((value) {
-    //         emit(value);
-    //       })
-    //       .catchError((error) {
-    //         emit(error);
-    //       });
-    // });
-    // on<GenerateOrder>((event, emit) async {
-    //   await ApiProvider()
-    //       .postGenerateOrderAPI(event.orderPayloadJson)
-    //       .then((value) {
-    //         emit(value);
-    //       })
-    //       .catchError((error) {
-    //         emit(error);
-    //       });
-    // });
-    // on<UpdateOrder>((event, emit) async {
-    //   await ApiProvider()
-    //       .updateGenerateOrderAPI(event.orderPayloadJson, event.orderId)
-    //       .then((value) {
-    //         emit(value);
-    //       })
-    //       .catchError((error) {
-    //         emit(error);
-    //       });
-    // });
-    // on<TableDine>((event, emit) async {
-    //   await ApiProvider()
-    //       .getTableAPI()
-    //       .then((value) {
-    //         emit(value);
-    //       })
-    //       .catchError((error) {
-    //         emit(error);
-    //       });
-    // });
-    // on<WaiterDine>((event, emit) async {
-    //   await ApiProvider()
-    //       .getWaiterAPI()
-    //       .then((value) {
-    //         emit(value);
-    //       })
-    //       .catchError((error) {
-    //         emit(error);
-    //       });
-    // });
+    on<AddToBilling>((event, emit) async {
+      await ApiProvider()
+          .postAddToBillingAPI(
+            event.billingItems,
+            event.isDiscount,
+            event.orderType?.apiValue,
+          )
+          .then((value) {
+            emit(value);
+          })
+          .catchError((error) {
+            emit(error);
+          });
+    });
+    on<GenerateOrder>((event, emit) async {
+      await ApiProvider()
+          .postGenerateOrderAPI(event.orderPayloadJson)
+          .then((value) {
+            emit(value);
+          })
+          .catchError((error) {
+            emit(error);
+          });
+    });
+    on<UpdateOrder>((event, emit) async {
+      await ApiProvider()
+          .updateGenerateOrderAPI(event.orderPayloadJson, event.orderId)
+          .then((value) {
+            emit(value);
+          })
+          .catchError((error) {
+            emit(error);
+          });
+    });
+    on<TableDine>((event, emit) async {
+      await ApiProvider()
+          .getTableAPI()
+          .then((value) {
+            emit(value);
+          })
+          .catchError((error) {
+            emit(error);
+          });
+    });
+    on<WaiterDine>((event, emit) async {
+      await ApiProvider()
+          .getWaiterAPI()
+          .then((value) {
+            emit(value);
+          })
+          .catchError((error) {
+            emit(error);
+          });
+    });
     on<StockDetails>((event, emit) async {
       await ApiProvider()
           .getStockDetailsAPI()

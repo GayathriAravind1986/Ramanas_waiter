@@ -2,9 +2,15 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:ramanas_waiter/Bloc/Response/errorResponse.dart';
 import 'package:ramanas_waiter/ModelClass/Authentication/Post_login_model.dart';
+import 'package:ramanas_waiter/ModelClass/Cart/Post_Add_to_billing_model.dart';
 import 'package:ramanas_waiter/ModelClass/HomeScreen/Category&Product/Get_category_model.dart';
 import 'package:ramanas_waiter/ModelClass/HomeScreen/Category&Product/Get_product_by_catId_model.dart';
+import 'package:ramanas_waiter/ModelClass/Order/Delete_order_model.dart';
+import 'package:ramanas_waiter/ModelClass/Order/Post_generate_order_model.dart';
+import 'package:ramanas_waiter/ModelClass/Order/Update_generate_order_model.dart';
 import 'package:ramanas_waiter/ModelClass/ShopDetails/getStockMaintanencesModel.dart';
+import 'package:ramanas_waiter/ModelClass/Table/Get_table_model.dart';
+import 'package:ramanas_waiter/ModelClass/Waiter/getWaiterModel.dart';
 import 'package:ramanas_waiter/Reusable/constant.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -153,6 +159,139 @@ class ApiProvider {
     }
   }
 
+  /// Add to Billing - Post API Integration
+  Future<PostAddToBillingModel> postAddToBillingAPI(
+    List<Map<String, dynamic>> billingItems,
+    bool? isDiscount,
+    String? orderType,
+  ) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var token = sharedPreferences.getString("token");
+    try {
+      final dataMap = {
+        "items": billingItems,
+        "isApplicableDiscount": isDiscount,
+        "orderType": orderType,
+      };
+      var data = json.encode(dataMap);
+      var dio = Dio();
+      var response = await dio.request(
+        '${Constants.baseUrl}api/generate-order/billing/calculate',
+        options: Options(
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        ),
+        data: data,
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        try {
+          PostAddToBillingModel postAddToBillingResponse =
+              PostAddToBillingModel.fromJson(response.data);
+          return postAddToBillingResponse;
+        } catch (e) {
+          return PostAddToBillingModel()
+            ..errorResponse = ErrorResponse(
+              message: "Failed to parse response: $e",
+            );
+        }
+      } else {
+        return PostAddToBillingModel()
+          ..errorResponse = ErrorResponse(
+            message: "Error: ${response.data['message'] ?? 'Unknown error'}",
+            statusCode: response.statusCode,
+          );
+      }
+    } on DioException catch (dioError) {
+      final errorResponse = handleError(dioError);
+      return PostAddToBillingModel()..errorResponse = errorResponse;
+    } catch (error) {
+      return PostAddToBillingModel()..errorResponse = handleError(error);
+    }
+  }
+
+  /// Table - Fetch API Integration
+  Future<GetTableModel> getTableAPI() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var token = sharedPreferences.getString("token");
+    try {
+      var dio = Dio();
+      var response = await dio.request(
+        '${Constants.baseUrl}api/tables',
+        options: Options(
+          method: 'GET',
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        if (response.data['success'] == true) {
+          GetTableModel getTableResponse = GetTableModel.fromJson(
+            response.data,
+          );
+          return getTableResponse;
+        }
+      } else {
+        return GetTableModel()
+          ..errorResponse = ErrorResponse(
+            message: "Error: ${response.data['message'] ?? 'Unknown error'}",
+            statusCode: response.statusCode,
+          );
+      }
+      return GetTableModel()
+        ..errorResponse = ErrorResponse(
+          message: "Unexpected error occurred.",
+          statusCode: 500,
+        );
+    } on DioException catch (dioError) {
+      final errorResponse = handleError(dioError);
+      return GetTableModel()..errorResponse = errorResponse;
+    } catch (error) {
+      return GetTableModel()..errorResponse = handleError(error);
+    }
+  }
+
+  /// Waiter Details -Fetch API Integration
+  Future<GetWaiterModel> getWaiterAPI() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var token = sharedPreferences.getString("token");
+    try {
+      var dio = Dio();
+      var response = await dio.request(
+        '${Constants.baseUrl}api/waiter',
+        options: Options(
+          method: 'GET',
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        if (response.data['success'] == true) {
+          GetWaiterModel getWaiterResponse = GetWaiterModel.fromJson(
+            response.data,
+          );
+          return getWaiterResponse;
+        }
+      } else {
+        return GetWaiterModel()
+          ..errorResponse = ErrorResponse(
+            message: "Error: ${response.data['message'] ?? 'Unknown error'}",
+            statusCode: response.statusCode,
+          );
+      }
+      return GetWaiterModel()
+        ..errorResponse = ErrorResponse(
+          message: "Unexpected error occurred.",
+          statusCode: 500,
+        );
+    } on DioException catch (dioError) {
+      final errorResponse = handleError(dioError);
+      return GetWaiterModel()..errorResponse = errorResponse;
+    } catch (error) {
+      return GetWaiterModel()..errorResponse = handleError(error);
+    }
+  }
+
   /// Stock Details - Fetch API Integration
   Future<GetStockMaintanencesModel> getStockDetailsAPI() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -189,6 +328,139 @@ class ApiProvider {
       return GetStockMaintanencesModel()..errorResponse = errorResponse;
     } catch (error) {
       return GetStockMaintanencesModel()..errorResponse = handleError(error);
+    }
+  }
+
+  /// Generate Order - Post API Integration
+  Future<PostGenerateOrderModel> postGenerateOrderAPI(
+    final String orderPayloadJson,
+  ) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var token = sharedPreferences.getString("token");
+    try {
+      var data = orderPayloadJson;
+      var dio = Dio();
+      var response = await dio.request(
+        '${Constants.baseUrl}api/generate-order/order',
+        options: Options(
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        ),
+        data: data,
+      );
+      if (response.statusCode == 201 && response.data != null) {
+        try {
+          PostGenerateOrderModel postGenerateOrderResponse =
+              PostGenerateOrderModel.fromJson(response.data);
+          return postGenerateOrderResponse;
+        } catch (e) {
+          return PostGenerateOrderModel()
+            ..errorResponse = ErrorResponse(
+              message: "Failed to parse response: $e",
+            );
+        }
+      } else {
+        return PostGenerateOrderModel()
+          ..errorResponse = ErrorResponse(
+            message: "Error: ${response.data['message'] ?? 'Unknown error'}",
+            statusCode: response.statusCode,
+          );
+      }
+    } on DioException catch (dioError) {
+      final errorResponse = handleError(dioError);
+      return PostGenerateOrderModel()..errorResponse = errorResponse;
+    } catch (error) {
+      return PostGenerateOrderModel()..errorResponse = handleError(error);
+    }
+  }
+
+  /// Delete Order - Fetch API Integration
+  Future<DeleteOrderModel> deleteOrderAPI(String? orderId) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var token = sharedPreferences.getString("token");
+    try {
+      var dio = Dio();
+      var response = await dio.request(
+        '${Constants.baseUrl}api/generate-order/order/$orderId',
+        options: Options(
+          method: 'DELETE',
+          headers: {'Authorization': 'Bearer $token'},
+        ),
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        if (response.data['success'] == true) {
+          DeleteOrderModel deleteOrderResponse = DeleteOrderModel.fromJson(
+            response.data,
+          );
+          return deleteOrderResponse;
+        }
+      } else {
+        return DeleteOrderModel()
+          ..errorResponse = ErrorResponse(
+            message: "Error: ${response.data['message'] ?? 'Unknown error'}",
+            statusCode: response.statusCode,
+          );
+      }
+      return DeleteOrderModel()
+        ..errorResponse = ErrorResponse(
+          message: "Unexpected error occurred.",
+          statusCode: 500,
+        );
+    } on DioException catch (dioError) {
+      final errorResponse = handleError(dioError);
+      return DeleteOrderModel()..errorResponse = errorResponse;
+    } catch (error) {
+      return DeleteOrderModel()..errorResponse = handleError(error);
+    }
+  }
+
+  /// Update Generate Order - Post API Integration
+  Future<UpdateGenerateOrderModel> updateGenerateOrderAPI(
+    final String orderPayloadJson,
+    String? orderId,
+  ) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var token = sharedPreferences.getString("token");
+    try {
+      var data = orderPayloadJson;
+      var dio = Dio();
+      var response = await dio.request(
+        '${Constants.baseUrl}api/generate-order/order/$orderId',
+        options: Options(
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        ),
+        data: data,
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        try {
+          UpdateGenerateOrderModel updateGenerateOrderResponse =
+              UpdateGenerateOrderModel.fromJson(response.data);
+          return updateGenerateOrderResponse;
+        } catch (e) {
+          return UpdateGenerateOrderModel()
+            ..errorResponse = ErrorResponse(
+              message: "Failed to parse response: $e",
+            );
+        }
+      } else {
+        return UpdateGenerateOrderModel()
+          ..errorResponse = ErrorResponse(
+            message: "Error: ${response.data['message'] ?? 'Unknown error'}",
+            statusCode: response.statusCode,
+          );
+      }
+    } on DioException catch (dioError) {
+      final errorResponse = handleError(dioError);
+      return UpdateGenerateOrderModel()..errorResponse = errorResponse;
+    } catch (error) {
+      return UpdateGenerateOrderModel()..errorResponse = handleError(error);
     }
   }
 
