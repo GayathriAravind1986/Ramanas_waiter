@@ -31,9 +31,9 @@ class CategoryCard extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        width: size.width * 0.3,
+        width: size.width < 500 ? size.width * 0.25 : size.width * 0.168,
         height: size.height * 0.15,
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         decoration: BoxDecoration(
           color: isSelected ? whiteColor : greyColor.shade100,
           borderRadius: BorderRadius.circular(12),
