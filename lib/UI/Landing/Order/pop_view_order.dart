@@ -429,12 +429,12 @@ class _ThermalReceiptDialogState extends State<ThermalReceiptDialog> {
         : Dialog(
             backgroundColor: Colors.transparent,
             insetPadding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 40,
+              horizontal: 5,
+              vertical: 20,
             ),
             child: SingleChildScrollView(
               child: Container(
-                width: size.width * 0.5,
+                width: size.width * 0.95,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: whiteColor,
@@ -443,25 +443,25 @@ class _ThermalReceiptDialogState extends State<ThermalReceiptDialog> {
                 child: Column(
                   children: [
                     // Header
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Center(
-                          child: const Text(
-                            "Order Receipt",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.close),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //   children: [
+                    //     Center(
+                    //       child: Text(
+                    //         "Order# $orderNumber",
+                    //         style: TextStyle(
+                    //           fontSize: 16,
+                    //           fontWeight: FontWeight.bold,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //     IconButton(
+                    //       onPressed: () => Navigator.pop(context),
+                    //       icon: const Icon(Icons.close),
+                    //     ),
+                    //   ],
+                    // ),
+                    // const SizedBox(height: 16),
                     RepaintBoundary(
                       key: normalReceiptKey,
                       child: getThermalReceiptWidget(
@@ -508,7 +508,7 @@ class _ThermalReceiptDialogState extends State<ThermalReceiptDialog> {
                         ),
                       ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -559,7 +559,8 @@ class _ThermalReceiptDialogState extends State<ThermalReceiptDialog> {
                         // ),
                         // horizontalSpace(width: 10),
                         SizedBox(
-                          width: size.width * 0.09,
+                          width: size.width * 0.28,
+                          height: size.height * 0.04,
                           child: OutlinedButton(
                             onPressed: () => Navigator.pop(context),
                             child: const Text(

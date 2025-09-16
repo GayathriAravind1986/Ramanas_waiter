@@ -92,7 +92,7 @@ extension OrderTypeX on OrderType {
   }
 }
 
-class HomePageViewState extends State<HomePageView> {
+class HomePageViewState extends State<HomePageView>  with TickerProviderStateMixin {
   GetCategoryModel getCategoryModel = GetCategoryModel();
   GetProductByCatIdModel getProductByCatIdModel = GetProductByCatIdModel();
   PostAddToBillingModel postAddToBillingModel = PostAddToBillingModel();
@@ -148,7 +148,8 @@ class HomePageViewState extends State<HomePageView> {
   dynamic selectedValueWaiter;
   dynamic tableId;
   dynamic waiterId;
-
+  late TabController _tabController;
+  int? _currentTabIndex;
   bool showTipField = false;
   final TextEditingController tipController = TextEditingController();
   double tipAmount = 0.0;
@@ -259,7 +260,7 @@ class HomePageViewState extends State<HomePageView> {
       selectedOrderType = OrderType.line;
       isSplitPayment = false;
       selectedFullPaymentMethod = "";
-      // widget.isEditingOrder = false;
+      widget.isEditingOrder = false;
       balance = 0;
       if (billingItems.isEmpty || billingItems == []) {
         isDiscountApplied = false;
@@ -273,6 +274,25 @@ class HomePageViewState extends State<HomePageView> {
   @override
   void initState() {
     super.initState();
+    int initialIndex = (widget.isEditingOrder == true) ? 1 : 0;
+
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: initialIndex,
+    );
+
+    _currentTabIndex = initialIndex;
+
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) {
+        setState(() {
+          _currentTabIndex = _tabController.index;
+        });
+      }
+    });
+
+    // fire bloc events
     context.read<FoodCategoryBloc>().add(FoodCategory());
     context.read<FoodCategoryBloc>().add(
       FoodProductItem(
@@ -284,9 +304,11 @@ class HomePageViewState extends State<HomePageView> {
     context.read<FoodCategoryBloc>().add(TableDine());
     context.read<FoodCategoryBloc>().add(WaiterDine());
     context.read<FoodCategoryBloc>().add(StockDetails());
+
     setState(() {
       categoryLoad = true;
     });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.isEditingOrder == true && widget.existingOrder != null) {
         loadExistingOrder(widget.existingOrder!);
@@ -296,12 +318,14 @@ class HomePageViewState extends State<HomePageView> {
     });
   }
 
+
   @override
   void dispose() {
     for (var controller in quantityControllers.values) {
       controller.dispose();
     }
     quantityControllers.clear();
+    _tabController.dispose();
     super.dispose();
   }
 
@@ -345,6 +369,39 @@ class HomePageViewState extends State<HomePageView> {
         );
         return item?['qty'] ?? 0;
       }
+
+      bool isOriginalOrderItem(String productId) {
+        if (widget.existingOrder?.data?.items == null) return false;
+        return widget.existingOrder!.data!.items!.any((item) => item.product?.id == productId);
+      }
+
+
+      bool isExistingItem(String itemId) {
+        if (widget.isEditingOrder != true || widget.existingOrder?.data?.items == null) {
+          return false;
+        }
+
+        return widget.existingOrder!.data!.items!.any((item) => item.product?.id == itemId);
+      }
+
+// Helper method to get original quantity of an item
+      int getOriginalQuantity(String itemId) {
+        if (widget.isEditingOrder != true || widget.existingOrder?.data?.items == null) {
+          return 0;
+        }
+
+        final originalItem = widget.existingOrder!.data!.items!
+            .firstWhereOrNull((item) => item.product?.id == itemId);
+
+        return int.parse(originalItem!.quantity.toString()) ?? 0;
+      }
+
+// Helper method to get current quantity from billing items
+      int getCurrentQuantityFromBilling(String itemId) {
+        final billingItem = billingItems.firstWhereOrNull((item) => item['_id'] == itemId);
+        return billingItem?['qty'] ?? 0;
+      }
+
 
       @override
       Widget price(String label, String value, {bool isBold = false}) {
@@ -406,6 +463,7 @@ class HomePageViewState extends State<HomePageView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TabBar(
+                      controller: _tabController,
                       indicatorColor: appPrimaryColor,
                       labelColor: appPrimaryColor,
                       unselectedLabelColor: greyColor,
@@ -416,6 +474,7 @@ class HomePageViewState extends State<HomePageView> {
                     ),
                     Expanded(
                       child: TabBarView(
+                        controller: _tabController,
                         children: [
                           /// category screen
                           categoryLoad
@@ -598,12 +657,36 @@ class HomePageViewState extends State<HomePageView> {
                                           height: size.height * 0.02,
                                         ),
 
-                                        Text(
-                                          "Choose Category",
-                                          style: MyTextStyle.f18(
-                                            blackColor,
-                                            weight: FontWeight.bold,
-                                          ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              "Choose Category",
+                                              style: MyTextStyle.f18(
+                                                blackColor,
+                                                weight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                setState(() {
+                                                  searchController.clear();
+                                                  searchCodeController.clear();
+                                                });
+                                                context
+                                                    .read<FoodCategoryBloc>()
+                                                    .add(FoodCategory());
+                                                context
+                                                    .read<FoodCategoryBloc>()
+                                                    .add(FoodProductItem(
+                                                    selectedCatId.toString(),
+                                                    searchController.text,
+                                                    searchCodeController
+                                                        .text));
+                                              },
+                                              icon: const Icon(Icons.refresh),
+                                            ),
+                                          ],
                                         ),
                                         verticalSpace(
                                           height: size.height * 0.02,
@@ -765,6 +848,7 @@ class HomePageViewState extends State<HomePageView> {
                                                     debugPrint(
                                                       "shopName:${getStockMaintanencesModel.data!.name}",
                                                     );
+
                                                     TextEditingController
                                                     getQuantityController(
                                                       String productId,
@@ -803,6 +887,8 @@ class HomePageViewState extends State<HomePageView> {
                                                     final p =
                                                         getProductByCatIdModel
                                                             .rows![index];
+                                                    debugPrint("addonsAddvbills:${p
+                                                        .addons}");
                                                     int currentQuantity =
                                                         getCurrentQuantity(
                                                           p.id.toString(),
@@ -878,7 +964,7 @@ class HomePageViewState extends State<HomePageView> {
                                                                                           imageUrl: p.image!,
                                                                                           width:
                                                                                               size.width *
-                                                                                              0.5,
+                                                                                              0.9,
                                                                                           height:
                                                                                               size.height *
                                                                                               0.2,
@@ -1070,6 +1156,7 @@ class HomePageViewState extends State<HomePageView> {
                                                                                           ),
                                                                                           ElevatedButton(
                                                                                             onPressed: () {
+
                                                                                               final currentQtyInCart = getCurrentQuantity(
                                                                                                 p.id.toString(),
                                                                                               );
@@ -1244,7 +1331,8 @@ class HomePageViewState extends State<HomePageView> {
                                                                 );
                                                               },
                                                             );
-                                                          } else {
+                                                          }
+                                                          else {
                                                             final currentQtyInCart =
                                                                 getCurrentQuantity(
                                                                   p.id.toString(),
@@ -1660,316 +1748,266 @@ class HomePageViewState extends State<HomePageView> {
                                                                         MainAxisAlignment
                                                                             .center,
                                                                     children: [
-                                                                      // Expanded(
-                                                                      //   child: Text(
-                                                                      //     '₹ ${p.basePrice}',
-                                                                      //     style: MyTextStyle.f14(
-                                                                      //       blackColor,
-                                                                      //       weight:
-                                                                      //           FontWeight.w600,
-                                                                      //     ),
-                                                                      //     maxLines:
-                                                                      //         1,
-                                                                      //     overflow:
-                                                                      //         TextOverflow.ellipsis,
-                                                                      //   ),
-                                                                      // ),
-                                                                      // horizontalSpace(
-                                                                      //   width:
-                                                                      //       5,
-                                                                      // ),
                                                                       CircleAvatar(
-                                                                        radius:
-                                                                            15,
-                                                                        backgroundColor:
-                                                                            greyColor200,
+                                                                        radius: 15,
+                                                                        backgroundColor: greyColor200,
                                                                         child: IconButton(
-                                                                          icon: const Icon(
+                                                                          icon: Icon(
                                                                             Icons.remove,
-                                                                            size:
-                                                                                15,
-                                                                            color:
-                                                                                blackColor,
+                                                                            size: 15,
+                                                                            color: blackColor,
                                                                           ),
                                                                           onPressed: () {
                                                                             setState(() {
                                                                               isSplitPayment = false;
-                                                                              if (widget.isEditingOrder !=
-                                                                                  true) {
+                                                                              if (widget.isEditingOrder != true) {
                                                                                 selectedOrderType = OrderType.line;
                                                                               }
+
                                                                               final index = billingItems.indexWhere(
-                                                                                (
-                                                                                  item,
-                                                                                ) =>
-                                                                                    item['_id'] ==
-                                                                                    p.id,
+                                                                                    (item) => item['_id'] == p.id,
                                                                               );
-                                                                              if (index !=
-                                                                                      -1 &&
-                                                                                  billingItems[index]['qty'] >
-                                                                                      1) {
-                                                                                billingItems[index]['qty'] =
-                                                                                    billingItems[index]['qty'] -
-                                                                                    1;
-                                                                                updateControllerText(
-                                                                                  p.id.toString(),
-                                                                                  billingItems[index]['qty'],
-                                                                                );
-                                                                              } else {
-                                                                                billingItems.removeWhere(
-                                                                                  (
-                                                                                    item,
-                                                                                  ) =>
-                                                                                      item['_id'] ==
-                                                                                      p.id,
-                                                                                );
-                                                                                quantityControllers.remove(
-                                                                                  p.id,
-                                                                                );
-                                                                                if (billingItems.isEmpty ||
-                                                                                    billingItems ==
-                                                                                        []) {
-                                                                                  isDiscountApplied = false;
-                                                                                  widget.isEditingOrder = false;
-                                                                                  tableId = null;
-                                                                                  waiterId = null;
-                                                                                  selectedValue = null;
-                                                                                  selectedValueWaiter = null;
-                                                                                }
-                                                                              }
-                                                                              context
-                                                                                  .read<
-                                                                                    FoodCategoryBloc
-                                                                                  >()
-                                                                                  .add(
-                                                                                    AddToBilling(
-                                                                                      List.from(
-                                                                                        billingItems,
+
+                                                                              if (index != -1) {
+                                                                                final currentQty = billingItems[index]['qty'];
+
+                                                                                // 🔎 original quantity from existing order
+                                                                                final originalQty = widget.existingOrder?.data?.items
+                                                                                    ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                                                    ?.quantity ??
+                                                                                    0;
+
+                                                                                if (isOriginalOrderItem(p.id.toString())) {
+                                                                                  // ✅ original item: only allow decrease if above originalQty
+                                                                                  if (currentQty > originalQty) {
+                                                                                    billingItems[index]['qty'] = currentQty - 1;
+                                                                                    updateControllerText(
+                                                                                      p.id.toString(),
+                                                                                      billingItems[index]['qty'],
+                                                                                    );
+                                                                                  } else {
+                                                                                    // show feedback if user tries to go below
+                                                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                                                      SnackBar(
+                                                                                        content: Text(
+                                                                                          "Cannot reduce below original ordered qty ($originalQty)",
+                                                                                        ),
                                                                                       ),
-                                                                                      isDiscountApplied,
-                                                                                      selectedOrderType,
-                                                                                    ),
-                                                                                  );
+                                                                                    );
+                                                                                  }
+                                                                                } else {
+                                                                                  // ✅ new item: free to decrease/remove
+                                                                                  if (currentQty > 1) {
+                                                                                    billingItems[index]['qty'] = currentQty - 1;
+                                                                                    updateControllerText(
+                                                                                      p.id.toString(),
+                                                                                      billingItems[index]['qty'],
+                                                                                    );
+                                                                                  } else {
+                                                                                    billingItems.removeWhere((item) => item['_id'] == p.id);
+                                                                                    quantityControllers.remove(p.id);
+                                                                                    if (billingItems.isEmpty) {
+                                                                                      isDiscountApplied = false;
+                                                                                      widget.isEditingOrder = false;
+                                                                                      tableId = null;
+                                                                                      waiterId = null;
+                                                                                      selectedValue = null;
+                                                                                      selectedValueWaiter = null;
+                                                                                    }
+                                                                                  }
+                                                                                }
+
+                                                                                context.read<FoodCategoryBloc>().add(
+                                                                                  AddToBilling(
+                                                                                    List.from(billingItems),
+                                                                                    isDiscountApplied,
+                                                                                    selectedOrderType,
+                                                                                  ),
+                                                                                );
+                                                                              }
                                                                             });
                                                                           },
                                                                         ),
                                                                       ),
                                                                       Container(
-                                                                        width:
-                                                                            45,
-                                                                        height:
-                                                                            32,
-                                                                        margin: const EdgeInsets.symmetric(
-                                                                          horizontal:
-                                                                              12,
-                                                                        ),
+                                                                        width: 45,
+                                                                        height: 32,
+                                                                        margin: const EdgeInsets.symmetric(horizontal: 12),
                                                                         decoration: BoxDecoration(
                                                                           border: Border.all(
-                                                                            color:
-                                                                                greyColor,
+                                                                            color: (widget.isEditingOrder == true &&
+                                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                                isOriginalOrderItem(p.id.toString()))
+                                                                                ? greyColor.withOpacity(0.5) // Lighter border for locked items
+                                                                                : greyColor,
                                                                           ),
-                                                                          borderRadius:
-                                                                              BorderRadius.circular(
-                                                                                4,
-                                                                              ),
+                                                                          borderRadius: BorderRadius.circular(4),
+                                                                          color: (widget.isEditingOrder == true &&
+                                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                              isOriginalOrderItem(p.id.toString()))
+                                                                              ? greyColor.withOpacity(0.1) // Light gray background for locked items
+                                                                              : whiteColor,
                                                                         ),
                                                                         child: TextField(
-                                                                          controller:
-                                                                              currentController,
-                                                                          textAlign:
-                                                                              TextAlign.center,
-                                                                          keyboardType:
-                                                                              TextInputType.number,
+                                                                          controller: currentController,
+                                                                          textAlign: TextAlign.center,
+                                                                          keyboardType: TextInputType.number,
+                                                                          enabled: !(widget.isEditingOrder == true &&
+                                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                              isOriginalOrderItem(p.id.toString())), // Disable for original items
                                                                           style: MyTextStyle.f16(
-                                                                            blackColor,
+                                                                            (widget.isEditingOrder == true &&
+                                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                                isOriginalOrderItem(p.id.toString()))
+                                                                                ? greyColor // Gray text for locked items
+                                                                                : blackColor,
                                                                           ),
-                                                                          decoration: const InputDecoration(
-                                                                            border:
-                                                                                InputBorder.none,
-                                                                            isDense:
-                                                                                true,
-                                                                            contentPadding: EdgeInsets.all(
-                                                                              8,
-                                                                            ),
+                                                                          decoration: InputDecoration(
+                                                                            border: InputBorder.none,
+                                                                            isDense: true,
+                                                                            contentPadding: EdgeInsets.all(8),
+                                                                            hintText: (widget.isEditingOrder == true &&
+                                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                                isOriginalOrderItem(p.id.toString()))
+                                                                                ? "Locked"
+                                                                                : null,
+                                                                            hintStyle: TextStyle(color: greyColor, fontSize: 12),
                                                                           ),
-                                                                          onChanged:
-                                                                              (
-                                                                                value,
-                                                                              ) {
-                                                                                final newQty = int.tryParse(
-                                                                                  value,
-                                                                                );
-                                                                                if (newQty !=
-                                                                                        null &&
-                                                                                    newQty >
-                                                                                        0) {
-                                                                                  bool canSetQuantity;
-                                                                                  if (p.isStock ==
-                                                                                      true) {
-                                                                                    if ((widget.isEditingOrder ==
-                                                                                                true &&
-                                                                                            widget.existingOrder?.data?.orderStatus ==
-                                                                                                "COMPLETED") ||
-                                                                                        (widget.isEditingOrder ==
-                                                                                                true &&
-                                                                                            widget.existingOrder?.data?.orderStatus ==
-                                                                                                "WAITLIST")) {
-                                                                                      final paidQty =
-                                                                                          widget.existingOrder?.data?.items
-                                                                                              ?.firstWhereOrNull(
-                                                                                                (
-                                                                                                  item,
-                                                                                                ) =>
-                                                                                                    item.product?.id ==
-                                                                                                    p.id,
-                                                                                              )
-                                                                                              ?.quantity ??
-                                                                                          0;
-                                                                                      canSetQuantity =
-                                                                                          newQty <=
-                                                                                          ((p.availableQuantity ??
-                                                                                                  0) +
-                                                                                              paidQty);
-                                                                                    } else {
-                                                                                      canSetQuantity =
-                                                                                          newQty <=
-                                                                                          (p.availableQuantity ??
-                                                                                              0);
-                                                                                    }
-                                                                                  } else {
-                                                                                    canSetQuantity = true;
-                                                                                  }
+                                                                          onChanged: (value) {
+                                                                            final newQty = int.tryParse(value);
 
-                                                                                  if (canSetQuantity) {
-                                                                                    setState(
-                                                                                      () {
-                                                                                        isSplitPayment = false;
-                                                                                        if (widget.isEditingOrder !=
-                                                                                            true) {
-                                                                                          selectedOrderType = OrderType.line;
-                                                                                        }
+                                                                            // original order quantity (0 if not in existing order)
+                                                                            final originalQty = widget.existingOrder?.data?.items
+                                                                                ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                                                ?.quantity ??
+                                                                                0;
 
-                                                                                        final index = billingItems.indexWhere(
-                                                                                          (
-                                                                                            item,
-                                                                                          ) =>
-                                                                                              item['_id'] ==
-                                                                                              p.id,
-                                                                                        );
-                                                                                        if (index !=
-                                                                                            -1) {
-                                                                                          billingItems[index]['qty'] = newQty;
-                                                                                        } else {
-                                                                                          billingItems.add(
-                                                                                            {
-                                                                                              "_id": p.id,
-                                                                                              "basePrice": p.basePrice,
-                                                                                              "image": p.image,
-                                                                                              "qty": newQty,
-                                                                                              "name": p.name,
-                                                                                              "availableQuantity": p.availableQuantity,
-                                                                                              "selectedAddons": p.addons!
-                                                                                                  .where(
-                                                                                                    (
-                                                                                                      addon,
-                                                                                                    ) =>
-                                                                                                        addon.quantity >
-                                                                                                        0,
-                                                                                                  )
-                                                                                                  .map(
-                                                                                                    (
-                                                                                                      addon,
-                                                                                                    ) => {
-                                                                                                      "_id": addon.id,
-                                                                                                      "price": addon.price,
-                                                                                                      "quantity": addon.quantity,
-                                                                                                      "name": addon.name,
-                                                                                                      "isAvailable": addon.isAvailable,
-                                                                                                      "maxQuantity": addon.maxQuantity,
-                                                                                                      "isFree": addon.isFree,
-                                                                                                    },
-                                                                                                  )
-                                                                                                  .toList(),
-                                                                                            },
-                                                                                          );
-                                                                                        }
-                                                                                        context
-                                                                                            .read<
-                                                                                              FoodCategoryBloc
-                                                                                            >()
-                                                                                            .add(
-                                                                                              AddToBilling(
-                                                                                                List.from(
-                                                                                                  billingItems,
-                                                                                                ),
-                                                                                                isDiscountApplied,
-                                                                                                selectedOrderType,
-                                                                                              ),
-                                                                                            );
-                                                                                      },
-                                                                                    );
-                                                                                  } else {
-                                                                                    currentController.text = getCurrentQuantity(
-                                                                                      p.id.toString(),
-                                                                                    ).toString();
-                                                                                    ScaffoldMessenger.of(
-                                                                                      context,
-                                                                                    ).showSnackBar(
-                                                                                      SnackBar(
-                                                                                        content: Text(
-                                                                                          "Maximum available quantity is ${p.availableQuantity ?? 0}",
-                                                                                        ),
-                                                                                      ),
-                                                                                    );
-                                                                                  }
-                                                                                } else if (newQty ==
-                                                                                        0 ||
-                                                                                    value.isEmpty) {
-                                                                                  setState(
-                                                                                    () {
-                                                                                      billingItems.removeWhere(
-                                                                                        (
-                                                                                          item,
-                                                                                        ) =>
-                                                                                            item['_id'] ==
-                                                                                            p.id,
-                                                                                      );
-                                                                                      quantityControllers.remove(
-                                                                                        p.id,
-                                                                                      );
-                                                                                      if (billingItems.isEmpty ||
-                                                                                          billingItems ==
-                                                                                              []) {
-                                                                                        isDiscountApplied = false;
-                                                                                        widget.isEditingOrder = false;
-                                                                                        tableId = null;
-                                                                                        waiterId = null;
-                                                                                        selectedValue = null;
-                                                                                        selectedValueWaiter = null;
-                                                                                      }
-                                                                                      context
-                                                                                          .read<
-                                                                                            FoodCategoryBloc
-                                                                                          >()
-                                                                                          .add(
-                                                                                            AddToBilling(
-                                                                                              List.from(
-                                                                                                billingItems,
-                                                                                              ),
-                                                                                              isDiscountApplied,
-                                                                                              selectedOrderType,
-                                                                                            ),
-                                                                                          );
-                                                                                    },
-                                                                                  );
+                                                                            if (newQty != null && newQty > 0) {
+                                                                              bool canSetQuantity = true;
+
+                                                                              if (p.isStock == true) {
+                                                                                if ((widget.isEditingOrder == true &&
+                                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST"))) {
+                                                                                  // For editing order, allow up to available stock + originalQty
+                                                                                  canSetQuantity = newQty <= ((p.availableQuantity ?? 0) + originalQty);
+                                                                                } else {
+                                                                                  canSetQuantity = newQty <= (p.availableQuantity ?? 0);
                                                                                 }
-                                                                              },
+                                                                              }
+
+                                                                              // 👇 extra rule: don't allow decreasing below originalQty
+                                                                              if (widget.isEditingOrder == true &&
+                                                                                  isOriginalOrderItem(p.id.toString()) &&
+                                                                                  newQty < originalQty) {
+                                                                                canSetQuantity = false;
+                                                                              }
+
+                                                                              if (canSetQuantity) {
+                                                                                setState(() {
+                                                                                  isSplitPayment = false;
+                                                                                  if (widget.isEditingOrder != true) {
+                                                                                    selectedOrderType = OrderType.line;
+                                                                                  }
+
+                                                                                  final index =
+                                                                                  billingItems.indexWhere((item) => item['_id'] == p.id);
+                                                                                  if (index != -1) {
+                                                                                    billingItems[index]['qty'] = newQty;
+                                                                                  } else {
+                                                                                    billingItems.add({
+                                                                                      "_id": p.id,
+                                                                                      "basePrice": p.basePrice,
+                                                                                      "image": p.image,
+                                                                                      "qty": newQty,
+                                                                                      "name": p.name,
+                                                                                      "availableQuantity": p.availableQuantity,
+                                                                                      "selectedAddons": p.addons!
+                                                                                          .where((addon) => addon.quantity > 0)
+                                                                                          .map((addon) => {
+                                                                                        "_id": addon.id,
+                                                                                        "price": addon.price,
+                                                                                        "quantity": addon.quantity,
+                                                                                        "name": addon.name,
+                                                                                        "isAvailable": addon.isAvailable,
+                                                                                        "maxQuantity": addon.maxQuantity,
+                                                                                        "isFree": addon.isFree,
+                                                                                      })
+                                                                                          .toList(),
+                                                                                    });
+                                                                                  }
+                                                                                  context.read<FoodCategoryBloc>().add(
+                                                                                    AddToBilling(
+                                                                                      List.from(billingItems),
+                                                                                      isDiscountApplied,
+                                                                                      selectedOrderType,
+                                                                                    ),
+                                                                                  );
+                                                                                });
+                                                                              } else {
+                                                                                // restore previous valid qty
+                                                                                currentController.text =
+                                                                                    getCurrentQuantity(p.id.toString()).toString();
+                                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                                  SnackBar(
+                                                                                    content: Text(
+                                                                                      newQty < originalQty
+                                                                                          ? "Cannot reduce below original ordered qty ($originalQty)"
+                                                                                          : "Maximum available quantity is ${p.availableQuantity ?? 0}",
+                                                                                    ),
+                                                                                  ),
+                                                                                );
+                                                                              }
+                                                                            } else if (newQty == 0 || value.isEmpty) {
+                                                                              // 👇 allow removal only if it's not an original order item
+                                                                              if (isOriginalOrderItem(p.id.toString())) {
+                                                                                currentController.text = originalQty.toString();
+                                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                                  SnackBar(
+                                                                                    content: Text(
+                                                                                      "This item cannot be removed. Minimum qty is $originalQty",
+                                                                                    ),
+                                                                                  ),
+                                                                                );
+                                                                              } else {
+                                                                                setState(() {
+                                                                                  billingItems.removeWhere((item) => item['_id'] == p.id);
+                                                                                  quantityControllers.remove(p.id);
+                                                                                  if (billingItems.isEmpty) {
+                                                                                    isDiscountApplied = false;
+                                                                                    widget.isEditingOrder = false;
+                                                                                    tableId = null;
+                                                                                    waiterId = null;
+                                                                                    selectedValue = null;
+                                                                                    selectedValueWaiter = null;
+                                                                                  }
+                                                                                  context.read<FoodCategoryBloc>().add(
+                                                                                    AddToBilling(
+                                                                                      List.from(billingItems),
+                                                                                      isDiscountApplied,
+                                                                                      selectedOrderType,
+                                                                                    ),
+                                                                                  );
+                                                                                });
+                                                                              }
+                                                                            }
+                                                                          },
+
                                                                           onTap: () {
-                                                                            currentController.selection = TextSelection(
-                                                                              baseOffset: 0,
-                                                                              extentOffset: currentController.text.length,
-                                                                            );
+                                                                            if (!(widget.isEditingOrder == true &&
+                                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                                isOriginalOrderItem(p.id.toString()))) {
+                                                                              currentController.selection = TextSelection(
+                                                                                baseOffset: 0,
+                                                                                extentOffset: currentController.text.length,
+                                                                              );
+                                                                            }
                                                                           },
                                                                         ),
                                                                       ),
@@ -2162,316 +2200,267 @@ class HomePageViewState extends State<HomePageView> {
                                                                         MainAxisAlignment
                                                                             .center,
                                                                     children: [
-                                                                      // Expanded(
-                                                                      //   child: Text(
-                                                                      //     '₹ ${p.basePrice}',
-                                                                      //     style: MyTextStyle.f14(
-                                                                      //       blackColor,
-                                                                      //       weight:
-                                                                      //           FontWeight.w600,
-                                                                      //     ),
-                                                                      //     maxLines:
-                                                                      //         1,
-                                                                      //     overflow:
-                                                                      //         TextOverflow.ellipsis,
-                                                                      //   ),
-                                                                      // ),
-                                                                      // horizontalSpace(
-                                                                      //   width:
-                                                                      //       5,
-                                                                      // ),
                                                                       CircleAvatar(
-                                                                        radius:
-                                                                            15,
-                                                                        backgroundColor:
-                                                                            greyColor200,
+                                                                        radius: 15,
+                                                                        backgroundColor: greyColor200,
                                                                         child: IconButton(
-                                                                          icon: const Icon(
+                                                                          icon: Icon(
                                                                             Icons.remove,
-                                                                            size:
-                                                                                15,
-                                                                            color:
-                                                                                blackColor,
+                                                                            size: 15,
+                                                                            color: blackColor,
                                                                           ),
                                                                           onPressed: () {
                                                                             setState(() {
                                                                               isSplitPayment = false;
-                                                                              if (widget.isEditingOrder !=
-                                                                                  true) {
+                                                                              if (widget.isEditingOrder != true) {
                                                                                 selectedOrderType = OrderType.line;
                                                                               }
+
                                                                               final index = billingItems.indexWhere(
-                                                                                (
-                                                                                  item,
-                                                                                ) =>
-                                                                                    item['_id'] ==
-                                                                                    p.id,
+                                                                                    (item) => item['_id'] == p.id,
                                                                               );
-                                                                              if (index !=
-                                                                                      -1 &&
-                                                                                  billingItems[index]['qty'] >
-                                                                                      1) {
-                                                                                billingItems[index]['qty'] =
-                                                                                    billingItems[index]['qty'] -
-                                                                                    1;
-                                                                                updateControllerText(
-                                                                                  p.id.toString(),
-                                                                                  billingItems[index]['qty'],
-                                                                                );
-                                                                              } else {
-                                                                                billingItems.removeWhere(
-                                                                                  (
-                                                                                    item,
-                                                                                  ) =>
-                                                                                      item['_id'] ==
-                                                                                      p.id,
-                                                                                );
-                                                                                quantityControllers.remove(
-                                                                                  p.id,
-                                                                                );
-                                                                                if (billingItems.isEmpty ||
-                                                                                    billingItems ==
-                                                                                        []) {
-                                                                                  isDiscountApplied = false;
-                                                                                  widget.isEditingOrder = false;
-                                                                                  tableId = null;
-                                                                                  waiterId = null;
-                                                                                  selectedValue = null;
-                                                                                  selectedValueWaiter = null;
-                                                                                }
-                                                                              }
-                                                                              context
-                                                                                  .read<
-                                                                                    FoodCategoryBloc
-                                                                                  >()
-                                                                                  .add(
-                                                                                    AddToBilling(
-                                                                                      List.from(
-                                                                                        billingItems,
-                                                                                      ),
-                                                                                      isDiscountApplied,
-                                                                                      selectedOrderType,
-                                                                                    ),
-                                                                                  );
-                                                                            });
-                                                                          },
-                                                                        ),
-                                                                      ),
-                                                                      Container(
-                                                                        width:
-                                                                            45,
-                                                                        height:
-                                                                            32,
-                                                                        margin: const EdgeInsets.symmetric(
-                                                                          horizontal:
-                                                                              12,
-                                                                        ),
-                                                                        decoration: BoxDecoration(
-                                                                          border: Border.all(
-                                                                            color:
-                                                                                greyColor,
-                                                                          ),
-                                                                          borderRadius:
-                                                                              BorderRadius.circular(
-                                                                                4,
-                                                                              ),
-                                                                        ),
-                                                                        child: TextField(
-                                                                          controller:
-                                                                              currentController,
-                                                                          textAlign:
-                                                                              TextAlign.center,
-                                                                          keyboardType:
-                                                                              TextInputType.number,
-                                                                          style: MyTextStyle.f16(
-                                                                            blackColor,
-                                                                          ),
-                                                                          decoration: const InputDecoration(
-                                                                            border:
-                                                                                InputBorder.none,
-                                                                            isDense:
-                                                                                true,
-                                                                            contentPadding: EdgeInsets.all(
-                                                                              8,
-                                                                            ),
-                                                                          ),
-                                                                          onChanged:
-                                                                              (
-                                                                                value,
-                                                                              ) {
-                                                                                final newQty = int.tryParse(
-                                                                                  value,
-                                                                                );
-                                                                                if (newQty !=
-                                                                                        null &&
-                                                                                    newQty >
-                                                                                        0) {
-                                                                                  bool canSetQuantity;
-                                                                                  if (p.isStock ==
-                                                                                      true) {
-                                                                                    if ((widget.isEditingOrder ==
-                                                                                                true &&
-                                                                                            widget.existingOrder?.data?.orderStatus ==
-                                                                                                "COMPLETED") ||
-                                                                                        (widget.isEditingOrder ==
-                                                                                                true &&
-                                                                                            widget.existingOrder?.data?.orderStatus ==
-                                                                                                "WAITLIST")) {
-                                                                                      final paidQty =
-                                                                                          widget.existingOrder?.data?.items
-                                                                                              ?.firstWhereOrNull(
-                                                                                                (
-                                                                                                  item,
-                                                                                                ) =>
-                                                                                                    item.product?.id ==
-                                                                                                    p.id,
-                                                                                              )
-                                                                                              ?.quantity ??
-                                                                                          0;
-                                                                                      canSetQuantity =
-                                                                                          newQty <=
-                                                                                          ((p.availableQuantity ??
-                                                                                                  0) +
-                                                                                              paidQty);
-                                                                                    } else {
-                                                                                      canSetQuantity =
-                                                                                          newQty <=
-                                                                                          (p.availableQuantity ??
-                                                                                              0);
-                                                                                    }
-                                                                                  } else {
-                                                                                    canSetQuantity = true;
-                                                                                  }
 
-                                                                                  if (canSetQuantity) {
-                                                                                    setState(
-                                                                                      () {
-                                                                                        isSplitPayment = false;
-                                                                                        if (widget.isEditingOrder !=
-                                                                                            true) {
-                                                                                          selectedOrderType = OrderType.line;
-                                                                                        }
+                                                                              if (index != -1) {
+                                                                                final currentQty = billingItems[index]['qty'];
 
-                                                                                        final index = billingItems.indexWhere(
-                                                                                          (
-                                                                                            item,
-                                                                                          ) =>
-                                                                                              item['_id'] ==
-                                                                                              p.id,
-                                                                                        );
-                                                                                        if (index !=
-                                                                                            -1) {
-                                                                                          billingItems[index]['qty'] = newQty;
-                                                                                        } else {
-                                                                                          billingItems.add(
-                                                                                            {
-                                                                                              "_id": p.id,
-                                                                                              "basePrice": p.basePrice,
-                                                                                              "image": p.image,
-                                                                                              "qty": newQty,
-                                                                                              "name": p.name,
-                                                                                              "availableQuantity": p.availableQuantity,
-                                                                                              "selectedAddons": p.addons!
-                                                                                                  .where(
-                                                                                                    (
-                                                                                                      addon,
-                                                                                                    ) =>
-                                                                                                        addon.quantity >
-                                                                                                        0,
-                                                                                                  )
-                                                                                                  .map(
-                                                                                                    (
-                                                                                                      addon,
-                                                                                                    ) => {
-                                                                                                      "_id": addon.id,
-                                                                                                      "price": addon.price,
-                                                                                                      "quantity": addon.quantity,
-                                                                                                      "name": addon.name,
-                                                                                                      "isAvailable": addon.isAvailable,
-                                                                                                      "maxQuantity": addon.maxQuantity,
-                                                                                                      "isFree": addon.isFree,
-                                                                                                    },
-                                                                                                  )
-                                                                                                  .toList(),
-                                                                                            },
-                                                                                          );
-                                                                                        }
-                                                                                        context
-                                                                                            .read<
-                                                                                              FoodCategoryBloc
-                                                                                            >()
-                                                                                            .add(
-                                                                                              AddToBilling(
-                                                                                                List.from(
-                                                                                                  billingItems,
-                                                                                                ),
-                                                                                                isDiscountApplied,
-                                                                                                selectedOrderType,
-                                                                                              ),
-                                                                                            );
-                                                                                      },
+                                                                                // 🔎 original quantity from existing order
+                                                                                final originalQty = widget.existingOrder?.data?.items
+                                                                                    ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                                                    ?.quantity ??
+                                                                                    0;
+
+                                                                                if (isOriginalOrderItem(p.id.toString())) {
+                                                                                  // ✅ original item: only allow decrease if above originalQty
+                                                                                  if (currentQty > originalQty) {
+                                                                                    billingItems[index]['qty'] = currentQty - 1;
+                                                                                    updateControllerText(
+                                                                                      p.id.toString(),
+                                                                                      billingItems[index]['qty'],
                                                                                     );
                                                                                   } else {
-                                                                                    currentController.text = getCurrentQuantity(
-                                                                                      p.id.toString(),
-                                                                                    ).toString();
-                                                                                    ScaffoldMessenger.of(
-                                                                                      context,
-                                                                                    ).showSnackBar(
+                                                                                    // show feedback if user tries to go below
+                                                                                    ScaffoldMessenger.of(context).showSnackBar(
                                                                                       SnackBar(
                                                                                         content: Text(
-                                                                                          "Maximum available quantity is ${p.availableQuantity ?? 0}",
+                                                                                          "Cannot reduce below original ordered qty ($originalQty)",
                                                                                         ),
                                                                                       ),
                                                                                     );
                                                                                   }
-                                                                                } else if (newQty ==
-                                                                                        0 ||
-                                                                                    value.isEmpty) {
-                                                                                  setState(
-                                                                                    () {
-                                                                                      billingItems.removeWhere(
-                                                                                        (
-                                                                                          item,
-                                                                                        ) =>
-                                                                                            item['_id'] ==
-                                                                                            p.id,
-                                                                                      );
-                                                                                      quantityControllers.remove(
-                                                                                        p.id,
-                                                                                      );
-                                                                                      if (billingItems.isEmpty ||
-                                                                                          billingItems ==
-                                                                                              []) {
-                                                                                        isDiscountApplied = false;
-                                                                                        widget.isEditingOrder = false;
-                                                                                        tableId = null;
-                                                                                        waiterId = null;
-                                                                                        selectedValue = null;
-                                                                                        selectedValueWaiter = null;
-                                                                                      }
-                                                                                      context
-                                                                                          .read<
-                                                                                            FoodCategoryBloc
-                                                                                          >()
-                                                                                          .add(
-                                                                                            AddToBilling(
-                                                                                              List.from(
-                                                                                                billingItems,
-                                                                                              ),
-                                                                                              isDiscountApplied,
-                                                                                              selectedOrderType,
-                                                                                            ),
-                                                                                          );
-                                                                                    },
-                                                                                  );
+                                                                                } else {
+                                                                                  // ✅ new item: free to decrease/remove
+                                                                                  if (currentQty > 1) {
+                                                                                    billingItems[index]['qty'] = currentQty - 1;
+                                                                                    updateControllerText(
+                                                                                      p.id.toString(),
+                                                                                      billingItems[index]['qty'],
+                                                                                    );
+                                                                                  } else {
+                                                                                    billingItems.removeWhere((item) => item['_id'] == p.id);
+                                                                                    quantityControllers.remove(p.id);
+                                                                                    if (billingItems.isEmpty) {
+                                                                                      isDiscountApplied = false;
+                                                                                      widget.isEditingOrder = false;
+                                                                                      tableId = null;
+                                                                                      waiterId = null;
+                                                                                      selectedValue = null;
+                                                                                      selectedValueWaiter = null;
+                                                                                    }
+                                                                                  }
                                                                                 }
-                                                                              },
+
+                                                                                context.read<FoodCategoryBloc>().add(
+                                                                                  AddToBilling(
+                                                                                    List.from(billingItems),
+                                                                                    isDiscountApplied,
+                                                                                    selectedOrderType,
+                                                                                  ),
+                                                                                );
+                                                                              }
+                                                                            });
+                                                                          },
+                                                                        ),
+                                                                      ),
+
+                                                                      Container(
+                                                                        width: 45,
+                                                                        height: 32,
+                                                                        margin: const EdgeInsets.symmetric(horizontal: 12),
+                                                                        decoration: BoxDecoration(
+                                                                          border: Border.all(
+                                                                            color: (widget.isEditingOrder == true &&
+                                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                                isOriginalOrderItem(p.id.toString()))
+                                                                                ? greyColor.withOpacity(0.5) // Lighter border for locked items
+                                                                                : greyColor,
+                                                                          ),
+                                                                          borderRadius: BorderRadius.circular(4),
+                                                                          color: (widget.isEditingOrder == true &&
+                                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                              isOriginalOrderItem(p.id.toString()))
+                                                                              ? greyColor.withOpacity(0.1) // Light gray background for locked items
+                                                                              : whiteColor,
+                                                                        ),
+                                                                        child: TextField(
+                                                                          controller: currentController,
+                                                                          textAlign: TextAlign.center,
+                                                                          keyboardType: TextInputType.number,
+                                                                          enabled: !(widget.isEditingOrder == true &&
+                                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                              isOriginalOrderItem(p.id.toString())), // Disable for original items
+                                                                          style: MyTextStyle.f16(
+                                                                            (widget.isEditingOrder == true &&
+                                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                                isOriginalOrderItem(p.id.toString()))
+                                                                                ? greyColor // Gray text for locked items
+                                                                                : blackColor,
+                                                                          ),
+                                                                          decoration: InputDecoration(
+                                                                            border: InputBorder.none,
+                                                                            isDense: true,
+                                                                            contentPadding: EdgeInsets.all(8),
+                                                                            hintText: (widget.isEditingOrder == true &&
+                                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                                isOriginalOrderItem(p.id.toString()))
+                                                                                ? "Locked"
+                                                                                : null,
+                                                                            hintStyle: TextStyle(color: greyColor, fontSize: 12),
+                                                                          ),
+                                                                          onChanged: (value) {
+                                                                            final newQty = int.tryParse(value);
+
+                                                                            // original order quantity (0 if not in existing order)
+                                                                            final originalQty = widget.existingOrder?.data?.items
+                                                                                ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                                                ?.quantity ??
+                                                                                0;
+
+                                                                            if (newQty != null && newQty > 0) {
+                                                                              bool canSetQuantity = true;
+
+                                                                              if (p.isStock == true) {
+                                                                                if ((widget.isEditingOrder == true &&
+                                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST"))) {
+                                                                                  // For editing order, allow up to available stock + originalQty
+                                                                                  canSetQuantity = newQty <= ((p.availableQuantity ?? 0) + originalQty);
+                                                                                } else {
+                                                                                  canSetQuantity = newQty <= (p.availableQuantity ?? 0);
+                                                                                }
+                                                                              }
+
+                                                                              // 👇 extra rule: don't allow decreasing below originalQty
+                                                                              if (widget.isEditingOrder == true &&
+                                                                                  isOriginalOrderItem(p.id.toString()) &&
+                                                                                  newQty < originalQty) {
+                                                                                canSetQuantity = false;
+                                                                              }
+
+                                                                              if (canSetQuantity) {
+                                                                                setState(() {
+                                                                                  isSplitPayment = false;
+                                                                                  if (widget.isEditingOrder != true) {
+                                                                                    selectedOrderType = OrderType.line;
+                                                                                  }
+
+                                                                                  final index =
+                                                                                  billingItems.indexWhere((item) => item['_id'] == p.id);
+                                                                                  if (index != -1) {
+                                                                                    billingItems[index]['qty'] = newQty;
+                                                                                  } else {
+                                                                                    billingItems.add({
+                                                                                      "_id": p.id,
+                                                                                      "basePrice": p.basePrice,
+                                                                                      "image": p.image,
+                                                                                      "qty": newQty,
+                                                                                      "name": p.name,
+                                                                                      "availableQuantity": p.availableQuantity,
+                                                                                      "selectedAddons": p.addons!
+                                                                                          .where((addon) => addon.quantity > 0)
+                                                                                          .map((addon) => {
+                                                                                        "_id": addon.id,
+                                                                                        "price": addon.price,
+                                                                                        "quantity": addon.quantity,
+                                                                                        "name": addon.name,
+                                                                                        "isAvailable": addon.isAvailable,
+                                                                                        "maxQuantity": addon.maxQuantity,
+                                                                                        "isFree": addon.isFree,
+                                                                                      })
+                                                                                          .toList(),
+                                                                                    });
+                                                                                  }
+                                                                                  context.read<FoodCategoryBloc>().add(
+                                                                                    AddToBilling(
+                                                                                      List.from(billingItems),
+                                                                                      isDiscountApplied,
+                                                                                      selectedOrderType,
+                                                                                    ),
+                                                                                  );
+                                                                                });
+                                                                              } else {
+                                                                                // restore previous valid qty
+                                                                                currentController.text =
+                                                                                    getCurrentQuantity(p.id.toString()).toString();
+                                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                                  SnackBar(
+                                                                                    content: Text(
+                                                                                      newQty < originalQty
+                                                                                          ? "Cannot reduce below original ordered qty ($originalQty)"
+                                                                                          : "Maximum available quantity is ${p.availableQuantity ?? 0}",
+                                                                                    ),
+                                                                                  ),
+                                                                                );
+                                                                              }
+                                                                            } else if (newQty == 0 || value.isEmpty) {
+                                                                              // 👇 allow removal only if it's not an original order item
+                                                                              if (isOriginalOrderItem(p.id.toString())) {
+                                                                                currentController.text = originalQty.toString();
+                                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                                  SnackBar(
+                                                                                    content: Text(
+                                                                                      "This item cannot be removed. Minimum qty is $originalQty",
+                                                                                    ),
+                                                                                  ),
+                                                                                );
+                                                                              } else {
+                                                                                setState(() {
+                                                                                  billingItems.removeWhere((item) => item['_id'] == p.id);
+                                                                                  quantityControllers.remove(p.id);
+                                                                                  if (billingItems.isEmpty) {
+                                                                                    isDiscountApplied = false;
+                                                                                    widget.isEditingOrder = false;
+                                                                                    tableId = null;
+                                                                                    waiterId = null;
+                                                                                    selectedValue = null;
+                                                                                    selectedValueWaiter = null;
+                                                                                  }
+                                                                                  context.read<FoodCategoryBloc>().add(
+                                                                                    AddToBilling(
+                                                                                      List.from(billingItems),
+                                                                                      isDiscountApplied,
+                                                                                      selectedOrderType,
+                                                                                    ),
+                                                                                  );
+                                                                                });
+                                                                              }
+                                                                            }
+                                                                          },
+
                                                                           onTap: () {
-                                                                            currentController.selection = TextSelection(
-                                                                              baseOffset: 0,
-                                                                              extentOffset: currentController.text.length,
-                                                                            );
+                                                                            if (!(widget.isEditingOrder == true &&
+                                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                                isOriginalOrderItem(p.id.toString()))) {
+                                                                              currentController.selection = TextSelection(
+                                                                                baseOffset: 0,
+                                                                                extentOffset: currentController.text.length,
+                                                                              );
+                                                                            }
                                                                           },
                                                                         ),
                                                                       ),
@@ -3958,66 +3947,50 @@ class HomePageViewState extends State<HomePageView> {
                                                                     MainAxisSize
                                                                         .min,
                                                                 children: [
-                                                                  // Decrease button
                                                                   CircleAvatar(
                                                                     radius: 15,
-                                                                    backgroundColor:
-                                                                        greyColor200,
+                                                                    backgroundColor: greyColor200,
                                                                     child: IconButton(
-                                                                      icon: const Icon(
-                                                                        Icons
-                                                                            .remove,
-                                                                        size:
-                                                                            15,
-                                                                        color:
-                                                                            blackColor,
+                                                                      icon: Icon(
+                                                                        Icons.remove,
+                                                                        size: 15,
+                                                                        color: (widget.isEditingOrder == true &&
+                                                                            (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                                widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                            isExistingItem(e.id.toString()) &&
+                                                                            getCurrentQuantityFromBilling(e.id.toString()) <= getOriginalQuantity(e.id.toString()))
+                                                                            ? greyColor  // Disabled color
+                                                                            : blackColor, // Enabled color
                                                                       ),
-                                                                      padding:
-                                                                          EdgeInsets
-                                                                              .zero,
-                                                                      constraints:
-                                                                          BoxConstraints(),
-                                                                      onPressed: () {
+                                                                      padding: EdgeInsets.zero,
+                                                                      constraints: BoxConstraints(),
+                                                                      onPressed: (widget.isEditingOrder == true &&
+                                                                          (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                              widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                          isExistingItem(e.id.toString()) &&
+                                                                          getCurrentQuantityFromBilling(e.id.toString()) <= getOriginalQuantity(e.id.toString()))
+                                                                          ? null  // Disable button
+                                                                          : () {
                                                                         setState(() {
-                                                                          isSplitPayment =
-                                                                              false;
-                                                                          if (widget.isEditingOrder !=
-                                                                              true) {
-                                                                            selectedOrderType =
-                                                                                OrderType.line;
+                                                                          isSplitPayment = false;
+                                                                          if (widget.isEditingOrder != true) {
+                                                                            selectedOrderType = OrderType.line;
                                                                           }
                                                                           final index = billingItems.indexWhere(
-                                                                            (
-                                                                              item,
-                                                                            ) =>
-                                                                                item['_id'] ==
-                                                                                e.id,
+                                                                                (item) => item['_id'] == e.id,
                                                                           );
-                                                                          if (index !=
-                                                                                  -1 &&
-                                                                              billingItems[index]['qty'] >
-                                                                                  1) {
-                                                                            billingItems[index]['qty'] =
-                                                                                billingItems[index]['qty'] -
-                                                                                1;
+                                                                          if (index != -1 && billingItems[index]['qty'] > 1) {
+                                                                            billingItems[index]['qty'] = billingItems[index]['qty'] - 1;
                                                                             updateControllerText(
                                                                               e.id.toString(),
                                                                               billingItems[index]['qty'],
                                                                             );
                                                                           } else {
                                                                             billingItems.removeWhere(
-                                                                              (
-                                                                                item,
-                                                                              ) =>
-                                                                                  item['_id'] ==
-                                                                                  e.id,
+                                                                                  (item) => item['_id'] == e.id,
                                                                             );
-                                                                            quantityControllers.remove(
-                                                                              e.id.toString(),
-                                                                            );
-                                                                            if (billingItems.isEmpty ||
-                                                                                billingItems ==
-                                                                                    []) {
+                                                                            quantityControllers.remove(e.id.toString());
+                                                                            if (billingItems.isEmpty || billingItems == []) {
                                                                               isDiscountApplied = false;
                                                                               widget.isEditingOrder = false;
                                                                               tableId = null;
@@ -4026,224 +3999,163 @@ class HomePageViewState extends State<HomePageView> {
                                                                               selectedValueWaiter = null;
                                                                             }
                                                                           }
-                                                                          context
-                                                                              .read<
-                                                                                FoodCategoryBloc
-                                                                              >()
-                                                                              .add(
-                                                                                AddToBilling(
-                                                                                  List.from(
-                                                                                    billingItems,
-                                                                                  ),
-                                                                                  isDiscountApplied,
-                                                                                  selectedOrderType,
-                                                                                ),
-                                                                              );
+                                                                          context.read<FoodCategoryBloc>().add(
+                                                                            AddToBilling(
+                                                                              List.from(billingItems),
+                                                                              isDiscountApplied,
+                                                                              selectedOrderType,
+                                                                            ),
+                                                                          );
                                                                         });
                                                                       },
                                                                     ),
                                                                   ),
-
-                                                                  // TextField for quantity input
                                                                   Container(
                                                                     width: 45,
                                                                     height: 32,
-                                                                    margin: const EdgeInsets.symmetric(
-                                                                      horizontal:
-                                                                          8,
-                                                                    ),
+                                                                    margin: const EdgeInsets.symmetric(horizontal: 8),
                                                                     decoration: BoxDecoration(
-                                                                      border: Border.all(
-                                                                        color:
-                                                                            greyColor,
-                                                                      ),
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                            4,
-                                                                          ),
+                                                                      border: Border.all(color: greyColor),
+                                                                      borderRadius: BorderRadius.circular(4),
+                                                                      color: (widget.isEditingOrder == true &&
+                                                                          (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                              widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                          isExistingItem(e.id.toString()))
+                                                                          ? greyColor200  // Disabled background
+                                                                          : whiteColor,   // Normal background
                                                                     ),
                                                                     child: TextField(
-                                                                      controller: getOrCreateController(
-                                                                        e.id.toString(),
-                                                                        e.qty?.toInt() ??
-                                                                            0,
-                                                                      ),
-                                                                      textAlign:
-                                                                          TextAlign
-                                                                              .center,
-                                                                      keyboardType:
-                                                                          TextInputType
-                                                                              .number,
+                                                                      controller: getOrCreateController(e.id.toString(), (e.qty?.toInt()) ?? 0),
+                                                                      textAlign: TextAlign.center,
+                                                                      keyboardType: TextInputType.number,
+                                                                      enabled: !(widget.isEditingOrder == true &&
+                                                                          (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                              widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                          isExistingItem(e.id.toString())), // Disable for existing items
                                                                       style: MyTextStyle.f16(
-                                                                        blackColor,
+                                                                        (widget.isEditingOrder == true &&
+                                                                            (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                                widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                            isExistingItem(e.id.toString()))
+                                                                            ? greyColor  // Disabled text color
+                                                                            : blackColor, // Normal text color
                                                                       ),
                                                                       decoration: const InputDecoration(
-                                                                        border:
-                                                                            InputBorder.none,
-                                                                        isDense:
-                                                                            true,
-                                                                        contentPadding:
-                                                                            EdgeInsets.all(
-                                                                              8,
-                                                                            ),
+                                                                        border: InputBorder.none,
+                                                                        isDense: true,
+                                                                        contentPadding: EdgeInsets.all(8),
                                                                       ),
                                                                       onChanged: (value) {
-                                                                        final newQty =
-                                                                            int.tryParse(
-                                                                              value,
-                                                                            );
-                                                                        if (newQty !=
-                                                                                null &&
-                                                                            newQty >
-                                                                                0) {
-                                                                          bool
-                                                                          canSetQuantity;
-                                                                          if (e.isStock ==
-                                                                              true) {
-                                                                            if ((widget.isEditingOrder ==
-                                                                                        true &&
-                                                                                    widget.existingOrder?.data?.orderStatus ==
-                                                                                        "COMPLETED") ||
-                                                                                (widget.isEditingOrder ==
-                                                                                        true &&
-                                                                                    widget.existingOrder?.data?.orderStatus ==
-                                                                                        "WAITLIST")) {
-                                                                              final paidQty =
-                                                                                  widget.existingOrder?.data?.items
-                                                                                      ?.firstWhereOrNull(
-                                                                                        (
-                                                                                          item,
-                                                                                        ) =>
-                                                                                            item.product?.id ==
-                                                                                            e.id,
-                                                                                      )
-                                                                                      ?.quantity ??
-                                                                                  0;
-                                                                              canSetQuantity =
-                                                                                  newQty <=
-                                                                                  ((availableQty) +
-                                                                                      paidQty);
+                                                                        final newQty = int.tryParse(value);
+                                                                        if (newQty != null && newQty > 0) {
+                                                                          // For existing items in edit mode, don't allow reducing below original quantity
+                                                                          if (widget.isEditingOrder == true &&
+                                                                              (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                                  widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                              isExistingItem(e.id.toString())) {
+
+                                                                            final originalQty = getOriginalQuantity(e.id.toString());
+                                                                            if (newQty < originalQty) {
+                                                                              // Reset to original quantity
+                                                                              getOrCreateController(e.id.toString(), originalQty).text = originalQty.toString();
+                                                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                                                SnackBar(
+                                                                                  content: Text("Cannot reduce quantity below original amount (${originalQty}) for existing items"),
+                                                                                ),
+                                                                              );
+                                                                              return;
+                                                                            }
+                                                                          }
+
+                                                                          bool canSetQuantity;
+                                                                          if (e.isStock == true) {
+                                                                            if ((widget.isEditingOrder == true &&
+                                                                                widget.existingOrder?.data?.orderStatus == "COMPLETED") ||
+                                                                                (widget.isEditingOrder == true &&
+                                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST")) {
+                                                                              final paidQty = widget.existingOrder?.data?.items
+                                                                                  ?.firstWhereOrNull((item) => item.product?.id == e.id)
+                                                                                  ?.quantity ?? 0;
+                                                                              canSetQuantity = newQty <= ((availableQty) + paidQty);
                                                                             } else {
-                                                                              canSetQuantity =
-                                                                                  newQty <=
-                                                                                  availableQty;
+                                                                              canSetQuantity = newQty <= availableQty;
                                                                             }
                                                                           } else {
-                                                                            canSetQuantity =
-                                                                                true;
+                                                                            canSetQuantity = true;
                                                                           }
 
                                                                           if (canSetQuantity) {
                                                                             setState(() {
                                                                               isSplitPayment = false;
-                                                                              if (widget.isEditingOrder !=
-                                                                                  true) {
+                                                                              if (widget.isEditingOrder != true) {
                                                                                 selectedOrderType = OrderType.line;
                                                                               }
 
-                                                                              final index = billingItems.indexWhere(
-                                                                                (
-                                                                                  item,
-                                                                                ) =>
-                                                                                    item['_id'] ==
-                                                                                    e.id,
-                                                                              );
-                                                                              if (index !=
-                                                                                  -1) {
+                                                                              final index = billingItems.indexWhere((item) => item['_id'] == e.id);
+                                                                              if (index != -1) {
                                                                                 billingItems[index]['qty'] = newQty;
                                                                               } else {
-                                                                                // This shouldn't happen in cart, but keeping for safety
-                                                                                billingItems.add(
-                                                                                  {
-                                                                                    "_id": e.id,
-                                                                                    "basePrice": e.basePrice,
-                                                                                    "image": e.image,
-                                                                                    "qty": newQty,
-                                                                                    "name": e.name,
-                                                                                    "availableQuantity": e.availableQuantity,
-                                                                                    "selectedAddons":
-                                                                                        (e.selectedAddons !=
-                                                                                            null)
-                                                                                        ? e.selectedAddons!
-                                                                                              .where(
-                                                                                                (
-                                                                                                  addon,
-                                                                                                ) =>
-                                                                                                    (addon.quantity ??
-                                                                                                        0) >
-                                                                                                    0,
-                                                                                              )
-                                                                                              .map(
-                                                                                                (
-                                                                                                  addon,
-                                                                                                ) => {
-                                                                                                  "_id": addon.id,
-                                                                                                  "price":
-                                                                                                      addon.price ??
-                                                                                                      0,
-                                                                                                  "quantity":
-                                                                                                      addon.quantity ??
-                                                                                                      0,
-                                                                                                  "name": addon.name,
-                                                                                                  "isAvailable": addon.isAvailable,
-                                                                                                  "maxQuantity": addon.quantity,
-                                                                                                  "isFree": addon.isFree,
-                                                                                                },
-                                                                                              )
-                                                                                              .toList()
-                                                                                        : [],
-                                                                                  },
-                                                                                );
+                                                                                billingItems.add({
+                                                                                  "_id": e.id,
+                                                                                  "basePrice": e.basePrice,
+                                                                                  "image": e.image,
+                                                                                  "qty": newQty,
+                                                                                  "name": e.name,
+                                                                                  "availableQuantity": e.availableQuantity,
+                                                                                  "selectedAddons": (e.selectedAddons != null)
+                                                                                      ? e.selectedAddons!
+                                                                                      .where((addon) => (addon.quantity ?? 0) > 0)
+                                                                                      .map((addon) => {
+                                                                                    "_id": addon.id,
+                                                                                    "price": addon.price ?? 0,
+                                                                                    "quantity": addon.quantity ?? 0,
+                                                                                    "name": addon.name,
+                                                                                    "isAvailable": addon.isAvailable,
+                                                                                    "maxQuantity": addon.quantity,
+                                                                                    "isFree": addon.isFree,
+                                                                                  })
+                                                                                      .toList()
+                                                                                      : [],
+                                                                                });
                                                                               }
-                                                                              context
-                                                                                  .read<
-                                                                                    FoodCategoryBloc
-                                                                                  >()
-                                                                                  .add(
-                                                                                    AddToBilling(
-                                                                                      List.from(
-                                                                                        billingItems,
-                                                                                      ),
-                                                                                      isDiscountApplied,
-                                                                                      selectedOrderType,
-                                                                                    ),
-                                                                                  );
+                                                                              context.read<FoodCategoryBloc>().add(
+                                                                                AddToBilling(
+                                                                                  List.from(billingItems),
+                                                                                  isDiscountApplied,
+                                                                                  selectedOrderType,
+                                                                                ),
+                                                                              );
                                                                             });
                                                                           } else {
-                                                                            getOrCreateController(
-                                                                              e.id.toString(),
-                                                                              e.qty?.toInt() ??
-                                                                                  0,
-                                                                            ).text = getCurrentQuantity(
-                                                                              e.id.toString(),
-                                                                            ).toString();
-                                                                            ScaffoldMessenger.of(
-                                                                              context,
-                                                                            ).showSnackBar(
+                                                                            getOrCreateController(e.id.toString(), e.qty?.toInt() ?? 0).text =
+                                                                                getCurrentQuantity(e.id.toString()).toString();
+                                                                            ScaffoldMessenger.of(context).showSnackBar(
                                                                               SnackBar(
-                                                                                content: Text(
-                                                                                  "Maximum available quantity is $availableQty",
-                                                                                ),
+                                                                                content: Text("Maximum available quantity is $availableQty"),
                                                                               ),
                                                                             );
                                                                           }
-                                                                        } else if (newQty ==
-                                                                                0 ||
-                                                                            value.isEmpty) {
+                                                                        } else if (newQty == 0 || value.isEmpty) {
+                                                                          // Don't allow removal of existing items in edit mode
+                                                                          if (widget.isEditingOrder == true &&
+                                                                              (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                                  widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                              isExistingItem(e.id.toString())) {
+
+                                                                            final originalQty = getOriginalQuantity(e.id.toString());
+                                                                            getOrCreateController(e.id.toString(), originalQty).text = originalQty.toString();
+                                                                            ScaffoldMessenger.of(context).showSnackBar(
+                                                                              SnackBar(
+                                                                                content: Text("Cannot remove existing items. Minimum quantity is ${originalQty}"),
+                                                                              ),
+                                                                            );
+                                                                            return;
+                                                                          }
+
                                                                           setState(() {
-                                                                            billingItems.removeWhere(
-                                                                              (
-                                                                                item,
-                                                                              ) =>
-                                                                                  item['_id'] ==
-                                                                                  e.id,
-                                                                            );
-                                                                            quantityControllers.remove(
-                                                                              e.id.toString(),
-                                                                            );
-                                                                            if (billingItems.isEmpty ||
-                                                                                billingItems ==
-                                                                                    []) {
+                                                                            billingItems.removeWhere((item) => item['_id'] == e.id);
+                                                                            quantityControllers.remove(e.id.toString());
+                                                                            if (billingItems.isEmpty || billingItems == []) {
                                                                               isDiscountApplied = false;
                                                                               widget.isEditingOrder = false;
                                                                               tableId = null;
@@ -4251,41 +4163,33 @@ class HomePageViewState extends State<HomePageView> {
                                                                               selectedValue = null;
                                                                               selectedValueWaiter = null;
                                                                             }
-                                                                            context
-                                                                                .read<
-                                                                                  FoodCategoryBloc
-                                                                                >()
-                                                                                .add(
-                                                                                  AddToBilling(
-                                                                                    List.from(
-                                                                                      billingItems,
-                                                                                    ),
-                                                                                    isDiscountApplied,
-                                                                                    selectedOrderType,
-                                                                                  ),
-                                                                                );
+                                                                            context.read<FoodCategoryBloc>().add(
+                                                                              AddToBilling(
+                                                                                List.from(billingItems),
+                                                                                isDiscountApplied,
+                                                                                selectedOrderType,
+                                                                              ),
+                                                                            );
                                                                           });
                                                                         }
                                                                       },
                                                                       onTap: () {
-                                                                        final controller = getOrCreateController(
-                                                                          e.id.toString(),
-                                                                          e.qty?.toInt() ??
-                                                                              0,
-                                                                        );
-                                                                        controller
-                                                                            .selection = TextSelection(
-                                                                          baseOffset:
-                                                                              0,
-                                                                          extentOffset: controller
-                                                                              .text
-                                                                              .length,
+                                                                        // Don't allow editing for existing items
+                                                                        if (widget.isEditingOrder == true &&
+                                                                            (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                                widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                            isExistingItem(e.id.toString())) {
+                                                                          return;
+                                                                        }
+
+                                                                        final controller = getOrCreateController(e.id.toString(), e.qty?.toInt() ?? 0);
+                                                                        controller.selection = TextSelection(
+                                                                          baseOffset: 0,
+                                                                          extentOffset: controller.text.length,
                                                                         );
                                                                       },
                                                                     ),
                                                                   ),
-
-                                                                  // Increase button
                                                                   Builder(
                                                                     builder: (context) {
                                                                       return CircleAvatar(
@@ -4367,63 +4271,43 @@ class HomePageViewState extends State<HomePageView> {
                                                                       );
                                                                     },
                                                                   ),
-
-                                                                  // Keep your existing delete button
                                                                   IconButton(
                                                                     icon: Icon(
-                                                                      Icons
-                                                                          .delete,
-                                                                      color:
-                                                                          redColor,
+                                                                      Icons.delete,
+                                                                      color: (widget.isEditingOrder == true &&
+                                                                          (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                              widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                          isExistingItem(e.id.toString()))
+                                                                          ? greyColor   // Disabled color
+                                                                          : redColor,   // Enabled color
                                                                       size: 20,
                                                                     ),
-                                                                    padding:
-                                                                        EdgeInsets.all(
-                                                                          4,
-                                                                        ),
-                                                                    constraints:
-                                                                        BoxConstraints(),
-                                                                    onPressed: () {
+                                                                    padding: EdgeInsets.all(4),
+                                                                    constraints: BoxConstraints(),
+                                                                    onPressed: (widget.isEditingOrder == true &&
+                                                                        (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                            widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                        isExistingItem(e.id.toString()))
+                                                                        ? null  // Disable button
+                                                                        : () {
                                                                       setState(() {
-                                                                        billingItems.removeWhere(
-                                                                          (
-                                                                            item,
-                                                                          ) =>
-                                                                              item['_id'] ==
-                                                                              e.id,
-                                                                        );
-                                                                        quantityControllers.remove(
-                                                                          e.id.toString(),
-                                                                        );
-                                                                        if (billingItems.isEmpty ||
-                                                                            billingItems ==
-                                                                                []) {
-                                                                          isDiscountApplied =
-                                                                              false;
-                                                                          widget.isEditingOrder =
-                                                                              false;
-                                                                          tableId =
-                                                                              null;
-                                                                          waiterId =
-                                                                              null;
-                                                                          selectedValue =
-                                                                              null;
-                                                                          selectedValueWaiter =
-                                                                              null;
+                                                                        billingItems.removeWhere((item) => item['_id'] == e.id);
+                                                                        quantityControllers.remove(e.id.toString());
+                                                                        if (billingItems.isEmpty || billingItems == []) {
+                                                                          isDiscountApplied = false;
+                                                                          widget.isEditingOrder = false;
+                                                                          tableId = null;
+                                                                          waiterId = null;
+                                                                          selectedValue = null;
+                                                                          selectedValueWaiter = null;
                                                                         }
-                                                                        context
-                                                                            .read<
-                                                                              FoodCategoryBloc
-                                                                            >()
-                                                                            .add(
-                                                                              AddToBilling(
-                                                                                List.from(
-                                                                                  billingItems,
-                                                                                ),
-                                                                                isDiscountApplied,
-                                                                                selectedOrderType,
-                                                                              ),
-                                                                            );
+                                                                        context.read<FoodCategoryBloc>().add(
+                                                                          AddToBilling(
+                                                                            List.from(billingItems),
+                                                                            isDiscountApplied,
+                                                                            selectedOrderType,
+                                                                          ),
+                                                                        );
                                                                       });
                                                                     },
                                                                   ),
@@ -6634,6 +6518,7 @@ class HomePageViewState extends State<HomePageView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TabBar(
+                        controller: _tabController,
                       indicatorColor: appPrimaryColor,
                       labelColor: appPrimaryColor,
                       unselectedLabelColor: greyColor,
@@ -6644,6 +6529,7 @@ class HomePageViewState extends State<HomePageView> {
                     ),
                     Expanded(
                       child: TabBarView(
+                        controller: _tabController,
                         children: [
                           /// category screen
                           categoryLoad
@@ -6672,7 +6558,7 @@ class HomePageViewState extends State<HomePageView> {
                                     children: [
                                       Expanded(
                                         child: SizedBox(
-                                          width: size.width * 0.5,
+                                          width: size.width * 0.6,
                                           child: TextField(
                                             controller: searchController,
                                             decoration: InputDecoration(
@@ -6826,12 +6712,36 @@ class HomePageViewState extends State<HomePageView> {
                                     height: size.height * 0.02,
                                   ),
 
-                                  Text(
-                                    "Choose Category",
-                                    style: MyTextStyle.f18(
-                                      blackColor,
-                                      weight: FontWeight.bold,
-                                    ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Choose Category",
+                                        style: MyTextStyle.f18(
+                                          blackColor,
+                                          weight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            searchController.clear();
+                                            searchCodeController.clear();
+                                          });
+                                          context
+                                              .read<FoodCategoryBloc>()
+                                              .add(FoodCategory());
+                                          context
+                                              .read<FoodCategoryBloc>()
+                                              .add(FoodProductItem(
+                                              selectedCatId.toString(),
+                                              searchController.text,
+                                              searchCodeController
+                                                  .text));
+                                        },
+                                        icon: const Icon(Icons.refresh),
+                                      ),
+                                    ],
                                   ),
                                   verticalSpace(
                                     height: size.height * 0.02,
@@ -7892,287 +7802,238 @@ class HomePageViewState extends State<HomePageView> {
                                                         MainAxisAlignment
                                                             .center,
                                                         children: [
-                                                          // Expanded(
-                                                          //   child: Text(
-                                                          //     '₹ ${p.basePrice}',
-                                                          //     style: MyTextStyle.f14(
-                                                          //       blackColor,
-                                                          //       weight:
-                                                          //           FontWeight.w600,
-                                                          //     ),
-                                                          //     maxLines:
-                                                          //         1,
-                                                          //     overflow:
-                                                          //         TextOverflow.ellipsis,
-                                                          //   ),
-                                                          // ),
-                                                          // horizontalSpace(
-                                                          //   width:
-                                                          //       5,
-                                                          // ),
+
                                                           CircleAvatar(
-                                                            radius:
-                                                            15,
-                                                            backgroundColor:
-                                                            greyColor200,
+                                                            radius: 15,
+                                                            backgroundColor: greyColor200,
                                                             child: IconButton(
-                                                              icon: const Icon(
+                                                              icon: Icon(
                                                                 Icons.remove,
-                                                                size:
-                                                                15,
-                                                                color:
-                                                                blackColor,
+                                                                size: 15,
+                                                                color: blackColor,
                                                               ),
                                                               onPressed: () {
                                                                 setState(() {
                                                                   isSplitPayment = false;
-                                                                  if (widget.isEditingOrder !=
-                                                                      true) {
+                                                                  if (widget.isEditingOrder != true) {
                                                                     selectedOrderType = OrderType.line;
                                                                   }
+
                                                                   final index = billingItems.indexWhere(
-                                                                        (
-                                                                        item,
-                                                                        ) =>
-                                                                    item['_id'] ==
-                                                                        p.id,
+                                                                        (item) => item['_id'] == p.id,
                                                                   );
-                                                                  if (index !=
-                                                                      -1 &&
-                                                                      billingItems[index]['qty'] >
-                                                                          1) {
-                                                                    billingItems[index]['qty'] =
-                                                                        billingItems[index]['qty'] -
-                                                                            1;
-                                                                    updateControllerText(
-                                                                      p.id.toString(),
-                                                                      billingItems[index]['qty'],
-                                                                    );
-                                                                  } else {
-                                                                    billingItems.removeWhere(
-                                                                          (
-                                                                          item,
-                                                                          ) =>
-                                                                      item['_id'] ==
-                                                                          p.id,
-                                                                    );
-                                                                    quantityControllers.remove(
-                                                                      p.id,
-                                                                    );
-                                                                    if (billingItems.isEmpty ||
-                                                                        billingItems ==
-                                                                            []) {
-                                                                      isDiscountApplied = false;
-                                                                      widget.isEditingOrder = false;
-                                                                      tableId = null;
-                                                                      waiterId = null;
-                                                                      selectedValue = null;
-                                                                      selectedValueWaiter = null;
+
+                                                                  if (index != -1) {
+                                                                    final currentQty = billingItems[index]['qty'];
+
+                                                                    // 🔎 original quantity from existing order
+                                                                    final originalQty = widget.existingOrder?.data?.items
+                                                                        ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                                        ?.quantity ??
+                                                                        0;
+
+                                                                    if (isOriginalOrderItem(p.id.toString())) {
+                                                                      // ✅ original item: only allow decrease if above originalQty
+                                                                      if (currentQty > originalQty) {
+                                                                        billingItems[index]['qty'] = currentQty - 1;
+                                                                        updateControllerText(
+                                                                          p.id.toString(),
+                                                                          billingItems[index]['qty'],
+                                                                        );
+                                                                      } else {
+                                                                        // show feedback if user tries to go below
+                                                                        ScaffoldMessenger.of(context).showSnackBar(
+                                                                          SnackBar(
+                                                                            content: Text(
+                                                                              "Cannot reduce below original ordered qty ($originalQty)",
+                                                                            ),
+                                                                          ),
+                                                                        );
+                                                                      }
+                                                                    } else {
+                                                                      // ✅ new item: free to decrease/remove
+                                                                      if (currentQty > 1) {
+                                                                        billingItems[index]['qty'] = currentQty - 1;
+                                                                        updateControllerText(
+                                                                          p.id.toString(),
+                                                                          billingItems[index]['qty'],
+                                                                        );
+                                                                      } else {
+                                                                        billingItems.removeWhere((item) => item['_id'] == p.id);
+                                                                        quantityControllers.remove(p.id);
+                                                                        if (billingItems.isEmpty) {
+                                                                          isDiscountApplied = false;
+                                                                          widget.isEditingOrder = false;
+                                                                          tableId = null;
+                                                                          waiterId = null;
+                                                                          selectedValue = null;
+                                                                          selectedValueWaiter = null;
+                                                                        }
+                                                                      }
                                                                     }
-                                                                  }
-                                                                  context
-                                                                      .read<
-                                                                      FoodCategoryBloc
-                                                                  >()
-                                                                      .add(
-                                                                    AddToBilling(
-                                                                      List.from(
-                                                                        billingItems,
+
+                                                                    context.read<FoodCategoryBloc>().add(
+                                                                      AddToBilling(
+                                                                        List.from(billingItems),
+                                                                        isDiscountApplied,
+                                                                        selectedOrderType,
                                                                       ),
-                                                                      isDiscountApplied,
-                                                                      selectedOrderType,
-                                                                    ),
-                                                                  );
+                                                                    );
+                                                                  }
                                                                 });
                                                               },
                                                             ),
                                                           ),
                                                           Container(
-                                                            width:
-                                                            45,
-                                                            height:
-                                                            32,
-                                                            margin: const EdgeInsets.symmetric(
-                                                              horizontal:
-                                                              12,
-                                                            ),
+                                                            width: 45,
+                                                            height: 32,
+                                                            margin: const EdgeInsets.symmetric(horizontal: 12),
                                                             decoration: BoxDecoration(
                                                               border: Border.all(
-                                                                color:
-                                                                greyColor,
+                                                                color: (widget.isEditingOrder == true &&
+                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                    isOriginalOrderItem(p.id.toString()))
+                                                                    ? greyColor.withOpacity(0.5) // Lighter border for locked items
+                                                                    : greyColor,
                                                               ),
-                                                              borderRadius:
-                                                              BorderRadius.circular(
-                                                                4,
-                                                              ),
+                                                              borderRadius: BorderRadius.circular(4),
+                                                              color: (widget.isEditingOrder == true &&
+                                                                  (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                      widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                  isOriginalOrderItem(p.id.toString()))
+                                                                  ? greyColor.withOpacity(0.1) // Light gray background for locked items
+                                                                  : whiteColor,
                                                             ),
                                                             child: TextField(
-                                                              controller:
-                                                              currentController,
-                                                              textAlign:
-                                                              TextAlign.center,
-                                                              keyboardType:
-                                                              TextInputType.number,
+                                                              controller: currentController,
+                                                              textAlign: TextAlign.center,
+                                                              keyboardType: TextInputType.number,
+                                                              enabled: !(widget.isEditingOrder == true &&
+                                                                  (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                      widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                  isOriginalOrderItem(p.id.toString())), // Disable for original items
                                                               style: MyTextStyle.f16(
-                                                                blackColor,
+                                                                (widget.isEditingOrder == true &&
+                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                    isOriginalOrderItem(p.id.toString()))
+                                                                    ? greyColor // Gray text for locked items
+                                                                    : blackColor,
                                                               ),
-                                                              decoration: const InputDecoration(
-                                                                border:
-                                                                InputBorder.none,
-                                                                isDense:
-                                                                true,
-                                                                contentPadding: EdgeInsets.all(
-                                                                  8,
-                                                                ),
+                                                              decoration: InputDecoration(
+                                                                border: InputBorder.none,
+                                                                isDense: true,
+                                                                contentPadding: EdgeInsets.all(8),
+                                                                hintText: (widget.isEditingOrder == true &&
+                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                    isOriginalOrderItem(p.id.toString()))
+                                                                    ? "Locked"
+                                                                    : null,
+                                                                hintStyle: TextStyle(color: greyColor, fontSize: 12),
                                                               ),
-                                                              onChanged:
-                                                                  (
-                                                                  value,
-                                                                  ) {
-                                                                final newQty = int.tryParse(
-                                                                  value,
-                                                                );
-                                                                if (newQty !=
-                                                                    null &&
-                                                                    newQty >
-                                                                        0) {
-                                                                  bool canSetQuantity;
-                                                                  if (p.isStock ==
-                                                                      true) {
-                                                                    if ((widget.isEditingOrder ==
-                                                                        true &&
-                                                                        widget.existingOrder?.data?.orderStatus ==
-                                                                            "COMPLETED") ||
-                                                                        (widget.isEditingOrder ==
-                                                                            true &&
-                                                                            widget.existingOrder?.data?.orderStatus ==
-                                                                                "WAITLIST")) {
-                                                                      final paidQty =
-                                                                          widget.existingOrder?.data?.items
-                                                                              ?.firstWhereOrNull(
-                                                                                (
-                                                                                item,
-                                                                                ) =>
-                                                                            item.product?.id ==
-                                                                                p.id,
-                                                                          )
-                                                                              ?.quantity ??
-                                                                              0;
-                                                                      canSetQuantity =
-                                                                          newQty <=
-                                                                              ((p.availableQuantity ??
-                                                                                  0) +
-                                                                                  paidQty);
+                                                              onChanged: (value) {
+                                                                final newQty = int.tryParse(value);
+
+                                                                // original order quantity (0 if not in existing order)
+                                                                final originalQty = widget.existingOrder?.data?.items
+                                                                    ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                                    ?.quantity ??
+                                                                    0;
+
+                                                                if (newQty != null && newQty > 0) {
+                                                                  bool canSetQuantity = true;
+
+                                                                  if (p.isStock == true) {
+                                                                    if ((widget.isEditingOrder == true &&
+                                                                        (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                            widget.existingOrder?.data?.orderStatus == "WAITLIST"))) {
+                                                                      // For editing order, allow up to available stock + originalQty
+                                                                      canSetQuantity = newQty <= ((p.availableQuantity ?? 0) + originalQty);
                                                                     } else {
-                                                                      canSetQuantity =
-                                                                          newQty <=
-                                                                              (p.availableQuantity ??
-                                                                                  0);
+                                                                      canSetQuantity = newQty <= (p.availableQuantity ?? 0);
                                                                     }
-                                                                  } else {
-                                                                    canSetQuantity = true;
+                                                                  }
+
+                                                                  // 👇 extra rule: don't allow decreasing below originalQty
+                                                                  if (widget.isEditingOrder == true &&
+                                                                      isOriginalOrderItem(p.id.toString()) &&
+                                                                      newQty < originalQty) {
+                                                                    canSetQuantity = false;
                                                                   }
 
                                                                   if (canSetQuantity) {
-                                                                    setState(
-                                                                          () {
-                                                                        isSplitPayment = false;
-                                                                        if (widget.isEditingOrder !=
-                                                                            true) {
-                                                                          selectedOrderType = OrderType.line;
-                                                                        }
+                                                                    setState(() {
+                                                                      isSplitPayment = false;
+                                                                      if (widget.isEditingOrder != true) {
+                                                                        selectedOrderType = OrderType.line;
+                                                                      }
 
-                                                                        final index = billingItems.indexWhere(
-                                                                              (
-                                                                              item,
-                                                                              ) =>
-                                                                          item['_id'] ==
-                                                                              p.id,
-                                                                        );
-                                                                        if (index !=
-                                                                            -1) {
-                                                                          billingItems[index]['qty'] = newQty;
-                                                                        } else {
-                                                                          billingItems.add(
-                                                                            {
-                                                                              "_id": p.id,
-                                                                              "basePrice": p.basePrice,
-                                                                              "image": p.image,
-                                                                              "qty": newQty,
-                                                                              "name": p.name,
-                                                                              "availableQuantity": p.availableQuantity,
-                                                                              "selectedAddons": p.addons!
-                                                                                  .where(
-                                                                                    (
-                                                                                    addon,
-                                                                                    ) =>
-                                                                                addon.quantity >
-                                                                                    0,
-                                                                              )
-                                                                                  .map(
-                                                                                    (
-                                                                                    addon,
-                                                                                    ) => {
-                                                                                  "_id": addon.id,
-                                                                                  "price": addon.price,
-                                                                                  "quantity": addon.quantity,
-                                                                                  "name": addon.name,
-                                                                                  "isAvailable": addon.isAvailable,
-                                                                                  "maxQuantity": addon.maxQuantity,
-                                                                                  "isFree": addon.isFree,
-                                                                                },
-                                                                              )
-                                                                                  .toList(),
-                                                                            },
-                                                                          );
-                                                                        }
-                                                                        context
-                                                                            .read<
-                                                                            FoodCategoryBloc
-                                                                        >()
-                                                                            .add(
-                                                                          AddToBilling(
-                                                                            List.from(
-                                                                              billingItems,
-                                                                            ),
-                                                                            isDiscountApplied,
-                                                                            selectedOrderType,
-                                                                          ),
-                                                                        );
-                                                                      },
-                                                                    );
+                                                                      final index =
+                                                                      billingItems.indexWhere((item) => item['_id'] == p.id);
+                                                                      if (index != -1) {
+                                                                        billingItems[index]['qty'] = newQty;
+                                                                      } else {
+                                                                        billingItems.add({
+                                                                          "_id": p.id,
+                                                                          "basePrice": p.basePrice,
+                                                                          "image": p.image,
+                                                                          "qty": newQty,
+                                                                          "name": p.name,
+                                                                          "availableQuantity": p.availableQuantity,
+                                                                          "selectedAddons": p.addons!
+                                                                              .where((addon) => addon.quantity > 0)
+                                                                              .map((addon) => {
+                                                                            "_id": addon.id,
+                                                                            "price": addon.price,
+                                                                            "quantity": addon.quantity,
+                                                                            "name": addon.name,
+                                                                            "isAvailable": addon.isAvailable,
+                                                                            "maxQuantity": addon.maxQuantity,
+                                                                            "isFree": addon.isFree,
+                                                                          })
+                                                                              .toList(),
+                                                                        });
+                                                                      }
+                                                                      context.read<FoodCategoryBloc>().add(
+                                                                        AddToBilling(
+                                                                          List.from(billingItems),
+                                                                          isDiscountApplied,
+                                                                          selectedOrderType,
+                                                                        ),
+                                                                      );
+                                                                    });
                                                                   } else {
-                                                                    currentController.text = getCurrentQuantity(
-                                                                      p.id.toString(),
-                                                                    ).toString();
-                                                                    ScaffoldMessenger.of(
-                                                                      context,
-                                                                    ).showSnackBar(
+                                                                    // restore previous valid qty
+                                                                    currentController.text =
+                                                                        getCurrentQuantity(p.id.toString()).toString();
+                                                                    ScaffoldMessenger.of(context).showSnackBar(
                                                                       SnackBar(
                                                                         content: Text(
-                                                                          "Maximum available quantity is ${p.availableQuantity ?? 0}",
+                                                                          newQty < originalQty
+                                                                              ? "Cannot reduce below original ordered qty ($originalQty)"
+                                                                              : "Maximum available quantity is ${p.availableQuantity ?? 0}",
                                                                         ),
                                                                       ),
                                                                     );
                                                                   }
-                                                                } else if (newQty ==
-                                                                    0 ||
-                                                                    value.isEmpty) {
-                                                                  setState(
-                                                                        () {
-                                                                      billingItems.removeWhere(
-                                                                            (
-                                                                            item,
-                                                                            ) =>
-                                                                        item['_id'] ==
-                                                                            p.id,
-                                                                      );
-                                                                      quantityControllers.remove(
-                                                                        p.id,
-                                                                      );
-                                                                      if (billingItems.isEmpty ||
-                                                                          billingItems ==
-                                                                              []) {
+                                                                } else if (newQty == 0 || value.isEmpty) {
+                                                                  // 👇 allow removal only if it's not an original order item
+                                                                  if (isOriginalOrderItem(p.id.toString())) {
+                                                                    currentController.text = originalQty.toString();
+                                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                                      SnackBar(
+                                                                        content: Text(
+                                                                          "This item cannot be removed. Minimum qty is $originalQty",
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                  } else {
+                                                                    setState(() {
+                                                                      billingItems.removeWhere((item) => item['_id'] == p.id);
+                                                                      quantityControllers.remove(p.id);
+                                                                      if (billingItems.isEmpty) {
                                                                         isDiscountApplied = false;
                                                                         widget.isEditingOrder = false;
                                                                         tableId = null;
@@ -8180,28 +8041,28 @@ class HomePageViewState extends State<HomePageView> {
                                                                         selectedValue = null;
                                                                         selectedValueWaiter = null;
                                                                       }
-                                                                      context
-                                                                          .read<
-                                                                          FoodCategoryBloc
-                                                                      >()
-                                                                          .add(
+                                                                      context.read<FoodCategoryBloc>().add(
                                                                         AddToBilling(
-                                                                          List.from(
-                                                                            billingItems,
-                                                                          ),
+                                                                          List.from(billingItems),
                                                                           isDiscountApplied,
                                                                           selectedOrderType,
                                                                         ),
                                                                       );
-                                                                    },
-                                                                  );
+                                                                    });
+                                                                  }
                                                                 }
                                                               },
+
                                                               onTap: () {
-                                                                currentController.selection = TextSelection(
-                                                                  baseOffset: 0,
-                                                                  extentOffset: currentController.text.length,
-                                                                );
+                                                                if (!(widget.isEditingOrder == true &&
+                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                    isOriginalOrderItem(p.id.toString()))) {
+                                                                  currentController.selection = TextSelection(
+                                                                    baseOffset: 0,
+                                                                    extentOffset: currentController.text.length,
+                                                                  );
+                                                                }
                                                               },
                                                             ),
                                                           ),
@@ -8394,287 +8255,238 @@ class HomePageViewState extends State<HomePageView> {
                                                         MainAxisAlignment
                                                             .center,
                                                         children: [
-                                                          // Expanded(
-                                                          //   child: Text(
-                                                          //     '₹ ${p.basePrice}',
-                                                          //     style: MyTextStyle.f14(
-                                                          //       blackColor,
-                                                          //       weight:
-                                                          //           FontWeight.w600,
-                                                          //     ),
-                                                          //     maxLines:
-                                                          //         1,
-                                                          //     overflow:
-                                                          //         TextOverflow.ellipsis,
-                                                          //   ),
-                                                          // ),
-                                                          // horizontalSpace(
-                                                          //   width:
-                                                          //       5,
-                                                          // ),
                                                           CircleAvatar(
-                                                            radius:
-                                                            15,
-                                                            backgroundColor:
-                                                            greyColor200,
+                                                            radius: 15,
+                                                            backgroundColor: greyColor200,
                                                             child: IconButton(
-                                                              icon: const Icon(
+                                                              icon: Icon(
                                                                 Icons.remove,
-                                                                size:
-                                                                15,
-                                                                color:
-                                                                blackColor,
+                                                                size: 15,
+                                                                color: blackColor,
                                                               ),
                                                               onPressed: () {
                                                                 setState(() {
                                                                   isSplitPayment = false;
-                                                                  if (widget.isEditingOrder !=
-                                                                      true) {
+                                                                  if (widget.isEditingOrder != true) {
                                                                     selectedOrderType = OrderType.line;
                                                                   }
+
                                                                   final index = billingItems.indexWhere(
-                                                                        (
-                                                                        item,
-                                                                        ) =>
-                                                                    item['_id'] ==
-                                                                        p.id,
+                                                                        (item) => item['_id'] == p.id,
                                                                   );
-                                                                  if (index !=
-                                                                      -1 &&
-                                                                      billingItems[index]['qty'] >
-                                                                          1) {
-                                                                    billingItems[index]['qty'] =
-                                                                        billingItems[index]['qty'] -
-                                                                            1;
-                                                                    updateControllerText(
-                                                                      p.id.toString(),
-                                                                      billingItems[index]['qty'],
-                                                                    );
-                                                                  } else {
-                                                                    billingItems.removeWhere(
-                                                                          (
-                                                                          item,
-                                                                          ) =>
-                                                                      item['_id'] ==
-                                                                          p.id,
-                                                                    );
-                                                                    quantityControllers.remove(
-                                                                      p.id,
-                                                                    );
-                                                                    if (billingItems.isEmpty ||
-                                                                        billingItems ==
-                                                                            []) {
-                                                                      isDiscountApplied = false;
-                                                                      widget.isEditingOrder = false;
-                                                                      tableId = null;
-                                                                      waiterId = null;
-                                                                      selectedValue = null;
-                                                                      selectedValueWaiter = null;
+
+                                                                  if (index != -1) {
+                                                                    final currentQty = billingItems[index]['qty'];
+
+                                                                    // 🔎 original quantity from existing order
+                                                                    final originalQty = widget.existingOrder?.data?.items
+                                                                        ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                                        ?.quantity ??
+                                                                        0;
+
+                                                                    if (isOriginalOrderItem(p.id.toString())) {
+                                                                      // ✅ original item: only allow decrease if above originalQty
+                                                                      if (currentQty > originalQty) {
+                                                                        billingItems[index]['qty'] = currentQty - 1;
+                                                                        updateControllerText(
+                                                                          p.id.toString(),
+                                                                          billingItems[index]['qty'],
+                                                                        );
+                                                                      } else {
+                                                                        // show feedback if user tries to go below
+                                                                        ScaffoldMessenger.of(context).showSnackBar(
+                                                                          SnackBar(
+                                                                            content: Text(
+                                                                              "Cannot reduce below original ordered qty ($originalQty)",
+                                                                            ),
+                                                                          ),
+                                                                        );
+                                                                      }
+                                                                    } else {
+                                                                      // ✅ new item: free to decrease/remove
+                                                                      if (currentQty > 1) {
+                                                                        billingItems[index]['qty'] = currentQty - 1;
+                                                                        updateControllerText(
+                                                                          p.id.toString(),
+                                                                          billingItems[index]['qty'],
+                                                                        );
+                                                                      } else {
+                                                                        billingItems.removeWhere((item) => item['_id'] == p.id);
+                                                                        quantityControllers.remove(p.id);
+                                                                        if (billingItems.isEmpty) {
+                                                                          isDiscountApplied = false;
+                                                                          widget.isEditingOrder = false;
+                                                                          tableId = null;
+                                                                          waiterId = null;
+                                                                          selectedValue = null;
+                                                                          selectedValueWaiter = null;
+                                                                        }
+                                                                      }
                                                                     }
-                                                                  }
-                                                                  context
-                                                                      .read<
-                                                                      FoodCategoryBloc
-                                                                  >()
-                                                                      .add(
-                                                                    AddToBilling(
-                                                                      List.from(
-                                                                        billingItems,
+
+                                                                    context.read<FoodCategoryBloc>().add(
+                                                                      AddToBilling(
+                                                                        List.from(billingItems),
+                                                                        isDiscountApplied,
+                                                                        selectedOrderType,
                                                                       ),
-                                                                      isDiscountApplied,
-                                                                      selectedOrderType,
-                                                                    ),
-                                                                  );
+                                                                    );
+                                                                  }
                                                                 });
                                                               },
                                                             ),
                                                           ),
+
                                                           Container(
-                                                            width:
-                                                            45,
-                                                            height:
-                                                            32,
-                                                            margin: const EdgeInsets.symmetric(
-                                                              horizontal:
-                                                              12,
-                                                            ),
+                                                            width: 45,
+                                                            height: 32,
+                                                            margin: const EdgeInsets.symmetric(horizontal: 12),
                                                             decoration: BoxDecoration(
                                                               border: Border.all(
-                                                                color:
-                                                                greyColor,
+                                                                color: (widget.isEditingOrder == true &&
+                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                    isOriginalOrderItem(p.id.toString()))
+                                                                    ? greyColor.withOpacity(0.5) // Lighter border for locked items
+                                                                    : greyColor,
                                                               ),
-                                                              borderRadius:
-                                                              BorderRadius.circular(
-                                                                4,
-                                                              ),
+                                                              borderRadius: BorderRadius.circular(4),
+                                                              color: (widget.isEditingOrder == true &&
+                                                                  (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                      widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                  isOriginalOrderItem(p.id.toString()))
+                                                                  ? greyColor.withOpacity(0.1) // Light gray background for locked items
+                                                                  : whiteColor,
                                                             ),
                                                             child: TextField(
-                                                              controller:
-                                                              currentController,
-                                                              textAlign:
-                                                              TextAlign.center,
-                                                              keyboardType:
-                                                              TextInputType.number,
+                                                              controller: currentController,
+                                                              textAlign: TextAlign.center,
+                                                              keyboardType: TextInputType.number,
+                                                              enabled: !(widget.isEditingOrder == true &&
+                                                                  (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                      widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                  isOriginalOrderItem(p.id.toString())), // Disable for original items
                                                               style: MyTextStyle.f16(
-                                                                blackColor,
+                                                                (widget.isEditingOrder == true &&
+                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                    isOriginalOrderItem(p.id.toString()))
+                                                                    ? greyColor // Gray text for locked items
+                                                                    : blackColor,
                                                               ),
-                                                              decoration: const InputDecoration(
-                                                                border:
-                                                                InputBorder.none,
-                                                                isDense:
-                                                                true,
-                                                                contentPadding: EdgeInsets.all(
-                                                                  8,
-                                                                ),
+                                                              decoration: InputDecoration(
+                                                                border: InputBorder.none,
+                                                                isDense: true,
+                                                                contentPadding: EdgeInsets.all(8),
+                                                                hintText: (widget.isEditingOrder == true &&
+                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                    isOriginalOrderItem(p.id.toString()))
+                                                                    ? "Locked"
+                                                                    : null,
+                                                                hintStyle: TextStyle(color: greyColor, fontSize: 12),
                                                               ),
-                                                              onChanged:
-                                                                  (
-                                                                  value,
-                                                                  ) {
-                                                                final newQty = int.tryParse(
-                                                                  value,
-                                                                );
-                                                                if (newQty !=
-                                                                    null &&
-                                                                    newQty >
-                                                                        0) {
-                                                                  bool canSetQuantity;
-                                                                  if (p.isStock ==
-                                                                      true) {
-                                                                    if ((widget.isEditingOrder ==
-                                                                        true &&
-                                                                        widget.existingOrder?.data?.orderStatus ==
-                                                                            "COMPLETED") ||
-                                                                        (widget.isEditingOrder ==
-                                                                            true &&
-                                                                            widget.existingOrder?.data?.orderStatus ==
-                                                                                "WAITLIST")) {
-                                                                      final paidQty =
-                                                                          widget.existingOrder?.data?.items
-                                                                              ?.firstWhereOrNull(
-                                                                                (
-                                                                                item,
-                                                                                ) =>
-                                                                            item.product?.id ==
-                                                                                p.id,
-                                                                          )
-                                                                              ?.quantity ??
-                                                                              0;
-                                                                      canSetQuantity =
-                                                                          newQty <=
-                                                                              ((p.availableQuantity ??
-                                                                                  0) +
-                                                                                  paidQty);
+                                                              onChanged: (value) {
+                                                                final newQty = int.tryParse(value);
+
+                                                                // original order quantity (0 if not in existing order)
+                                                                final originalQty = widget.existingOrder?.data?.items
+                                                                    ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                                    ?.quantity ??
+                                                                    0;
+
+                                                                if (newQty != null && newQty > 0) {
+                                                                  bool canSetQuantity = true;
+
+                                                                  if (p.isStock == true) {
+                                                                    if ((widget.isEditingOrder == true &&
+                                                                        (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                            widget.existingOrder?.data?.orderStatus == "WAITLIST"))) {
+                                                                      // For editing order, allow up to available stock + originalQty
+                                                                      canSetQuantity = newQty <= ((p.availableQuantity ?? 0) + originalQty);
                                                                     } else {
-                                                                      canSetQuantity =
-                                                                          newQty <=
-                                                                              (p.availableQuantity ??
-                                                                                  0);
+                                                                      canSetQuantity = newQty <= (p.availableQuantity ?? 0);
                                                                     }
-                                                                  } else {
-                                                                    canSetQuantity = true;
+                                                                  }
+
+                                                                  // 👇 extra rule: don't allow decreasing below originalQty
+                                                                  if (widget.isEditingOrder == true &&
+                                                                      isOriginalOrderItem(p.id.toString()) &&
+                                                                      newQty < originalQty) {
+                                                                    canSetQuantity = false;
                                                                   }
 
                                                                   if (canSetQuantity) {
-                                                                    setState(
-                                                                          () {
-                                                                        isSplitPayment = false;
-                                                                        if (widget.isEditingOrder !=
-                                                                            true) {
-                                                                          selectedOrderType = OrderType.line;
-                                                                        }
+                                                                    setState(() {
+                                                                      isSplitPayment = false;
+                                                                      if (widget.isEditingOrder != true) {
+                                                                        selectedOrderType = OrderType.line;
+                                                                      }
 
-                                                                        final index = billingItems.indexWhere(
-                                                                              (
-                                                                              item,
-                                                                              ) =>
-                                                                          item['_id'] ==
-                                                                              p.id,
-                                                                        );
-                                                                        if (index !=
-                                                                            -1) {
-                                                                          billingItems[index]['qty'] = newQty;
-                                                                        } else {
-                                                                          billingItems.add(
-                                                                            {
-                                                                              "_id": p.id,
-                                                                              "basePrice": p.basePrice,
-                                                                              "image": p.image,
-                                                                              "qty": newQty,
-                                                                              "name": p.name,
-                                                                              "availableQuantity": p.availableQuantity,
-                                                                              "selectedAddons": p.addons!
-                                                                                  .where(
-                                                                                    (
-                                                                                    addon,
-                                                                                    ) =>
-                                                                                addon.quantity >
-                                                                                    0,
-                                                                              )
-                                                                                  .map(
-                                                                                    (
-                                                                                    addon,
-                                                                                    ) => {
-                                                                                  "_id": addon.id,
-                                                                                  "price": addon.price,
-                                                                                  "quantity": addon.quantity,
-                                                                                  "name": addon.name,
-                                                                                  "isAvailable": addon.isAvailable,
-                                                                                  "maxQuantity": addon.maxQuantity,
-                                                                                  "isFree": addon.isFree,
-                                                                                },
-                                                                              )
-                                                                                  .toList(),
-                                                                            },
-                                                                          );
-                                                                        }
-                                                                        context
-                                                                            .read<
-                                                                            FoodCategoryBloc
-                                                                        >()
-                                                                            .add(
-                                                                          AddToBilling(
-                                                                            List.from(
-                                                                              billingItems,
-                                                                            ),
-                                                                            isDiscountApplied,
-                                                                            selectedOrderType,
-                                                                          ),
-                                                                        );
-                                                                      },
-                                                                    );
+                                                                      final index =
+                                                                      billingItems.indexWhere((item) => item['_id'] == p.id);
+                                                                      if (index != -1) {
+                                                                        billingItems[index]['qty'] = newQty;
+                                                                      } else {
+                                                                        billingItems.add({
+                                                                          "_id": p.id,
+                                                                          "basePrice": p.basePrice,
+                                                                          "image": p.image,
+                                                                          "qty": newQty,
+                                                                          "name": p.name,
+                                                                          "availableQuantity": p.availableQuantity,
+                                                                          "selectedAddons": p.addons!
+                                                                              .where((addon) => addon.quantity > 0)
+                                                                              .map((addon) => {
+                                                                            "_id": addon.id,
+                                                                            "price": addon.price,
+                                                                            "quantity": addon.quantity,
+                                                                            "name": addon.name,
+                                                                            "isAvailable": addon.isAvailable,
+                                                                            "maxQuantity": addon.maxQuantity,
+                                                                            "isFree": addon.isFree,
+                                                                          })
+                                                                              .toList(),
+                                                                        });
+                                                                      }
+                                                                      context.read<FoodCategoryBloc>().add(
+                                                                        AddToBilling(
+                                                                          List.from(billingItems),
+                                                                          isDiscountApplied,
+                                                                          selectedOrderType,
+                                                                        ),
+                                                                      );
+                                                                    });
                                                                   } else {
-                                                                    currentController.text = getCurrentQuantity(
-                                                                      p.id.toString(),
-                                                                    ).toString();
-                                                                    ScaffoldMessenger.of(
-                                                                      context,
-                                                                    ).showSnackBar(
+                                                                    // restore previous valid qty
+                                                                    currentController.text =
+                                                                        getCurrentQuantity(p.id.toString()).toString();
+                                                                    ScaffoldMessenger.of(context).showSnackBar(
                                                                       SnackBar(
                                                                         content: Text(
-                                                                          "Maximum available quantity is ${p.availableQuantity ?? 0}",
+                                                                          newQty < originalQty
+                                                                              ? "Cannot reduce below original ordered qty ($originalQty)"
+                                                                              : "Maximum available quantity is ${p.availableQuantity ?? 0}",
                                                                         ),
                                                                       ),
                                                                     );
                                                                   }
-                                                                } else if (newQty ==
-                                                                    0 ||
-                                                                    value.isEmpty) {
-                                                                  setState(
-                                                                        () {
-                                                                      billingItems.removeWhere(
-                                                                            (
-                                                                            item,
-                                                                            ) =>
-                                                                        item['_id'] ==
-                                                                            p.id,
-                                                                      );
-                                                                      quantityControllers.remove(
-                                                                        p.id,
-                                                                      );
-                                                                      if (billingItems.isEmpty ||
-                                                                          billingItems ==
-                                                                              []) {
+                                                                } else if (newQty == 0 || value.isEmpty) {
+                                                                  // 👇 allow removal only if it's not an original order item
+                                                                  if (isOriginalOrderItem(p.id.toString())) {
+                                                                    currentController.text = originalQty.toString();
+                                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                                      SnackBar(
+                                                                        content: Text(
+                                                                          "This item cannot be removed. Minimum qty is $originalQty",
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                  } else {
+                                                                    setState(() {
+                                                                      billingItems.removeWhere((item) => item['_id'] == p.id);
+                                                                      quantityControllers.remove(p.id);
+                                                                      if (billingItems.isEmpty) {
                                                                         isDiscountApplied = false;
                                                                         widget.isEditingOrder = false;
                                                                         tableId = null;
@@ -8682,28 +8494,28 @@ class HomePageViewState extends State<HomePageView> {
                                                                         selectedValue = null;
                                                                         selectedValueWaiter = null;
                                                                       }
-                                                                      context
-                                                                          .read<
-                                                                          FoodCategoryBloc
-                                                                      >()
-                                                                          .add(
+                                                                      context.read<FoodCategoryBloc>().add(
                                                                         AddToBilling(
-                                                                          List.from(
-                                                                            billingItems,
-                                                                          ),
+                                                                          List.from(billingItems),
                                                                           isDiscountApplied,
                                                                           selectedOrderType,
                                                                         ),
                                                                       );
-                                                                    },
-                                                                  );
+                                                                    });
+                                                                  }
                                                                 }
                                                               },
+
                                                               onTap: () {
-                                                                currentController.selection = TextSelection(
-                                                                  baseOffset: 0,
-                                                                  extentOffset: currentController.text.length,
-                                                                );
+                                                                if (!(widget.isEditingOrder == true &&
+                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                    isOriginalOrderItem(p.id.toString()))) {
+                                                                  currentController.selection = TextSelection(
+                                                                    baseOffset: 0,
+                                                                    extentOffset: currentController.text.length,
+                                                                  );
+                                                                }
                                                               },
                                                             ),
                                                           ),
@@ -10144,66 +9956,50 @@ class HomePageViewState extends State<HomePageView> {
                                                           MainAxisSize
                                                               .min,
                                                           children: [
-                                                            // Decrease button
                                                             CircleAvatar(
                                                               radius: 15,
-                                                              backgroundColor:
-                                                              greyColor200,
+                                                              backgroundColor: greyColor200,
                                                               child: IconButton(
-                                                                icon: const Icon(
-                                                                  Icons
-                                                                      .remove,
-                                                                  size:
-                                                                  15,
-                                                                  color:
-                                                                  blackColor,
+                                                                icon: Icon(
+                                                                  Icons.remove,
+                                                                  size: 15,
+                                                                  color: (widget.isEditingOrder == true &&
+                                                                      (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                          widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                      isExistingItem(e.id.toString()) &&
+                                                                      getCurrentQuantityFromBilling(e.id.toString()) <= getOriginalQuantity(e.id.toString()))
+                                                                      ? greyColor  // Disabled color
+                                                                      : blackColor, // Enabled color
                                                                 ),
-                                                                padding:
-                                                                EdgeInsets
-                                                                    .zero,
-                                                                constraints:
-                                                                BoxConstraints(),
-                                                                onPressed: () {
+                                                                padding: EdgeInsets.zero,
+                                                                constraints: BoxConstraints(),
+                                                                onPressed: (widget.isEditingOrder == true &&
+                                                                    (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                        widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                    isExistingItem(e.id.toString()) &&
+                                                                    getCurrentQuantityFromBilling(e.id.toString()) <= getOriginalQuantity(e.id.toString()))
+                                                                    ? null  // Disable button
+                                                                    : () {
                                                                   setState(() {
-                                                                    isSplitPayment =
-                                                                    false;
-                                                                    if (widget.isEditingOrder !=
-                                                                        true) {
-                                                                      selectedOrderType =
-                                                                          OrderType.line;
+                                                                    isSplitPayment = false;
+                                                                    if (widget.isEditingOrder != true) {
+                                                                      selectedOrderType = OrderType.line;
                                                                     }
                                                                     final index = billingItems.indexWhere(
-                                                                          (
-                                                                          item,
-                                                                          ) =>
-                                                                      item['_id'] ==
-                                                                          e.id,
+                                                                          (item) => item['_id'] == e.id,
                                                                     );
-                                                                    if (index !=
-                                                                        -1 &&
-                                                                        billingItems[index]['qty'] >
-                                                                            1) {
-                                                                      billingItems[index]['qty'] =
-                                                                          billingItems[index]['qty'] -
-                                                                              1;
+                                                                    if (index != -1 && billingItems[index]['qty'] > 1) {
+                                                                      billingItems[index]['qty'] = billingItems[index]['qty'] - 1;
                                                                       updateControllerText(
                                                                         e.id.toString(),
                                                                         billingItems[index]['qty'],
                                                                       );
                                                                     } else {
                                                                       billingItems.removeWhere(
-                                                                            (
-                                                                            item,
-                                                                            ) =>
-                                                                        item['_id'] ==
-                                                                            e.id,
+                                                                            (item) => item['_id'] == e.id,
                                                                       );
-                                                                      quantityControllers.remove(
-                                                                        e.id.toString(),
-                                                                      );
-                                                                      if (billingItems.isEmpty ||
-                                                                          billingItems ==
-                                                                              []) {
+                                                                      quantityControllers.remove(e.id.toString());
+                                                                      if (billingItems.isEmpty || billingItems == []) {
                                                                         isDiscountApplied = false;
                                                                         widget.isEditingOrder = false;
                                                                         tableId = null;
@@ -10212,15 +10008,9 @@ class HomePageViewState extends State<HomePageView> {
                                                                         selectedValueWaiter = null;
                                                                       }
                                                                     }
-                                                                    context
-                                                                        .read<
-                                                                        FoodCategoryBloc
-                                                                    >()
-                                                                        .add(
+                                                                    context.read<FoodCategoryBloc>().add(
                                                                       AddToBilling(
-                                                                        List.from(
-                                                                          billingItems,
-                                                                        ),
+                                                                        List.from(billingItems),
                                                                         isDiscountApplied,
                                                                         selectedOrderType,
                                                                       ),
@@ -10229,207 +10019,152 @@ class HomePageViewState extends State<HomePageView> {
                                                                 },
                                                               ),
                                                             ),
-
-                                                            // TextField for quantity input
                                                             Container(
                                                               width: 45,
                                                               height: 32,
-                                                              margin: const EdgeInsets.symmetric(
-                                                                horizontal:
-                                                                8,
-                                                              ),
+                                                              margin: const EdgeInsets.symmetric(horizontal: 8),
                                                               decoration: BoxDecoration(
-                                                                border: Border.all(
-                                                                  color:
-                                                                  greyColor,
-                                                                ),
-                                                                borderRadius:
-                                                                BorderRadius.circular(
-                                                                  4,
-                                                                ),
+                                                                border: Border.all(color: greyColor),
+                                                                borderRadius: BorderRadius.circular(4),
+                                                                color: (widget.isEditingOrder == true &&
+                                                                    (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                        widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                    isExistingItem(e.id.toString()))
+                                                                    ? greyColor200  // Disabled background
+                                                                    : whiteColor,   // Normal background
                                                               ),
                                                               child: TextField(
-                                                                controller: getOrCreateController(
-                                                                  e.id.toString(),
-                                                                  e.qty?.toInt() ??
-                                                                      0,
-                                                                ),
-                                                                textAlign:
-                                                                TextAlign
-                                                                    .center,
-                                                                keyboardType:
-                                                                TextInputType
-                                                                    .number,
+                                                                controller: getOrCreateController(e.id.toString(), (e.qty?.toInt()) ?? 0),
+                                                                textAlign: TextAlign.center,
+                                                                keyboardType: TextInputType.number,
+                                                                enabled: !(widget.isEditingOrder == true &&
+                                                                    (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                        widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                    isExistingItem(e.id.toString())), // Disable for existing items
                                                                 style: MyTextStyle.f16(
-                                                                  blackColor,
+                                                                  (widget.isEditingOrder == true &&
+                                                                      (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                          widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                      isExistingItem(e.id.toString()))
+                                                                      ? greyColor  // Disabled text color
+                                                                      : blackColor, // Normal text color
                                                                 ),
                                                                 decoration: const InputDecoration(
-                                                                  border:
-                                                                  InputBorder.none,
-                                                                  isDense:
-                                                                  true,
-                                                                  contentPadding:
-                                                                  EdgeInsets.all(
-                                                                    8,
-                                                                  ),
+                                                                  border: InputBorder.none,
+                                                                  isDense: true,
+                                                                  contentPadding: EdgeInsets.all(8),
                                                                 ),
                                                                 onChanged: (value) {
-                                                                  final newQty =
-                                                                  int.tryParse(
-                                                                    value,
-                                                                  );
-                                                                  if (newQty !=
-                                                                      null &&
-                                                                      newQty >
-                                                                          0) {
-                                                                    bool
-                                                                    canSetQuantity;
-                                                                    if (e.isStock ==
-                                                                        true) {
-                                                                      if ((widget.isEditingOrder ==
-                                                                          true &&
-                                                                          widget.existingOrder?.data?.orderStatus ==
-                                                                              "COMPLETED") ||
-                                                                          (widget.isEditingOrder ==
-                                                                              true &&
-                                                                              widget.existingOrder?.data?.orderStatus ==
-                                                                                  "WAITLIST")) {
-                                                                        final paidQty =
-                                                                            widget.existingOrder?.data?.items
-                                                                                ?.firstWhereOrNull(
-                                                                                  (
-                                                                                  item,
-                                                                                  ) =>
-                                                                              item.product?.id ==
-                                                                                  e.id,
-                                                                            )
-                                                                                ?.quantity ??
-                                                                                0;
-                                                                        canSetQuantity =
-                                                                            newQty <=
-                                                                                ((availableQty) +
-                                                                                    paidQty);
+                                                                  final newQty = int.tryParse(value);
+                                                                  if (newQty != null && newQty > 0) {
+                                                                    // For existing items in edit mode, don't allow reducing below original quantity
+                                                                    if (widget.isEditingOrder == true &&
+                                                                        (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                            widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                        isExistingItem(e.id.toString())) {
+
+                                                                      final originalQty = getOriginalQuantity(e.id.toString());
+                                                                      if (newQty < originalQty) {
+                                                                        // Reset to original quantity
+                                                                        getOrCreateController(e.id.toString(), originalQty).text = originalQty.toString();
+                                                                        ScaffoldMessenger.of(context).showSnackBar(
+                                                                          SnackBar(
+                                                                            content: Text("Cannot reduce quantity below original amount (${originalQty}) for existing items"),
+                                                                          ),
+                                                                        );
+                                                                        return;
+                                                                      }
+                                                                    }
+
+                                                                    bool canSetQuantity;
+                                                                    if (e.isStock == true) {
+                                                                      if ((widget.isEditingOrder == true &&
+                                                                          widget.existingOrder?.data?.orderStatus == "COMPLETED") ||
+                                                                          (widget.isEditingOrder == true &&
+                                                                              widget.existingOrder?.data?.orderStatus == "WAITLIST")) {
+                                                                        final paidQty = widget.existingOrder?.data?.items
+                                                                            ?.firstWhereOrNull((item) => item.product?.id == e.id)
+                                                                            ?.quantity ?? 0;
+                                                                        canSetQuantity = newQty <= ((availableQty) + paidQty);
                                                                       } else {
-                                                                        canSetQuantity =
-                                                                            newQty <=
-                                                                                availableQty;
+                                                                        canSetQuantity = newQty <= availableQty;
                                                                       }
                                                                     } else {
-                                                                      canSetQuantity =
-                                                                      true;
+                                                                      canSetQuantity = true;
                                                                     }
 
                                                                     if (canSetQuantity) {
                                                                       setState(() {
                                                                         isSplitPayment = false;
-                                                                        if (widget.isEditingOrder !=
-                                                                            true) {
+                                                                        if (widget.isEditingOrder != true) {
                                                                           selectedOrderType = OrderType.line;
                                                                         }
 
-                                                                        final index = billingItems.indexWhere(
-                                                                              (
-                                                                              item,
-                                                                              ) =>
-                                                                          item['_id'] ==
-                                                                              e.id,
-                                                                        );
-                                                                        if (index !=
-                                                                            -1) {
+                                                                        final index = billingItems.indexWhere((item) => item['_id'] == e.id);
+                                                                        if (index != -1) {
                                                                           billingItems[index]['qty'] = newQty;
                                                                         } else {
-                                                                          // This shouldn't happen in cart, but keeping for safety
-                                                                          billingItems.add(
-                                                                            {
-                                                                              "_id": e.id,
-                                                                              "basePrice": e.basePrice,
-                                                                              "image": e.image,
-                                                                              "qty": newQty,
-                                                                              "name": e.name,
-                                                                              "availableQuantity": e.availableQuantity,
-                                                                              "selectedAddons":
-                                                                              (e.selectedAddons !=
-                                                                                  null)
-                                                                                  ? e.selectedAddons!
-                                                                                  .where(
-                                                                                    (
-                                                                                    addon,
-                                                                                    ) =>
-                                                                                (addon.quantity ??
-                                                                                    0) >
-                                                                                    0,
-                                                                              )
-                                                                                  .map(
-                                                                                    (
-                                                                                    addon,
-                                                                                    ) => {
-                                                                                  "_id": addon.id,
-                                                                                  "price":
-                                                                                  addon.price ??
-                                                                                      0,
-                                                                                  "quantity":
-                                                                                  addon.quantity ??
-                                                                                      0,
-                                                                                  "name": addon.name,
-                                                                                  "isAvailable": addon.isAvailable,
-                                                                                  "maxQuantity": addon.quantity,
-                                                                                  "isFree": addon.isFree,
-                                                                                },
-                                                                              )
-                                                                                  .toList()
-                                                                                  : [],
-                                                                            },
-                                                                          );
+                                                                          billingItems.add({
+                                                                            "_id": e.id,
+                                                                            "basePrice": e.basePrice,
+                                                                            "image": e.image,
+                                                                            "qty": newQty,
+                                                                            "name": e.name,
+                                                                            "availableQuantity": e.availableQuantity,
+                                                                            "selectedAddons": (e.selectedAddons != null)
+                                                                                ? e.selectedAddons!
+                                                                                .where((addon) => (addon.quantity ?? 0) > 0)
+                                                                                .map((addon) => {
+                                                                              "_id": addon.id,
+                                                                              "price": addon.price ?? 0,
+                                                                              "quantity": addon.quantity ?? 0,
+                                                                              "name": addon.name,
+                                                                              "isAvailable": addon.isAvailable,
+                                                                              "maxQuantity": addon.quantity,
+                                                                              "isFree": addon.isFree,
+                                                                            })
+                                                                                .toList()
+                                                                                : [],
+                                                                          });
                                                                         }
-                                                                        context
-                                                                            .read<
-                                                                            FoodCategoryBloc
-                                                                        >()
-                                                                            .add(
+                                                                        context.read<FoodCategoryBloc>().add(
                                                                           AddToBilling(
-                                                                            List.from(
-                                                                              billingItems,
-                                                                            ),
+                                                                            List.from(billingItems),
                                                                             isDiscountApplied,
                                                                             selectedOrderType,
                                                                           ),
                                                                         );
                                                                       });
                                                                     } else {
-                                                                      getOrCreateController(
-                                                                        e.id.toString(),
-                                                                        e.qty?.toInt() ??
-                                                                            0,
-                                                                      ).text = getCurrentQuantity(
-                                                                        e.id.toString(),
-                                                                      ).toString();
-                                                                      ScaffoldMessenger.of(
-                                                                        context,
-                                                                      ).showSnackBar(
+                                                                      getOrCreateController(e.id.toString(), e.qty?.toInt() ?? 0).text =
+                                                                          getCurrentQuantity(e.id.toString()).toString();
+                                                                      ScaffoldMessenger.of(context).showSnackBar(
                                                                         SnackBar(
-                                                                          content: Text(
-                                                                            "Maximum available quantity is $availableQty",
-                                                                          ),
+                                                                          content: Text("Maximum available quantity is $availableQty"),
                                                                         ),
                                                                       );
                                                                     }
-                                                                  } else if (newQty ==
-                                                                      0 ||
-                                                                      value.isEmpty) {
+                                                                  } else if (newQty == 0 || value.isEmpty) {
+                                                                    // Don't allow removal of existing items in edit mode
+                                                                    if (widget.isEditingOrder == true &&
+                                                                        (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                            widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                        isExistingItem(e.id.toString())) {
+
+                                                                      final originalQty = getOriginalQuantity(e.id.toString());
+                                                                      getOrCreateController(e.id.toString(), originalQty).text = originalQty.toString();
+                                                                      ScaffoldMessenger.of(context).showSnackBar(
+                                                                        SnackBar(
+                                                                          content: Text("Cannot remove existing items. Minimum quantity is ${originalQty}"),
+                                                                        ),
+                                                                      );
+                                                                      return;
+                                                                    }
+
                                                                     setState(() {
-                                                                      billingItems.removeWhere(
-                                                                            (
-                                                                            item,
-                                                                            ) =>
-                                                                        item['_id'] ==
-                                                                            e.id,
-                                                                      );
-                                                                      quantityControllers.remove(
-                                                                        e.id.toString(),
-                                                                      );
-                                                                      if (billingItems.isEmpty ||
-                                                                          billingItems ==
-                                                                              []) {
+                                                                      billingItems.removeWhere((item) => item['_id'] == e.id);
+                                                                      quantityControllers.remove(e.id.toString());
+                                                                      if (billingItems.isEmpty || billingItems == []) {
                                                                         isDiscountApplied = false;
                                                                         widget.isEditingOrder = false;
                                                                         tableId = null;
@@ -10437,15 +10172,9 @@ class HomePageViewState extends State<HomePageView> {
                                                                         selectedValue = null;
                                                                         selectedValueWaiter = null;
                                                                       }
-                                                                      context
-                                                                          .read<
-                                                                          FoodCategoryBloc
-                                                                      >()
-                                                                          .add(
+                                                                      context.read<FoodCategoryBloc>().add(
                                                                         AddToBilling(
-                                                                          List.from(
-                                                                            billingItems,
-                                                                          ),
+                                                                          List.from(billingItems),
                                                                           isDiscountApplied,
                                                                           selectedOrderType,
                                                                         ),
@@ -10454,24 +10183,22 @@ class HomePageViewState extends State<HomePageView> {
                                                                   }
                                                                 },
                                                                 onTap: () {
-                                                                  final controller = getOrCreateController(
-                                                                    e.id.toString(),
-                                                                    e.qty?.toInt() ??
-                                                                        0,
-                                                                  );
-                                                                  controller
-                                                                      .selection = TextSelection(
-                                                                    baseOffset:
-                                                                    0,
-                                                                    extentOffset: controller
-                                                                        .text
-                                                                        .length,
+                                                                  // Don't allow editing for existing items
+                                                                  if (widget.isEditingOrder == true &&
+                                                                      (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                          widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                      isExistingItem(e.id.toString())) {
+                                                                    return;
+                                                                  }
+
+                                                                  final controller = getOrCreateController(e.id.toString(), e.qty?.toInt() ?? 0);
+                                                                  controller.selection = TextSelection(
+                                                                    baseOffset: 0,
+                                                                    extentOffset: controller.text.length,
                                                                   );
                                                                 },
                                                               ),
                                                             ),
-
-                                                            // Increase button
                                                             Builder(
                                                               builder: (context) {
                                                                 return CircleAvatar(
@@ -10553,59 +10280,39 @@ class HomePageViewState extends State<HomePageView> {
                                                                 );
                                                               },
                                                             ),
-
-                                                            // Keep your existing delete button
                                                             IconButton(
                                                               icon: Icon(
-                                                                Icons
-                                                                    .delete,
-                                                                color:
-                                                                redColor,
+                                                                Icons.delete,
+                                                                color: (widget.isEditingOrder == true &&
+                                                                    (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                        widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                    isExistingItem(e.id.toString()))
+                                                                    ? greyColor   // Disabled color
+                                                                    : redColor,   // Enabled color
                                                                 size: 20,
                                                               ),
-                                                              padding:
-                                                              EdgeInsets.all(
-                                                                4,
-                                                              ),
-                                                              constraints:
-                                                              BoxConstraints(),
-                                                              onPressed: () {
+                                                              padding: EdgeInsets.all(4),
+                                                              constraints: BoxConstraints(),
+                                                              onPressed: (widget.isEditingOrder == true &&
+                                                                  (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
+                                                                      widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
+                                                                  isExistingItem(e.id.toString()))
+                                                                  ? null  // Disable button
+                                                                  : () {
                                                                 setState(() {
-                                                                  billingItems.removeWhere(
-                                                                        (
-                                                                        item,
-                                                                        ) =>
-                                                                    item['_id'] ==
-                                                                        e.id,
-                                                                  );
-                                                                  quantityControllers.remove(
-                                                                    e.id.toString(),
-                                                                  );
-                                                                  if (billingItems.isEmpty ||
-                                                                      billingItems ==
-                                                                          []) {
-                                                                    isDiscountApplied =
-                                                                    false;
-                                                                    widget.isEditingOrder =
-                                                                    false;
-                                                                    tableId =
-                                                                    null;
-                                                                    waiterId =
-                                                                    null;
-                                                                    selectedValue =
-                                                                    null;
-                                                                    selectedValueWaiter =
-                                                                    null;
+                                                                  billingItems.removeWhere((item) => item['_id'] == e.id);
+                                                                  quantityControllers.remove(e.id.toString());
+                                                                  if (billingItems.isEmpty || billingItems == []) {
+                                                                    isDiscountApplied = false;
+                                                                    widget.isEditingOrder = false;
+                                                                    tableId = null;
+                                                                    waiterId = null;
+                                                                    selectedValue = null;
+                                                                    selectedValueWaiter = null;
                                                                   }
-                                                                  context
-                                                                      .read<
-                                                                      FoodCategoryBloc
-                                                                  >()
-                                                                      .add(
+                                                                  context.read<FoodCategoryBloc>().add(
                                                                     AddToBilling(
-                                                                      List.from(
-                                                                        billingItems,
-                                                                      ),
+                                                                      List.from(billingItems),
                                                                       isDiscountApplied,
                                                                       selectedOrderType,
                                                                     ),

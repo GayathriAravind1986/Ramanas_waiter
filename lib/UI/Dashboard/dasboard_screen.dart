@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:ramanas_waiter/ModelClass/Order/Get_view_order_model.dart';
 import 'package:ramanas_waiter/Reusable/color.dart';
-
+import 'package:ramanas_waiter/UI/Landing/Home/home_screen.dart';
+import 'package:ramanas_waiter/UI/Landing/Order/order_screen.dart';
 import 'navigator_item.dart';
 
 class DashboardScreen extends StatefulWidget {
   final selectTab;
-
-  const DashboardScreen({super.key, this.selectTab});
+  final GetViewOrderModel? existingOrder;
+  final bool? isEditingOrder;
+  const DashboardScreen({
+    super.key,
+    this.selectTab,
+    this.existingOrder,
+    this.isEditingOrder,
+  });
 
   @override
   DashboardScreenState createState() => DashboardScreenState();
@@ -15,7 +23,32 @@ class DashboardScreen extends StatefulWidget {
 class DashboardScreenState extends State<DashboardScreen> {
   int currentIndex = 0;
 
-  callApis() async {
+  GetViewOrderModel? currentOrder;
+  bool? currentIsEditing;
+
+  Widget getCurrentScreen() {
+    switch (currentIndex) {
+      case 0:
+        return HomePage(
+          existingOrder: currentOrder,
+          isEditingOrder: currentIsEditing,
+        );
+      case 1:
+        return OrderPage();
+      default:
+        return HomePage(
+          existingOrder: currentOrder,
+          isEditingOrder: currentIsEditing,
+        );
+    }
+  }
+
+  List<NavigatorItem> get navigatorItems => [
+    NavigatorItem(Icons.home_outlined, 0, Container()),
+    NavigatorItem(Icons.shopping_cart_outlined, 1, Container()),
+  ];
+
+  Future<void> callApis() async {
     if (widget.selectTab == 1) {
       currentIndex = 1;
     }
@@ -23,6 +56,8 @@ class DashboardScreenState extends State<DashboardScreen> {
 
   @override
   void initState() {
+    currentOrder = widget.existingOrder;
+    currentIsEditing = widget.isEditingOrder;
     callApis();
     super.initState();
   }
@@ -47,7 +82,7 @@ class DashboardScreenState extends State<DashboardScreen> {
         }
       },
       child: Scaffold(
-        body: navigatorItems[currentIndex].screen,
+        body: getCurrentScreen(),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.only(
@@ -74,6 +109,10 @@ class DashboardScreenState extends State<DashboardScreen> {
               onTap: (index) {
                 setState(() {
                   currentIndex = index;
+                  if (index == 1) {
+                    currentOrder = null;
+                    currentIsEditing = null;
+                  }
                 });
               },
               type: BottomNavigationBarType.fixed,
@@ -136,3 +175,4 @@ class DashboardScreenState extends State<DashboardScreen> {
     );
   }
 }
+

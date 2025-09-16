@@ -30,50 +30,15 @@ Widget getThermalReceiptKOTWidget({
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Business Header
-          Center(
-            child: Column(
-              children: [
-                // Business symbol/icon
-                Text(
-                  businessName,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: blackColor,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 4),
-                // Text(
-                //   "Order#: $orderNumber",
-                //   style: const TextStyle(
-                //     fontSize: 16,
-                //     fontWeight: FontWeight.bold,
-                //     color: blackColor,
-                //   ),
-                //   textAlign: TextAlign.center,
-                // ),
-                // Text(
-                //   "Phone: $phone",
-                //   style: const TextStyle(
-                //     fontSize: 18,
-                //     color: blackColor,
-                //   ),
-                //   textAlign: TextAlign.center,
-                // ),
-              ],
-            ),
+          Container(
+            height: 4,
+            color: blackColor,
+            margin: const EdgeInsets.symmetric(vertical: 4),
           ),
-          const SizedBox(height: 8),
-
-          // Dashed separator
-          _buildDashedLine(),
-
           // KOT Receipt Title
           const Center(
             child: Text(
-              "KOT RECEIPT",
+              "KOT",
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -82,25 +47,11 @@ Widget getThermalReceiptKOTWidget({
             ),
           ),
 
-          _buildDashedLine(),
-
-          // Order Info Section
-          _buildKOTInfoRow("Date:", date),
-          _buildKOTInfoRow("Order#:", orderNumber),
-          _buildKOTInfoRow("Type:", orderType),
-          if (orderType == 'LINE' || orderType == 'AC')
-            _buildKOTInfoRow("Table:", tableName),
-
-          // if (orderType == 'LINE' || orderType == 'AC')
-          //   _buildKOTInfoRow("Waiter:", waiterName),
-          // _buildKOTInfoRow("Status:", status),
-          const SizedBox(height: 8),
           Container(
-            height: 1,
+            height: 4,
             color: blackColor,
             margin: const EdgeInsets.symmetric(vertical: 4),
           ),
-          // Items header with proper spacing
           Row(
             children: [
               const Expanded(
@@ -109,7 +60,7 @@ Widget getThermalReceiptKOTWidget({
                   "Item",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 22,
+                    fontSize: 16,
                     color: blackColor,
                   ),
                 ),
@@ -120,7 +71,7 @@ Widget getThermalReceiptKOTWidget({
                   "Qty",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 22,
+                    fontSize: 16,
                     color: blackColor,
                   ),
                   textAlign: TextAlign.center,
@@ -131,7 +82,7 @@ Widget getThermalReceiptKOTWidget({
 
           // Line under header
           Container(
-            height: 1,
+            height: 4,
             color: blackColor,
             margin: const EdgeInsets.symmetric(vertical: 4),
           ),
@@ -142,105 +93,15 @@ Widget getThermalReceiptKOTWidget({
           ),
 
           // Separator before total
-          _buildDashedLine(),
-
-          // // Total section
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     const Text(
-          //       "TOTAL",
-          //       style: TextStyle(
-          //         fontWeight: FontWeight.bold,
-          //         fontSize: 16,
-          //         color: blackColor,
-          //       ),
-          //     ),
-          //     Text(
-          //       total.toStringAsFixed(2),
-          //       style: const TextStyle(
-          //         fontWeight: FontWeight.bold,
-          //         fontSize: 16,
-          //         color: blackColor,
-          //       ),
-          //     ),
-          //   ],
-          // ),
-          //
-          // _buildDashedLine(),
-          const SizedBox(height: 8),
-
-          // Footer
-          const Center(
-            child: Text(
-              "Thank You! Visit Again",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: blackColor,
-              ),
-            ),
+          Container(
+            height: 4,
+            color: blackColor,
+            margin: const EdgeInsets.symmetric(vertical: 4),
           ),
 
-          // const SizedBox(height: 8),
-
-          // Powered by section
-          // const Center(
-          //   child: Column(
-          //     children: [
-          //       Text(
-          //         "Powered By",
-          //         style: TextStyle(
-          //           fontSize: 12,
-          //           color: blackColor,
-          //         ),
-          //       ),
-          //       Text(
-          //         "www.sentinixtechsolutions.com",
-          //         style: TextStyle(
-          //           fontSize: 12,
-          //           color: blackColor,
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // ),
-
-          // Extra space for thermal printer cutting
-          const SizedBox(height: 40),
+          const SizedBox(height: 8),
         ],
       ),
-    ),
-  );
-}
-
-Widget _buildKOTInfoRow(String label, String value) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 1.0),
-    child: Row(
-      children: [
-        SizedBox(
-          width: 80,
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 22,
-              color: blackColor,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 22,
-              color: blackColor,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
     ),
   );
 }
@@ -255,7 +116,7 @@ Widget _buildKOTItemRow(String name, int qty) {
           child: Text(
             name,
             style: const TextStyle(
-              fontSize: 22,
+              fontSize: 16,
               color: blackColor,
               fontWeight: FontWeight.bold,
             ),
@@ -266,7 +127,7 @@ Widget _buildKOTItemRow(String name, int qty) {
           child: Text(
             '$qty',
             style: const TextStyle(
-              fontSize: 22,
+              fontSize: 16,
               color: blackColor,
               fontWeight: FontWeight.bold,
             ),

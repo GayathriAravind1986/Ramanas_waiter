@@ -20,6 +20,7 @@ import 'package:ramanas_waiter/Reusable/responsive.dart';
 import 'package:ramanas_waiter/Reusable/text_styles.dart';
 import 'package:ramanas_waiter/UI/Authentication/login_screen.dart';
 import 'package:ramanas_waiter/UI/Cart/Widget/payment_option.dart';
+import 'package:ramanas_waiter/UI/Dashboard/dasboard_screen.dart';
 import 'package:ramanas_waiter/UI/Landing/Order/Helper/order_helper_waitlist.dart';
 import 'package:ramanas_waiter/UI/Landing/Order/Helper/time_formatter.dart';
 import 'package:ramanas_waiter/UI/Landing/Order/pop_view_order.dart';
@@ -153,7 +154,6 @@ class OrderPageViewState extends State<OrderPageView>
     context.read<OrderTodayBloc>().add(TableDine());
     context.read<OrderTodayBloc>().add(WaiterDine());
     context.read<OrderTodayBloc>().add(UserDetails());
-    // Reload orders with current filters
     _loadOrdersForCurrentTab();
   }
 
@@ -174,182 +174,180 @@ class OrderPageViewState extends State<OrderPageView>
 
   // Build order grid widget
   Widget _buildOrderGrid(List<dynamic> orders) {
-    //  String tabName = _tabNames[_currentTabIndex];
-    // if (orderLoad) {
-    //   return Container(
-    //     padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.1),
-    //     alignment: Alignment.center,
-    //     child: const SpinKitChasingDots(color: appPrimaryColor, size: 30),
-    //   );
-    // }
-    //
-    // if (orders.isEmpty) {
-    //   String tabName = _tabNames[_currentTabIndex];
-    //   return Container(
-    //     padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.1),
-    //     alignment: Alignment.center,
-    //     child: Text(
-    //       tabName == "All"
-    //           ? "No Orders Today !!!"
-    //           : "No $tabName Orders Today !!!",
-    //       style: MyTextStyle.f16(greyColor, weight: FontWeight.w500),
-    //     ),
-    //   );
-    // }
+    String tabName = _tabNames[_currentTabIndex];
+    if (orderLoad) {
+      return Container(
+        padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.1),
+        alignment: Alignment.center,
+        child: const SpinKitChasingDots(color: appPrimaryColor, size: 30),
+      );
+    }
 
-    return orderLoad
-        ? Container(
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).size.height * 0.1,
+    if (orders.isEmpty) {
+      return Container(
+        padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.1),
+        alignment: Alignment.center,
+        child: Text(
+          tabName == "All"
+              ? "No Orders Today !!!"
+              : "No $tabName Orders Today !!!",
+          style: MyTextStyle.f16(greyColor, weight: FontWeight.w500),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: GridView.builder(
+        itemCount: orders.length,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: MediaQuery.of(context).size.width < 632
+              ? 1
+              : MediaQuery.of(context).size.width >= 632 &&
+                    MediaQuery.of(context).size.width < 830
+              ? 2
+              : 3,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio:
+              MediaQuery.of(context).size.width > 500 &&
+                  MediaQuery.of(context).size.width < 632
+              ? 3
+              : MediaQuery.of(context).size.width >= 632 &&
+                    MediaQuery.of(context).size.width < 830
+              ? 2.5
+              : 1.8,
+        ),
+        itemBuilder: (context, index) {
+          final order = orders[index];
+          final payment = order.payments?.isNotEmpty == true
+              ? order.payments!.first
+              : null;
+          debugPrint("sizeWidthOrder:${MediaQuery.of(context).size.width}");
+          debugPrint("sizeHeightOrder:${MediaQuery.of(context).size.height}");
+          return Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
             ),
-            alignment: Alignment.center,
-            child: const SpinKitChasingDots(color: appPrimaryColor, size: 30),
-          )
-        : orders.isEmpty
-        ? Container(
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).size.height * 0.1,
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              "No Orders Today !!!",
-              style: MyTextStyle.f16(greyColor, weight: FontWeight.w500),
-            ),
-          )
-        : Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: GridView.builder(
-              itemCount: orders.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 1,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 1.8,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Order ID & Total
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          "Order ID: ${order.orderNumber ?? '--'}",
+                          style: MyTextStyle.f14(
+                            appPrimaryColor,
+                            weight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        "₹${order.total?.toStringAsFixed(2) ?? '0.00'}",
+                        style: MyTextStyle.f14(
+                          appPrimaryColor,
+                          weight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Time: ${formatTime(order.invoice?.date)}"),
+                      Text(
+                        payment?.paymentMethod != null &&
+                                payment!.paymentMethod!.isNotEmpty
+                            ? "Payment: ${payment.paymentMethod}: ₹${payment.amount?.toStringAsFixed(2) ?? '0.00'}"
+                            : "Payment: N/A",
+                        style: MyTextStyle.f12(greyColor),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Type: ${order.orderType ?? '--'}"),
+                      Text(
+                        "Status: ${order.orderStatus}",
+                        style: TextStyle(
+                          color: order.orderStatus == 'COMPLETED'
+                              ? greenColor
+                              : orangeColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text("Table: ${order.tableName ?? 'N/A'}"),
+                  const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(),
+                            icon: Icon(
+                              Icons.remove_red_eye,
+                              color: appPrimaryColor,
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                view = true;
+                              });
+                              context.read<OrderTodayBloc>().add(
+                                ViewOrder(order.id),
+                              );
+                            },
+                          ),
+                          if (MediaQuery.of(context).size.width >= 500)
+                            SizedBox(width: 8),
+                          if ((operatorId == userId ||
+                              userId == null ||
+                              userId == ""))
+                            // &&
+                            // order.orderStatus != 'COMPLETED')
+                            IconButton(
+                              padding: EdgeInsets.zero,
+                              constraints: BoxConstraints(),
+                              icon: Icon(
+                                Icons.edit,
+                                color: appPrimaryColor,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  view = false;
+                                });
+                                context.read<OrderTodayBloc>().add(
+                                  ViewOrder(order.id),
+                                );
+                              },
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              itemBuilder: (context, index) {
-                final order = orders[index];
-                final payment = order.payments?.isNotEmpty == true
-                    ? order.payments!.first
-                    : null;
-
-                return Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Order ID & Total
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                "Order ID: ${order.orderNumber ?? '--'}",
-                                style: MyTextStyle.f14(
-                                  appPrimaryColor,
-                                  weight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              "₹${order.total?.toStringAsFixed(2) ?? '0.00'}",
-                              style: MyTextStyle.f14(
-                                appPrimaryColor,
-                                weight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("Time: ${formatTime(order.invoice?.date)}"),
-                            Text(
-                              payment?.paymentMethod != null &&
-                                      payment!.paymentMethod!.isNotEmpty
-                                  ? "Payment: ${payment.paymentMethod}: ₹${payment.amount?.toStringAsFixed(2) ?? '0.00'}"
-                                  : "Payment: N/A",
-                              style: MyTextStyle.f12(greyColor),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("Type: ${order.orderType ?? '--'}"),
-                            Text(
-                              "Status: ${order.orderStatus}",
-                              style: TextStyle(
-                                color: order.orderStatus == 'COMPLETED'
-                                    ? greenColor
-                                    : orangeColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Text("Table: ${order.tableName ?? 'N/A'}"),
-                        const Spacer(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  padding: EdgeInsets.zero,
-                                  constraints: BoxConstraints(),
-                                  icon: Icon(
-                                    Icons.remove_red_eye,
-                                    color: appPrimaryColor,
-                                    size: 20,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      view = true;
-                                    });
-                                    context.read<OrderTodayBloc>().add(
-                                      ViewOrder(order.id),
-                                    );
-                                  },
-                                ),
-                                SizedBox(width: 4),
-                                if (order.orderStatus != 'COMPLETED')
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                    icon: Icon(
-                                      Icons.check_circle,
-                                      color: appPrimaryColor,
-                                      size: 20,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        view = false;
-                                      });
-                                      context.read<OrderTodayBloc>().add(
-                                        ViewOrder(order.id),
-                                      );
-                                    },
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
             ),
           );
+        },
+      ),
+    );
   }
 
   @override
@@ -722,9 +720,354 @@ class OrderPageViewState extends State<OrderPageView>
             );
           },
           tabletBuilder: (context, constraints) {
-            return Text(
-              "No Orders found !!!",
-              style: MyTextStyle.f20(appHomeTextColor, weight: FontWeight.w500),
+            return DefaultTabController(
+              length: 6,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Today's Orders",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: appPrimaryColor,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            _refreshData();
+                          },
+                          icon: const Icon(
+                            Icons.refresh,
+                            color: appPrimaryColor,
+                            size: 28,
+                          ),
+                          tooltip: 'Refresh Orders',
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Select Table',
+                            style: MyTextStyle.f14(
+                              blackColor,
+                              weight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Select Waiter',
+                            style: MyTextStyle.f14(
+                              blackColor,
+                              weight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Select Operator',
+                            style: MyTextStyle.f14(
+                              blackColor,
+                              weight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      // Table Dropdown
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.all(8),
+                          child: DropdownButtonFormField<String>(
+                            value:
+                                (getTableModel.data?.any(
+                                      (item) => item.name == selectedValue,
+                                    ) ??
+                                    false)
+                                ? selectedValue
+                                : null,
+                            icon: const Icon(
+                              Icons.arrow_drop_down,
+                              color: appPrimaryColor,
+                            ),
+                            isExpanded: true,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(
+                                  color: appPrimaryColor,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: appGreyColor,
+                                  width: 1.5,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: appPrimaryColor,
+                                  width: 1.5,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            items: getTableModel.data?.map((item) {
+                              return DropdownMenuItem<String>(
+                                value: item.name,
+                                child: Text(
+                                  "Table ${item.name}",
+                                  style: MyTextStyle.f14(
+                                    blackColor,
+                                    weight: FontWeight.normal,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  selectedValue = newValue;
+                                  final selectedItem = getTableModel.data
+                                      ?.firstWhere(
+                                        (item) => item.name == newValue,
+                                      );
+                                  tableId = selectedItem?.id.toString();
+                                });
+                                _loadOrdersForCurrentTab();
+                              }
+                            },
+                            hint: Text(
+                              '-- Select Table --',
+                              style: MyTextStyle.f14(
+                                blackColor,
+                                weight: FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Waiter Dropdown
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.all(8),
+                          child: DropdownButtonFormField<String>(
+                            value:
+                                (getWaiterModel.data?.any(
+                                      (item) =>
+                                          item.name == selectedValueWaiter,
+                                    ) ??
+                                    false)
+                                ? selectedValueWaiter
+                                : null,
+                            icon: const Icon(
+                              Icons.arrow_drop_down,
+                              color: appPrimaryColor,
+                            ),
+                            isExpanded: true,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(
+                                  color: appPrimaryColor,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: appGreyColor,
+                                  width: 1.5,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: appPrimaryColor,
+                                  width: 1.5,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            items: getWaiterModel.data?.map((item) {
+                              return DropdownMenuItem<String>(
+                                value: item.name,
+                                child: Text(
+                                  "${item.name}",
+                                  style: MyTextStyle.f14(
+                                    blackColor,
+                                    weight: FontWeight.normal,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  selectedValueWaiter = newValue;
+                                  final selectedItem = getWaiterModel.data
+                                      ?.firstWhere(
+                                        (item) => item.name == newValue,
+                                      );
+                                  waiterId = selectedItem?.id.toString();
+                                });
+                                _loadOrdersForCurrentTab();
+                              }
+                            },
+                            hint: Text(
+                              '-- Select Waiter --',
+                              style: MyTextStyle.f14(
+                                blackColor,
+                                weight: FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // User Dropdown
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.all(8),
+                          child: DropdownButtonFormField<String>(
+                            value:
+                                (getUserModel.data?.any(
+                                      (item) => item.name == selectedValueUser,
+                                    ) ??
+                                    false)
+                                ? selectedValueUser
+                                : null,
+                            icon: const Icon(
+                              Icons.arrow_drop_down,
+                              color: appPrimaryColor,
+                            ),
+                            isExpanded: true,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(
+                                  color: appPrimaryColor,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: appGreyColor,
+                                  width: 1.5,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: appPrimaryColor,
+                                  width: 1.5,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            items: getUserModel.data?.map((item) {
+                              return DropdownMenuItem<String>(
+                                value: item.name,
+                                child: Text(
+                                  "${item.name}",
+                                  style: MyTextStyle.f14(
+                                    blackColor,
+                                    weight: FontWeight.normal,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  selectedValueUser = newValue;
+                                  final selectedItem = getUserModel.data
+                                      ?.firstWhere(
+                                        (item) => item.name == newValue,
+                                      );
+                                  userId = selectedItem?.id.toString();
+                                });
+                                debugPrint("operatorSelectr:$userId");
+                                _loadOrdersForCurrentTab();
+                              }
+                            },
+                            hint: Text(
+                              '-- Select Operator --',
+                              style: MyTextStyle.f14(
+                                blackColor,
+                                weight: FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  TabBar(
+                    controller: _tabController,
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    labelColor: appPrimaryColor,
+                    unselectedLabelColor: greyColor,
+                    indicatorColor: appPrimaryColor,
+                    tabs: const [
+                      Tab(text: "All"),
+                      Tab(text: "Line"),
+                      Tab(text: "Parcel"),
+                      Tab(text: "AC"),
+                      Tab(text: "HD"),
+                      Tab(text: "SWIGGY"),
+                    ],
+                  ),
+                  // Updated TabBarView
+                  Expanded(
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: List.generate(6, (index) {
+                        // Get filtered orders for each tab
+                        List<dynamic> filteredOrders;
+                        if (index == 0) {
+                          // All tab
+                          filteredOrders = getOrderListTodayModel.data ?? [];
+                        } else {
+                          // Filter by specific tab
+                          String tabName = _tabNames[index];
+                          filteredOrders =
+                              getOrderListTodayModel.data?.where((order) {
+                                String? orderType = order.orderType
+                                    ?.toString()
+                                    .toUpperCase();
+                                return orderType == tabName.toUpperCase();
+                              }).toList() ??
+                              [];
+                        }
+
+                        return _buildOrderGrid(filteredOrders);
+                      }),
+                    ),
+                  ),
+                ],
+              ),
             );
           },
         ),
@@ -894,295 +1237,24 @@ class OrderPageViewState extends State<OrderPageView>
                         ThermalReceiptDialog(getViewOrderModel),
                   );
                 } else {
-                  showDialog(
-                    context: context,
-                    builder: (context2) {
-                      return BlocProvider(
-                        create: (context) => OrderTodayBloc(),
-                        child: BlocProvider.value(
-                          value: BlocProvider.of<OrderTodayBloc>(
-                            context,
-                            listen: false,
-                          ),
-                          child: StatefulBuilder(
-                            builder: (context, setState) {
-                              return AlertDialog(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                title: const Text("Select Payment Method"),
-                                content: SingleChildScrollView(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize
-                                        .min, // important for dialog
-                                    children: [
-                                      const SizedBox(height: 12),
-                                      Text(
-                                        "Payment Method",
-                                        style: MyTextStyle.f14(
-                                          blackColor,
-                                          weight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 12),
-                                      SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: Wrap(
-                                          spacing: 12,
-                                          runSpacing: 12,
-                                          children: [
-                                            GestureDetector(
-                                              onTap: () {
-                                                setState(() {
-                                                  selectedFullPaymentMethod =
-                                                      "Cash";
-                                                });
-                                              },
-                                              child: PaymentOption(
-                                                icon: Icons.money,
-                                                label: "Cash",
-                                                selected:
-                                                    selectedFullPaymentMethod ==
-                                                    "Cash",
-                                              ),
-                                            ),
-                                            GestureDetector(
-                                              onTap: () {
-                                                setState(() {
-                                                  selectedFullPaymentMethod =
-                                                      "Card";
-                                                });
-                                              },
-                                              child: PaymentOption(
-                                                icon: Icons.credit_card,
-                                                label: "Card",
-                                                selected:
-                                                    selectedFullPaymentMethod ==
-                                                    "Card",
-                                              ),
-                                            ),
-                                            GestureDetector(
-                                              onTap: () {
-                                                setState(() {
-                                                  selectedFullPaymentMethod =
-                                                      "UPI";
-                                                });
-
-                                                if (getStockMaintanencesModel
-                                                            .data
-                                                            ?.image !=
-                                                        null &&
-                                                    getStockMaintanencesModel
-                                                        .data!
-                                                        .image!
-                                                        .isNotEmpty) {
-                                                  // show QR inside another dialog
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (context) {
-                                                      return AlertDialog(
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                12,
-                                                              ),
-                                                        ),
-                                                        title: const Text(
-                                                          "Scan to Pay",
-                                                        ),
-                                                        content: SizedBox(
-                                                          width: 250,
-                                                          height: 250,
-                                                          child: Image.network(
-                                                            getStockMaintanencesModel
-                                                                .data!
-                                                                .image!,
-                                                            fit: BoxFit.contain,
-                                                            errorBuilder:
-                                                                (
-                                                                  context,
-                                                                  error,
-                                                                  stackTrace,
-                                                                ) => const Text(
-                                                                  "Failed to load QR",
-                                                                ),
-                                                          ),
-                                                        ),
-                                                        actions: [
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              Navigator.pop(
-                                                                context,
-                                                              );
-                                                            },
-                                                            child: const Text(
-                                                              "Close",
-                                                              style: TextStyle(
-                                                                color:
-                                                                    appPrimaryColor,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      );
-                                                    },
-                                                  );
-                                                } else {
-                                                  showToast(
-                                                    "QR code not available",
-                                                    context,
-                                                    color: false,
-                                                  );
-                                                }
-                                              },
-                                              child: PaymentOption(
-                                                icon: Icons.qr_code,
-                                                label: "UPI",
-                                                selected:
-                                                    selectedFullPaymentMethod ==
-                                                    "UPI",
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                actions: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      completeLoad
-                                          ? SpinKitCircle(
-                                              color: appPrimaryColor,
-                                              size: 30,
-                                            )
-                                          : ElevatedButton(
-                                              onPressed: () {
-                                                if (selectedFullPaymentMethod
-                                                        .isEmpty ||
-                                                    (selectedFullPaymentMethod !=
-                                                            "Cash" &&
-                                                        selectedFullPaymentMethod !=
-                                                            "Card" &&
-                                                        selectedFullPaymentMethod !=
-                                                            "UPI")) {
-                                                  showToast(
-                                                    "Select any one of the payment method",
-                                                    context,
-                                                    color: false,
-                                                  );
-                                                  return;
-                                                }
-                                                if (selectedFullPaymentMethod ==
-                                                        "Cash" ||
-                                                    selectedFullPaymentMethod ==
-                                                        "Card" ||
-                                                    selectedFullPaymentMethod ==
-                                                        "UPI") {
-                                                  List<Map<String, dynamic>>
-                                                  payments = [];
-                                                  payments = [
-                                                    {
-                                                      "amount":
-                                                          (getViewOrderModel
-                                                                      .data!
-                                                                      .total ??
-                                                                  0.0)
-                                                              .toDouble(),
-                                                      "balanceAmount": 0,
-                                                      "method":
-                                                          selectedFullPaymentMethod
-                                                              .toUpperCase(),
-                                                    },
-                                                  ];
-                                                  final orderPayload =
-                                                      buildOrderWaitListPayload(
-                                                        getViewOrderModel:
-                                                            getViewOrderModel,
-                                                        tableId:
-                                                            getViewOrderModel
-                                                                .data!
-                                                                .tableNo,
-                                                        waiterId:
-                                                            getViewOrderModel
-                                                                .data!
-                                                                .waiter,
-                                                        orderStatus:
-                                                            'COMPLETED',
-                                                        orderType:
-                                                            getViewOrderModel
-                                                                .data!
-                                                                .orderType
-                                                                .toString(),
-                                                        discountAmount:
-                                                            getViewOrderModel
-                                                                .data!
-                                                                .discountAmount!
-                                                                .toStringAsFixed(
-                                                                  2,
-                                                                ),
-                                                        isDiscountApplied:
-                                                            getViewOrderModel
-                                                                    .data!
-                                                                    .isDiscountApplied ==
-                                                                true
-                                                            ? true
-                                                            : false,
-                                                        tipAmount:
-                                                            tipController.text,
-                                                        payments: payments,
-                                                      );
-                                                  debugPrint(
-                                                    "payloadComplete:${jsonEncode(orderPayload)}",
-                                                  );
-                                                  setState(() {
-                                                    completeLoad = true;
-                                                  });
-
-                                                  context
-                                                      .read<OrderTodayBloc>()
-                                                      .add(
-                                                        UpdateOrder(
-                                                          jsonEncode(
-                                                            orderPayload,
-                                                          ),
-                                                          getViewOrderModel
-                                                              .data!
-                                                              .id,
-                                                        ),
-                                                      );
-                                                }
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    appPrimaryColor,
-                                                minimumSize: const Size(0, 50),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(30),
-                                                ),
-                                              ),
-                                              child: Text(
-                                                "Complete Order",
-                                                style: TextStyle(
-                                                  color: whiteColor,
-                                                ),
-                                              ),
-                                            ),
-                                    ],
-                                  ),
-                                ],
-                              );
-                            },
+                  Navigator.of(context)
+                      .pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => DashboardScreen(
+                            selectTab: 0,
+                            existingOrder: getViewOrderModel,
+                            isEditingOrder: true,
                           ),
                         ),
-                      );
-                    },
-                  );
+                        (Route<dynamic> route) => false,
+                      )
+                      .then((value) {
+                        if (value == true) {
+                          context.read<OrderTodayBloc>().add(
+                            OrderTodayList(todayDate, todayDate, "", "", ""),
+                          );
+                        }
+                      });
                 }
               }
             } catch (e, stackTrace) {
