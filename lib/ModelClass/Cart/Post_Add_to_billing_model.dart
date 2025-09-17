@@ -1,5 +1,3 @@
-
-
 import 'package:ramanas_waiter/Bloc/Response/errorResponse.dart';
 
 /// items : [{"name":"Apple juice","qty":1,"basePrice":120,"addonTotal":0,"subtotal":120,"totalTax":21.6,"total":141.6,"appliedTaxes":[{"name":"CGST","percentage":9,"amount":10.8,"isInclusive":false},{"name":"SGST","percentage":9,"amount":10.8,"isInclusive":false}]}]
@@ -59,15 +57,14 @@ class PostAddToBillingModel {
     num? totalTax,
     num? total,
     DiscountSummary? discountSummary,
-  }) =>
-      PostAddToBillingModel(
-        items: items ?? _items,
-        subtotal: subtotal ?? _subtotal,
-        totalDiscount: totalDiscount ?? _totalDiscount,
-        totalTax: totalTax ?? _totalTax,
-        total: total ?? _total,
-        discountSummary: discountSummary ?? _discountSummary,
-      );
+  }) => PostAddToBillingModel(
+    items: items ?? _items,
+    subtotal: subtotal ?? _subtotal,
+    totalDiscount: totalDiscount ?? _totalDiscount,
+    totalTax: totalTax ?? _totalTax,
+    total: total ?? _total,
+    discountSummary: discountSummary ?? _discountSummary,
+  );
   List<Items>? get items => _items;
   num? get subtotal => _subtotal;
   num? get totalDiscount => _totalDiscount;
@@ -127,13 +124,11 @@ class DiscountSummary {
     num? totalDiscountsApplied,
     num? totalDiscountAmount,
     num? averageDiscountPerItem,
-  }) =>
-      DiscountSummary(
-        totalDiscountsApplied: totalDiscountsApplied ?? _totalDiscountsApplied,
-        totalDiscountAmount: totalDiscountAmount ?? _totalDiscountAmount,
-        averageDiscountPerItem:
-            averageDiscountPerItem ?? _averageDiscountPerItem,
-      );
+  }) => DiscountSummary(
+    totalDiscountsApplied: totalDiscountsApplied ?? _totalDiscountsApplied,
+    totalDiscountAmount: totalDiscountAmount ?? _totalDiscountAmount,
+    averageDiscountPerItem: averageDiscountPerItem ?? _averageDiscountPerItem,
+  );
   num? get totalDiscountsApplied => _totalDiscountsApplied;
   num? get totalDiscountAmount => _totalDiscountAmount;
   num? get averageDiscountPerItem => _averageDiscountPerItem;
@@ -250,26 +245,25 @@ class Items {
     bool? stockMaintenance,
     bool? isStock,
     List<AppliedTaxes>? appliedTaxes,
-  }) =>
-      Items(
-        id: id ?? _id,
-        name: name ?? _name,
-        qty: qty ?? _qty,
-        availableQuantity: availableQuantity ?? _availableQuantity,
-        image: image ?? _image,
-        basePrice: basePrice ?? _basePrice,
-        addonTotal: addonTotal ?? _addonTotal,
-        selectedAddons: selectedAddons ?? _selectedAddons,
-        subtotal: subtotal ?? _subtotal,
-        discountAmount: discountAmount ?? _discountAmount,
-        appliedDiscount: appliedDiscount ?? _appliedDiscount,
-        availableDiscounts: availableDiscounts ?? _availableDiscounts,
-        totalTax: totalTax ?? _totalTax,
-        total: total ?? _total,
-        stockMaintenance: stockMaintenance ?? _stockMaintenance,
-        isStock: isStock ?? _isStock,
-        appliedTaxes: appliedTaxes ?? _appliedTaxes,
-      );
+  }) => Items(
+    id: id ?? _id,
+    name: name ?? _name,
+    qty: qty ?? _qty,
+    availableQuantity: availableQuantity ?? _availableQuantity,
+    image: image ?? _image,
+    basePrice: basePrice ?? _basePrice,
+    addonTotal: addonTotal ?? _addonTotal,
+    selectedAddons: selectedAddons ?? _selectedAddons,
+    subtotal: subtotal ?? _subtotal,
+    discountAmount: discountAmount ?? _discountAmount,
+    appliedDiscount: appliedDiscount ?? _appliedDiscount,
+    availableDiscounts: availableDiscounts ?? _availableDiscounts,
+    totalTax: totalTax ?? _totalTax,
+    total: total ?? _total,
+    stockMaintenance: stockMaintenance ?? _stockMaintenance,
+    isStock: isStock ?? _isStock,
+    appliedTaxes: appliedTaxes ?? _appliedTaxes,
+  );
   String? get id => _id;
   String? get name => _name;
   num? get qty => _qty;
@@ -348,13 +342,12 @@ class AppliedTaxes {
     num? percentage,
     num? amount,
     bool? isInclusive,
-  }) =>
-      AppliedTaxes(
-        name: name ?? _name,
-        percentage: percentage ?? _percentage,
-        amount: amount ?? _amount,
-        isInclusive: isInclusive ?? _isInclusive,
-      );
+  }) => AppliedTaxes(
+    name: name ?? _name,
+    percentage: percentage ?? _percentage,
+    amount: amount ?? _amount,
+    isInclusive: isInclusive ?? _isInclusive,
+  );
   String? get name => _name;
   num? get percentage => _percentage;
   num? get amount => _amount;
@@ -423,7 +416,6 @@ class SelectedAddons {
   num? _qty;
   num get qty => _qty ?? 0;
   set qty(num value) => _qty = value;
-
   SelectedAddons copyWith({
     String? id,
     String? name,
@@ -434,16 +426,16 @@ class SelectedAddons {
     bool? isAvailable,
     num? total,
     num? qty,
-  }) =>
-      SelectedAddons(
-        id: id ?? _id,
-        name: name ?? _name,
-        price: price ?? _price,
-        quantity: quantity ?? _quantity,
-        isFree: isFree ?? _isFree,
-        isAvailable: isAvailable ?? _isAvailable,
-        total: total ?? _total,
-      );
+  }) => SelectedAddons(
+    id: id ?? _id,
+    name: name ?? _name,
+    price: price ?? _price,
+    isSelected: isSelected ?? _isSelected,
+    quantity: quantity ?? _quantity,
+    isFree: isFree ?? _isFree,
+    isAvailable: isAvailable ?? _isAvailable,
+    total: total ?? _total,
+  );
   String? get id => _id;
   String? get name => _name;
   num? get price => _price;

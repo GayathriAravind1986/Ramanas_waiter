@@ -214,8 +214,14 @@ class OrderPageViewState extends State<OrderPageView>
                   MediaQuery.of(context).size.width < 632
               ? 3
               : MediaQuery.of(context).size.width >= 632 &&
+                    MediaQuery.of(context).size.width < 776
+              ? 2
+              : MediaQuery.of(context).size.width >= 776 &&
                     MediaQuery.of(context).size.width < 830
               ? 2.5
+              : MediaQuery.of(context).size.width >= 830 &&
+                    MediaQuery.of(context).size.width < 895
+              ? 1.5
               : 1.8,
         ),
         itemBuilder: (context, index) {
