@@ -91,7 +91,7 @@ class DashboardScreenState extends State<DashboardScreen> {
             ),
             boxShadow: [
               BoxShadow(
-                color: greyColor200!,
+                color: blackColor45,
                 spreadRadius: 0,
                 blurRadius: 37,
                 offset: const Offset(0, -12),

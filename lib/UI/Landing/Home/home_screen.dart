@@ -118,6 +118,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
 
   String? errorMessage;
   bool categoryLoad = false;
+  bool cartLoad = false;
 
   int counter = 0;
   OrderType? selectedOrderType = OrderType.line;
@@ -175,7 +176,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
 
   bool orderLoad = false;
   bool completeLoad = false;
-  bool cartLoad = false;
   bool isToppingSelected = false;
 
   String selectedFullPaymentMethod = "";
@@ -203,6 +203,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
     final data = order.data!;
 
     setState(() {
+      cartLoad = true;
       switch (data.orderType) {
         case 'LINE':
           selectedOrderType = OrderType.line;
@@ -476,6 +477,21 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
       /// show dialog box for addons logic
       bool isProductInCart(String productId) {
         return billingItems.any((item) => item['_id'].toString() == productId);
+      }
+/// disable addons remove option if edit
+      int getOriginalAddonQty(String productId, String addonId) {
+        final orderItem = widget.existingOrder?.data?.items
+            ?.firstWhereOrNull((item) => item.product?.id == productId);
+
+        if (orderItem == null) return 0;
+
+        final addon = orderItem.addons
+            ?.firstWhereOrNull((a) => a.id == addonId);
+
+        // If addon not found or quantity is null → return 0
+        if (addon == null || addon.quantity == null) return 0;
+
+        return addon.quantity is int ? addon.quantity as int : int.tryParse(addon.quantity.toString()) ?? 0;
       }
 
 
@@ -924,9 +940,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                     debugPrint(
                                                       "sizeHeight:${MediaQuery.of(context).size.height}",
                                                     );
-                                                    debugPrint(
-                                                      "shopName:${getStockMaintanencesModel.data!.name}",
-                                                    );
 
                                                     TextEditingController
                                                     getQuantityController(
@@ -1112,7 +1125,8 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                         15.0,
                                                                                       ),
                                                                                       child: CachedNetworkImage(
-                                                                                        imageUrl: p.image!,
+                                                                                        imageUrl: p.image ??
+                                                                                            "",
                                                                                         width:
                                                                                         size.width *
                                                                                             0.9,
@@ -2817,10 +2831,14 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                 (a) => a['_id'] == addon.id,
                                                           );
                                                           if (found != null) {
-                                                            addon.quantity = 1;
-                                                            addon.isSelected = true;
-                                                            // addon.quantity = found['quantity'] as int? ?? addon.quantity;
-                                                            // addon.isSelected = addon.quantity > 0;
+                                                           // if(widget.isEditingOrder == true){
+                                                              addon.quantity = found['quantity'] as int? ?? addon.quantity;
+                                                              addon.isSelected = addon.quantity > 0;
+                                                            // }
+                                                            // else {
+                                                            //   addon.quantity = 1;
+                                                            //   addon.isSelected = true;
+                                                            // }
                                                           }
                                                           else {
                                                             addon.quantity = 0;
@@ -2880,7 +2898,8 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                 15.0,
                                                                               ),
                                                                               child: CachedNetworkImage(
-                                                                                imageUrl: p.image!,
+                                                                                imageUrl: p.image ??
+                                                                                    "",
                                                                                 width:
                                                                                 size.width *
                                                                                     0.9,
@@ -2980,16 +2999,20 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                             children: [
                                                                                               IconButton(
                                                                                                 icon: const Icon(Icons.remove),
-                                                                                                onPressed: e.quantity > 0
-                                                                                                    ? () {
-                                                                                                  setState(() {
-                                                                                                    e.quantity = e.quantity - 1;
-                                                                                                    if (e.quantity == 0) {
-                                                                                                      e.isSelected = false;
-                                                                                                    }
-                                                                                                  });
-                                                                                                }
-                                                                                                    : null,
+                                                                                                onPressed: () {
+                                                                                                  final originalQty = (widget.isEditingOrder == true)
+                                                                                                      ? getOriginalAddonQty(p.id.toString(), e.id.toString())
+                                                                                                      : 0;
+
+                                                                                                  if (e.quantity > originalQty) {
+                                                                                                    setState(() {
+                                                                                                      e.quantity = e.quantity - 1;
+                                                                                                      if (e.quantity == 0) {
+                                                                                                        e.isSelected = false;
+                                                                                                      }
+                                                                                                    });
+                                                                                                  }
+                                                                                                },
                                                                                               ),
                                                                                               Text(
                                                                                                 '${e.quantity}',
@@ -3005,6 +3028,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                                     e.quantity = 1;
                                                                                                     e.isSelected = true;
                                                                                                   });
+
                                                                                                 }
                                                                                                     : null, // disable if already 1
                                                                                               )
@@ -3256,8 +3280,21 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                           SizedBox(
                             width: size.width * 0.5,
                             child: SingleChildScrollView(
-                              child:
-                                  postAddToBillingModel.items == null ||
+                              child:cartLoad
+                                  ? Container(
+                                padding: EdgeInsets.only(
+                                  top:
+                                  MediaQuery.of(context).size.height *
+                                      0.35,
+                                ),
+                                alignment: Alignment.center,
+                                child: const SpinKitChasingDots(
+                                  color: appPrimaryColor,
+                                  size: 30,
+                                ),
+                              )
+                                  :
+                              postAddToBillingModel.items == null ||
                                       postAddToBillingModel.items!.isEmpty ||
                                       postAddToBillingModel.items == []
                                   ? SingleChildScrollView(
@@ -5150,6 +5187,9 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                             selectedOrderType,
                                                                                           ),
                                                                                         );
+                                                                                        debugPrint("billingItem in addons in add :${List.from(
+                                                                                          billingItems,
+                                                                                        )}");
                                                                                       });
                                                                                     } else {
                                                                                       setState(() {
@@ -5163,12 +5203,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                           selectedValue = null;
                                                                                           selectedValueWaiter = null;
                                                                                         }
-                                                                                        // var removedAddon = e.selectedAddons!.firstWhereOrNull(
-                                                                                        //       (a) => a.id == addon.id
-                                                                                        // );
-                                                                                        // if (removedAddon != null) {
-                                                                                        //   removedAddon = removedAddon.copyWith(isSelected: false, qty: 0);
-                                                                                        // }
 
                                                                                         context.read<FoodCategoryBloc>().add(
                                                                                           AddToBilling(
@@ -5177,6 +5211,9 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                             selectedOrderType,
                                                                                           ),
                                                                                         );
+                                                                                        debugPrint("billingItem in addons in add :${List.from(
+                                                                                          billingItems,
+                                                                                        )}");
                                                                                       });
                                                                                     }
                                                                                   },
@@ -5228,6 +5265,9 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                                 selectedOrderType,
                                                                                               ),
                                                                                             );
+                                                                                        debugPrint("billingItem in addons in add :${List.from(
+                                                                                          billingItems,
+                                                                                        )}");
                                                                                       },
                                                                                     );
                                                                                   },
@@ -7578,9 +7618,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                         debugPrint(
                                           "sizeHeight:${MediaQuery.of(context).size.height}",
                                         );
-                                        debugPrint(
-                                          "shopName:${getStockMaintanencesModel.data!.name}",
-                                        );
                                         TextEditingController
                                         getQuantityController(
                                             String productId,
@@ -7764,7 +7801,8 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                             15.0,
                                                                           ),
                                                                           child: CachedNetworkImage(
-                                                                            imageUrl: p.image!,
+                                                                            imageUrl: p.image ??
+                                                                                "",
                                                                             width:
                                                                             size.width *
                                                                                 0.9,
@@ -9471,8 +9509,10 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                   (a) => a['_id'] == addon.id,
                                                             );
                                                             if (found != null) {
-                                                              addon.quantity = 1;
-                                                              addon.isSelected = true;
+                                                              // addon.quantity = 1;
+                                                              // addon.isSelected = true;
+                                                              addon.quantity = found['quantity'] as int? ?? addon.quantity;
+                                                              addon.isSelected = addon.quantity > 0;
                                                             } else {
                                                               addon.quantity = 0;
                                                               addon.isSelected = false;
@@ -9531,7 +9571,8 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                   15.0,
                                                                                 ),
                                                                                 child: CachedNetworkImage(
-                                                                                  imageUrl: p.image!,
+                                                                                  imageUrl: p.image ??
+                                                                                      "",
                                                                                   width:
                                                                                   size.width *
                                                                                       0.9,
@@ -9629,18 +9670,35 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                             ),
                                                                                             Row(
                                                                                               children: [
+                                                                                                // IconButton(
+                                                                                                //   icon: const Icon(Icons.remove),
+                                                                                                //   onPressed: e.quantity > 0
+                                                                                                //       ? () {
+                                                                                                //     setState(() {
+                                                                                                //       e.quantity = e.quantity - 1;
+                                                                                                //       if (e.quantity == 0) {
+                                                                                                //         e.isSelected = false;
+                                                                                                //       }
+                                                                                                //     });
+                                                                                                //   }
+                                                                                                //       : null,
+                                                                                                // ),
                                                                                                 IconButton(
                                                                                                   icon: const Icon(Icons.remove),
-                                                                                                  onPressed: e.quantity > 0
-                                                                                                      ? () {
-                                                                                                    setState(() {
-                                                                                                      e.quantity = e.quantity - 1;
-                                                                                                      if (e.quantity == 0) {
-                                                                                                        e.isSelected = false;
-                                                                                                      }
-                                                                                                    });
-                                                                                                  }
-                                                                                                      : null,
+                                                                                                  onPressed: () {
+                                                                                                    final originalQty = (widget.isEditingOrder == true)
+                                                                                                        ? getOriginalAddonQty(p.id.toString(), e.id.toString())
+                                                                                                        : 0;
+
+                                                                                                    if (e.quantity > originalQty) {
+                                                                                                      setState(() {
+                                                                                                        e.quantity = e.quantity - 1;
+                                                                                                        if (e.quantity == 0) {
+                                                                                                          e.isSelected = false;
+                                                                                                        }
+                                                                                                      });
+                                                                                                    }
+                                                                                                  },
                                                                                                 ),
                                                                                                 Text(
                                                                                                   '${e.quantity}',
@@ -9916,7 +9974,20 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                           SizedBox(
                             width: size.width * 0.5,
                             child: SingleChildScrollView(
-                              child:
+                              child: cartLoad
+                                  ? Container(
+                                padding: EdgeInsets.only(
+                                  top:
+                                  MediaQuery.of(context).size.height *
+                                      0.35,
+                                ),
+                                alignment: Alignment.center,
+                                child: const SpinKitChasingDots(
+                                  color: appPrimaryColor,
+                                  size: 30,
+                                ),
+                              )
+                                  :
                               postAddToBillingModel.items == null ||
                                   postAddToBillingModel.items!.isEmpty ||
                                   postAddToBillingModel.items == []
@@ -13872,6 +13943,9 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
           }
           if (current is PostAddToBillingModel) {
             postAddToBillingModel = current;
+            setState(() {
+              cartLoad = false;
+            });
             if (postAddToBillingModel.errorResponse?.isUnauthorized == true) {
               _handle401Error();
               return true;
