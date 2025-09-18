@@ -8,12 +8,12 @@ class PaymentOption extends StatelessWidget {
   final VoidCallback? onTap; // add onTap
 
   const PaymentOption({
-    Key? key,
+    super.key,
     required this.icon,
     required this.label,
     required this.selected,
-    this.onTap, // accept it in constructor
-  }) : super(key: key);
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {

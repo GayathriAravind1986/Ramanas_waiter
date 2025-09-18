@@ -81,7 +81,6 @@ class ApiProvider {
   Future<GetCategoryModel> getCategoryAPI() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     var token = sharedPreferences.getString("token");
-    var userId = sharedPreferences.getString("userId");
     try {
       var dio = Dio();
       var response = await dio.request(

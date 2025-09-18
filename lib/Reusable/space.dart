@@ -1,24 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:ramanas_waiter/Reusable/color.dart';
 
-verticalSpace({double height = 8.0}) {
-  return SizedBox(
-    height: height,
-  );
+SizedBox verticalSpace({double height = 8.0}) {
+  return SizedBox(height: height);
 }
 
-horizontalSpace({double width = 8.0}) {
-  return SizedBox(
-    width: width,
-  );
+SizedBox horizontalSpace({double width = 8.0}) {
+  return SizedBox(width: width);
 }
 
-appButton(
-    {double height = 0.0,
-    double width = 0.0,
-    double font = 14, // Font size is passed as a parameter
-    String? buttonText,
-    Color? color}) {
+Center appButton({
+  double height = 0.0,
+  double width = 0.0,
+  double font = 14, // Font size is passed as a parameter
+  String? buttonText,
+  Color? color,
+}) {
   return Center(
     child: Container(
       height: height,

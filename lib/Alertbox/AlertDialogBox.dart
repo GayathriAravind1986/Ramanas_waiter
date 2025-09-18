@@ -7,7 +7,7 @@ import 'package:ramanas_waiter/UI/Authentication/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// show to Logout AlertDialog
-showLogoutDialog(BuildContext context) {
+Future showLogoutDialog(BuildContext context) {
   return showDialog(
     context: context,
     builder: (context) {

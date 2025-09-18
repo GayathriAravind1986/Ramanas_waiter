@@ -14,7 +14,7 @@ const appDividerColor = Color(0xffCECECE);
 const appNotificationColor = Color(0xffD9EFF2);
 const appGreenColor = Color(0xff147338);
 const orangeColor = Colors.orange;
-
+var orangeColor200 = Colors.orange[200];
 const blackColor = Colors.black;
 const blackColor12 = Colors.black12;
 const blackColor45 = Colors.black45;
@@ -22,6 +22,7 @@ const blueColor = Colors.blue;
 const blueGreyColor = Colors.blueGrey;
 const whiteColor = Colors.white;
 const redColor = Colors.red;
+var redColor200 = Colors.red[200];
 const greyColor = Colors.grey;
 var greyColor200 = Colors.grey[200];
 const greenColor = Colors.green;

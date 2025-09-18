@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,9 +17,7 @@ import 'package:ramanas_waiter/Reusable/color.dart';
 import 'package:ramanas_waiter/Reusable/responsive.dart';
 import 'package:ramanas_waiter/Reusable/text_styles.dart';
 import 'package:ramanas_waiter/UI/Authentication/login_screen.dart';
-import 'package:ramanas_waiter/UI/Cart/Widget/payment_option.dart';
 import 'package:ramanas_waiter/UI/Dashboard/dasboard_screen.dart';
-import 'package:ramanas_waiter/UI/Landing/Order/Helper/order_helper_waitlist.dart';
 import 'package:ramanas_waiter/UI/Landing/Order/Helper/time_formatter.dart';
 import 'package:ramanas_waiter/UI/Landing/Order/pop_view_order.dart';
 import 'package:shared_preferences/shared_preferences.dart';

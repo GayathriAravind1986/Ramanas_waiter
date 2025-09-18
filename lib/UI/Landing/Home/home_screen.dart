@@ -153,7 +153,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
   dynamic tableId;
   dynamic waiterId;
   late TabController _tabController;
-  int? _currentTabIndex;
+  int? currentTabIndex;
   bool showTipField = false;
   final TextEditingController tipController = TextEditingController();
   double tipAmount = 0.0;
@@ -311,12 +311,12 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
       initialIndex: initialIndex,
     );
 
-    _currentTabIndex = initialIndex;
+    currentTabIndex = initialIndex;
 
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
         setState(() {
-          _currentTabIndex = _tabController.index;
+          currentTabIndex = _tabController.index;
         });
       }
     });
@@ -418,7 +418,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
         final originalItem = widget.existingOrder!.data!.items!
             .firstWhereOrNull((item) => item.product?.id == itemId);
 
-        return int.parse(originalItem!.quantity.toString()) ?? 0;
+        return int.parse(originalItem!.quantity.toString());
       }
 
       int getCurrentQuantityFromBilling(String itemId) {
@@ -456,7 +456,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
               (addon) => addon.id.toString() == addonId,
         );
 
-        return int.parse(existingAddon!.quantity.toString()) ?? 0;
+        return int.parse(existingAddon!.quantity.toString());
       }
 
       int getCurrentAddonQuantityFromBilling(String itemId, String addonId) {
@@ -872,7 +872,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                       context,
                                                     ).size.width <
                                                         500
-                                                        ?0.6:
+                                                        ?0.55:
                                                     MediaQuery.of(
                                                               context,
                                                             ).size.width <=
@@ -984,7 +984,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                               .isNotEmpty) {
                                                             productExists = isProductInCart(p.id.toString());
                                                             if(productExists == true) {
-                                                            // Product already in cart, add directly without showing dialog
                                                             final currentQtyInCart = getCurrentQuantity(p.id.toString());
                                                             bool canAdd;
 
@@ -1037,6 +1036,30 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                             );
                                                             });
                                                             } else {
+                                                              final index = billingItems.indexWhere((item) => item['_id'] == p.id);
+
+                                                              if (index == -1) {
+                                                                for (var addon in p.addons!) {
+                                                                  addon.isSelected = false;
+                                                                  addon.quantity = 0;
+                                                                }
+                                                              } else {
+                                                                final existingAddons = billingItems[index]['selectedAddons'] as List<dynamic>? ?? [];
+                                                                for (var addon in p.addons!) {
+                                                                  final found = existingAddons.firstWhereOrNull(
+                                                                        (a) => a['_id'] == addon.id,
+                                                                  );
+                                                                  if (found != null) {
+                                                                    addon.quantity = 1;
+                                                                    addon.isSelected = true;
+                                                                    // addon.quantity = found['quantity'] as int? ?? addon.quantity;
+                                                                    // addon.isSelected = addon.quantity > 0;
+                                                                  } else {
+                                                                    addon.quantity = 0;
+                                                                    addon.isSelected = false;
+                                                                  }
+                                                                }
+                                                              }
                                                               showDialog(
                                                                 context: context,
                                                                 builder: (context2) {
@@ -1772,10 +1795,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                             4,
                                                                       ),
                                                                   decoration: BoxDecoration(
-                                                                    color: redColor
-                                                                        .withOpacity(
-                                                                          0.1,
-                                                                        ),
+                                                                    color: redColor200,
                                                                     borderRadius:
                                                                         BorderRadius.circular(
                                                                           4,
@@ -1969,7 +1989,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                 (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
                                                                                     widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
                                                                                 isOriginalOrderItem(p.id.toString()))
-                                                                                ? greyColor.withOpacity(0.5) // Lighter border for locked items
+                                                                                ? greyColor200!
                                                                                 : greyColor,
                                                                           ),
                                                                           borderRadius: BorderRadius.circular(4),
@@ -1977,7 +1997,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                               (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
                                                                                   widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
                                                                               isOriginalOrderItem(p.id.toString()))
-                                                                              ? greyColor.withOpacity(0.1) // Light gray background for locked items
+                                                                              ? greyColor200
                                                                               : whiteColor,
                                                                         ),
                                                                         child: TextField(
@@ -2433,7 +2453,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                 (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
                                                                                     widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
                                                                                 isOriginalOrderItem(p.id.toString()))
-                                                                                ? greyColor.withOpacity(0.5) // Lighter border for locked items
+                                                                                ? greyColor200!
                                                                                 : greyColor,
                                                                           ),
                                                                           borderRadius: BorderRadius.circular(4),
@@ -2441,7 +2461,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                               (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
                                                                                   widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
                                                                               isOriginalOrderItem(p.id.toString()))
-                                                                              ? greyColor.withOpacity(0.1) // Light gray background for locked items
+                                                                              ? greyColor200
                                                                               : whiteColor,
                                                                         ),
                                                                         child: TextField(
@@ -2775,7 +2795,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                   .addons!
                                                                   .isNotEmpty)
                                                               verticalSpace(
-                                                                height: 5,
+                                                                height: 10,
                                                               ),
                                                               if ( currentQuantity >
                                                                   0 && p
@@ -2783,6 +2803,31 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                   .isNotEmpty )
                                                                 ElevatedButton(
                                                     onPressed: () {
+                                                      final index = billingItems.indexWhere((item) => item['_id'] == p.id);
+
+                                                      if (index == -1) {
+                                                        for (var addon in p.addons!) {
+                                                          addon.isSelected = false;
+                                                          addon.quantity = 0;
+                                                        }
+                                                      } else {
+                                                        final existingAddons = billingItems[index]['selectedAddons'] as List<dynamic>? ?? [];
+                                                        for (var addon in p.addons!) {
+                                                          final found = existingAddons.firstWhereOrNull(
+                                                                (a) => a['_id'] == addon.id,
+                                                          );
+                                                          if (found != null) {
+                                                            addon.quantity = 1;
+                                                            addon.isSelected = true;
+                                                            // addon.quantity = found['quantity'] as int? ?? addon.quantity;
+                                                            // addon.isSelected = addon.quantity > 0;
+                                                          }
+                                                          else {
+                                                            addon.quantity = 0;
+                                                            addon.isSelected = false;
+                                                          }
+                                                        }
+                                                      }
                                                       showDialog(
                                                         context: context,
                                                         builder: (context2) {
@@ -3176,11 +3221,13 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                     style: ElevatedButton.styleFrom(
                                                     backgroundColor: const Color(0xFFF5F6F8), // light grey background
                                                     foregroundColor: appPrimaryColor, // brown text
-                                                    shape: RoundedRectangleBorder(
-                                                    borderRadius: BorderRadius.circular(30), // pill shape
-                                                    ),
-                                                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                                    elevation: 0, // flat look (no shadow)
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(20),
+                                                      ),
+                                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                                      minimumSize: const Size(0, 0),
+                                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                                      elevation: 0,
                                                     ),
                                                     child: const Text(
                                                     "Choose Add-ons",
@@ -4622,7 +4669,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                               getOrCreateController(e.id.toString(), originalQty).text = originalQty.toString();
                                                                               ScaffoldMessenger.of(context).showSnackBar(
                                                                                 SnackBar(
-                                                                                  content: Text("Cannot reduce quantity below original amount (${originalQty}) for existing items"),
+                                                                                  content: Text("Cannot reduce quantity below original amount ($originalQty) for existing items"),
                                                                                 ),
                                                                               );
                                                                               return;
@@ -4708,7 +4755,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                             getOrCreateController(e.id.toString(), originalQty).text = originalQty.toString();
                                                                             ScaffoldMessenger.of(context).showSnackBar(
                                                                               SnackBar(
-                                                                                content: Text("Cannot remove existing items. Minimum quantity is ${originalQty}"),
+                                                                                content: Text("Cannot remove existing items. Minimum quantity is $originalQty"),
                                                                               ),
                                                                             );
                                                                             return;
@@ -4890,11 +4937,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                     vertical: 4,
                                                                   ),
                                                               decoration: BoxDecoration(
-                                                                color: Colors
-                                                                    .orange
-                                                                    .withOpacity(
-                                                                      0.1,
-                                                                    ),
+                                                                color: orangeColor200,
                                                                 borderRadius:
                                                                     BorderRadius.circular(
                                                                       4,
@@ -6866,14 +6909,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                           ) {
                                                             final method =
                                                                 selectedPaymentMethods[i];
-                                                            final amountText =
-                                                                splitAmountControllers[i]
-                                                                    .text;
-                                                            final amount =
-                                                                double.tryParse(
-                                                                  amountText,
-                                                                ) ??
-                                                                0;
                                                             if (method ==
                                                                     null ||
                                                                 method
@@ -7602,7 +7637,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                   .isNotEmpty) {
                                                 productExists = isProductInCart(p.id.toString());
                                                 if(productExists == true) {
-                                                  // Product already in cart, add directly without showing dialog
                                                   final currentQtyInCart = getCurrentQuantity(p.id.toString());
                                                   bool canAdd;
 
@@ -7655,6 +7689,29 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                     );
                                                   });
                                                 } else {
+                                                  final index = billingItems.indexWhere((item) => item['_id'] == p.id);
+
+                                                  if (index == -1) {
+                                                    for (var addon in p.addons!) {
+                                                      addon.isSelected = false;
+                                                      addon.quantity = 0;
+                                                    }
+                                                  }
+                                                  else {
+                                                    final existingAddons = billingItems[index]['selectedAddons'] as List<dynamic>? ?? [];
+                                                    for (var addon in p.addons!) {
+                                                      final found = existingAddons.firstWhereOrNull(
+                                                            (a) => a['_id'] == addon.id,
+                                                      );
+                                                      if (found != null) {
+                                                        addon.quantity = 1;
+                                                        addon.isSelected = true;
+                                                      } else {
+                                                        addon.quantity = 0;
+                                                        addon.isSelected = false;
+                                                      }
+                                                    }
+                                                  }
                                                   showDialog(
                                                     context: context,
                                                     builder: (context2) {
@@ -8390,10 +8447,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                         4,
                                                       ),
                                                       decoration: BoxDecoration(
-                                                        color: redColor
-                                                            .withOpacity(
-                                                          0.1,
-                                                        ),
+                                                        color: redColor200,
                                                         borderRadius:
                                                         BorderRadius.circular(
                                                           4,
@@ -8589,7 +8643,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                     (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
                                                                         widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
                                                                     isOriginalOrderItem(p.id.toString()))
-                                                                    ? greyColor.withOpacity(0.5) // Lighter border for locked items
+                                                                    ? greyColor200!
                                                                     : greyColor,
                                                               ),
                                                               borderRadius: BorderRadius.circular(4),
@@ -8597,7 +8651,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                   (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
                                                                       widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
                                                                   isOriginalOrderItem(p.id.toString()))
-                                                                  ? greyColor.withOpacity(0.1) // Light gray background for locked items
+                                                                  ? greyColor200
                                                                   : whiteColor,
                                                             ),
                                                             child: TextField(
@@ -8613,7 +8667,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                     (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
                                                                         widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
                                                                     isOriginalOrderItem(p.id.toString()))
-                                                                    ? greyColor // Gray text for locked items
+                                                                    ? greyColor
                                                                     : blackColor,
                                                               ),
                                                               decoration: InputDecoration(
@@ -9053,7 +9107,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                     (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
                                                                         widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
                                                                     isOriginalOrderItem(p.id.toString()))
-                                                                    ? greyColor.withOpacity(0.5) // Lighter border for locked items
+                                                                    ? greyColor200!
                                                                     : greyColor,
                                                               ),
                                                               borderRadius: BorderRadius.circular(4),
@@ -9061,7 +9115,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                   (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
                                                                       widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
                                                                   isOriginalOrderItem(p.id.toString()))
-                                                                  ? greyColor.withOpacity(0.1) // Light gray background for locked items
+                                                                  ? greyColor200
                                                                   : whiteColor,
                                                             ),
                                                             child: TextField(
@@ -9403,6 +9457,28 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                       .isNotEmpty )
                                                     ElevatedButton(
                                                       onPressed: () {
+                                                        final index = billingItems.indexWhere((item) => item['_id'] == p.id);
+
+                                                        if (index == -1) {
+                                                          for (var addon in p.addons!) {
+                                                            addon.isSelected = false;
+                                                            addon.quantity = 0;
+                                                          }
+                                                        } else {
+                                                          final existingAddons = billingItems[index]['selectedAddons'] as List<dynamic>? ?? [];
+                                                          for (var addon in p.addons!) {
+                                                            final found = existingAddons.firstWhereOrNull(
+                                                                  (a) => a['_id'] == addon.id,
+                                                            );
+                                                            if (found != null) {
+                                                              addon.quantity = 1;
+                                                              addon.isSelected = true;
+                                                            } else {
+                                                              addon.quantity = 0;
+                                                              addon.isSelected = false;
+                                                            }
+                                                          }
+                                                        }
                                                         showDialog(
                                                           context: context,
                                                           builder: (context2) {
@@ -9750,7 +9826,17 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                           debugPrint("billingItem in addons:${List.from(
                                                                                             billingItems,
                                                                                           )}");
-
+                                                                                          if(billingItems.isEmpty || billingItems == []) {
+                                                                                            for (var addon in p
+                                                                                                .addons!) {
+                                                                                              addon
+                                                                                                  .isSelected =
+                                                                                              false;
+                                                                                              addon
+                                                                                                  .quantity =
+                                                                                              0;
+                                                                                            }
+                                                                                          }
                                                                                           Navigator.of(
                                                                                             context,
                                                                                           ).pop();
@@ -9797,9 +9883,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                         backgroundColor: const Color(0xFFF5F6F8), // light grey background
                                                         foregroundColor: appPrimaryColor, // brown text
                                                         shape: RoundedRectangleBorder(
-                                                          borderRadius: BorderRadius.circular(30), // pill shape
+                                                          borderRadius: BorderRadius.circular(20),
                                                         ),
-                                                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                                        minimumSize: const Size(0, 0),
+                                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                                         elevation: 0, // flat look (no shadow)
                                                       ),
                                                       child: const Text(
@@ -11195,7 +11283,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                         getOrCreateController(e.id.toString(), originalQty).text = originalQty.toString();
                                                                         ScaffoldMessenger.of(context).showSnackBar(
                                                                           SnackBar(
-                                                                            content: Text("Cannot reduce quantity below original amount (${originalQty}) for existing items"),
+                                                                            content: Text("Cannot reduce quantity below original amount ($originalQty) for existing items"),
                                                                           ),
                                                                         );
                                                                         return;
@@ -11281,7 +11369,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                       getOrCreateController(e.id.toString(), originalQty).text = originalQty.toString();
                                                                       ScaffoldMessenger.of(context).showSnackBar(
                                                                         SnackBar(
-                                                                          content: Text("Cannot remove existing items. Minimum quantity is ${originalQty}"),
+                                                                          content: Text("Cannot remove existing items. Minimum quantity is $originalQty"),
                                                                         ),
                                                                       );
                                                                       return;
@@ -11463,11 +11551,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                           vertical: 4,
                                                         ),
                                                         decoration: BoxDecoration(
-                                                          color: Colors
-                                                              .orange
-                                                              .withOpacity(
-                                                            0.1,
-                                                          ),
+                                                          color: orangeColor200,
                                                           borderRadius:
                                                           BorderRadius.circular(
                                                             4,
@@ -13433,14 +13517,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                               ) {
                                                 final method =
                                                 selectedPaymentMethods[i];
-                                                final amountText =
-                                                    splitAmountControllers[i]
-                                                        .text;
-                                                final amount =
-                                                    double.tryParse(
-                                                      amountText,
-                                                    ) ??
-                                                        0;
                                                 if (method ==
                                                     null ||
                                                     method

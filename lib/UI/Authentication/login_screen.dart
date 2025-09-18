@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:ramanas_waiter/Alertbox/snackBarAlert.dart';
 import 'package:ramanas_waiter/Bloc/Authentication/login_bloc.dart';
-import 'package:ramanas_waiter/Bloc/demo/demo_bloc.dart';
 import 'package:ramanas_waiter/ModelClass/Authentication/Post_login_model.dart';
 import 'package:ramanas_waiter/Reusable/color.dart';
 import 'package:ramanas_waiter/Reusable/customTextfield.dart';
