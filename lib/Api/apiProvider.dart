@@ -34,7 +34,7 @@ class ApiProvider {
   /// LoginWithOTP API Integration
   Future<PostLoginModel> loginAPI(String email, String password) async {
     try {
-      final dataMap = {"email": email, "password": password};
+      final dataMap = {"email": email, "password": password, "isWaiter": true};
       var data = json.encode(dataMap);
       var dio = Dio();
       var response = await dio.request(

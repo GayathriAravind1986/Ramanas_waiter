@@ -30,6 +30,16 @@ Widget getThermalReceiptKOTWidget({
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Text(
+            businessName,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: blackColor,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 4),
           Container(
             height: 4,
             color: blackColor,
@@ -47,6 +57,16 @@ Widget getThermalReceiptKOTWidget({
             ),
           ),
 
+          Container(
+            height: 4,
+            color: blackColor,
+            margin: const EdgeInsets.symmetric(vertical: 4),
+          ),
+          _buildKOTInfoRow("Date:", date),
+          _buildKOTInfoRow("Order#:", orderNumber),
+          _buildKOTInfoRow("Type:", orderType),
+          if (orderType == 'LINE' || orderType == 'AC')
+            _buildKOTInfoRow("Table:", tableName),
           Container(
             height: 4,
             color: blackColor,
@@ -99,9 +119,40 @@ Widget getThermalReceiptKOTWidget({
             margin: const EdgeInsets.symmetric(vertical: 4),
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 20),
         ],
       ),
+    ),
+  );
+}
+
+Widget _buildKOTInfoRow(String label, String value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 1.0),
+    child: Row(
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              color: blackColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              color: blackColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
     ),
   );
 }

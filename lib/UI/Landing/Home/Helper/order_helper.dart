@@ -1,5 +1,3 @@
-
-
 import 'package:ramanas_waiter/ModelClass/Cart/Post_Add_to_billing_model.dart';
 
 Map<String, dynamic> buildOrderPayload({
@@ -24,11 +22,13 @@ Map<String, dynamic> buildOrderPayload({
         "quantity": item.qty,
         "subtotal": item.subtotal,
         "unitPrice": item.basePrice,
-        "addons": item.selectedAddons?.map((addon) {
+        "addons":
+            item.selectedAddons?.map((addon) {
               return {
                 "addon": addon.id,
                 "name": addon.name,
                 "price": addon.price,
+                "quantity": addon.quantity,
               };
             }).toList() ??
             [],

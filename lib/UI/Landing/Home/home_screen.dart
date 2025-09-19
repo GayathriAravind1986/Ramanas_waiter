@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
+import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:intl/intl.dart';
+import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:ramanas_waiter/Alertbox/AlertDialogBox.dart';
 import 'package:ramanas_waiter/Alertbox/snackBarAlert.dart';
 import 'package:ramanas_waiter/Bloc/Category/category_bloc.dart';
@@ -24,9 +28,11 @@ import 'package:ramanas_waiter/Reusable/space.dart';
 import 'package:ramanas_waiter/Reusable/text_styles.dart';
 import 'package:ramanas_waiter/UI/Authentication/login_screen.dart';
 import 'package:ramanas_waiter/UI/Cart/Widget/payment_option.dart';
+import 'package:ramanas_waiter/UI/KOT_printer_helper/printer_kot_helper.dart';
 import 'package:ramanas_waiter/UI/Landing/Home/Helper/order_helper.dart';
 import 'package:ramanas_waiter/UI/Landing/Home/Widget/category_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image/image.dart' as img;
 
 class HomePage extends StatelessWidget {
   final from;
@@ -74,8 +80,6 @@ extension OrderTypeX on OrderType {
         return "SWIGGY";
     }
   }
-
-  // 👇 to convert back from API string
   static OrderType fromApi(String value) {
     switch (value) {
       case "LINE":
@@ -187,6 +191,525 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
   List<Map<String, dynamic>> billingItems = [];
    Set<String> productsWithAddonsInCart = <String>{};
 
+/// print bluetooth options
+  GlobalKey kotReceiptKey = GlobalKey();
+  List<BluetoothInfo> _devices = [];
+  bool _isScanning = false;
+  String formatInvoiceDate(String? dateStr) {
+    DateTime dateTime;
+
+    if (dateStr == null) {
+      return DateFormat('dd/MM/yyyy hh:mm a').format(DateTime.now());
+    }
+
+    try {
+      dateTime = DateFormat('M/d/yyyy, h:mm:ss a').parse(dateStr);
+    } catch (_) {
+      try {
+        dateTime = DateTime.parse(dateStr);
+      } catch (_) {
+        dateTime = DateTime.now();
+      }
+    }
+    return DateFormat('dd/MM/yyyy hh:mm a').format(dateTime);
+  }
+  Future<void> _scanBluetoothDevices() async {
+    if (_isScanning) return;
+
+    setState(() {
+      _isScanning = true;
+      _devices.clear();
+    });
+
+    try {
+      // Check if Bluetooth is enabled
+      final bool result = await PrintBluetoothThermal.bluetoothEnabled;
+      if (!result) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Bluetooth is not enabled"),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() => _isScanning = false);
+        return;
+      }
+
+      // Get paired Bluetooth devices
+      final List<BluetoothInfo> bluetooths =
+      await PrintBluetoothThermal.pairedBluetooths;
+      setState(() {
+        _devices = bluetooths;
+        _isScanning = false;
+      });
+    } catch (e) {
+      debugPrint("Error scanning Bluetooth devices: $e");
+      setState(() => _isScanning = false);
+    }
+  }
+
+  Future<void> _selectBluetoothPrinter(BuildContext context) async {
+    await _scanBluetoothDevices();
+
+    if (_devices.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              "No paired Bluetooth printers found. Please pair your printer first."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      builder: (_) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                "Select Bluetooth Printer",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _devices.length,
+                itemBuilder: (_, index) {
+                  final printer = _devices[index];
+                  return ListTile(
+                    leading: const Icon(Icons.print),
+                    title: Text(
+                        printer.name), // Changed from printer.name ?? "Unknown"
+                    subtitle: Text(printer
+                        .macAdress), // Changed from printer.address ?? ""
+                    onTap: () {
+                      Navigator.pop(context);
+                      _startKOTPrintingBluetoothOnly(context, printer);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// BT KOT Print
+  Future<void> _startKOTPrintingBluetoothOnly(BuildContext context, BluetoothInfo printer) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(color: appPrimaryColor),
+              SizedBox(height: 16),
+              Text("Preparing KOT for Bluetooth printer...",
+                  style: TextStyle(color: whiteColor)),
+            ],
+          ),
+        ),
+      );
+
+      await Future.delayed(const Duration(milliseconds: 300));
+      await WidgetsBinding.instance.endOfFrame;
+
+      Uint8List? imageBytes = await captureMonochromeKOTReceipt(kotReceiptKey);
+
+      if (imageBytes != null) {
+        final bool connectionResult = await PrintBluetoothThermal.connect(
+            macPrinterAddress: printer.macAdress);
+
+        if (!connectionResult) {
+          throw Exception("Failed to connect to printer");
+        }
+
+        final profile = await CapabilityProfile.load();
+        final generator = Generator(PaperSize.mm58, profile);
+
+        final decodedImage = img.decodeImage(imageBytes);
+        if (decodedImage != null) {
+          // Updated API for image package v4.x
+          final resizedImage = img.copyResize(
+            decodedImage,
+            width: 384,
+            maintainAspect: true,
+          );
+
+          List<int> bytes = [];
+          bytes += generator.reset();
+
+          // For image v4.x, the imageRaster method signature may be different
+          // Check the documentation, but this should work:
+          bytes += generator.imageRaster(resizedImage);
+
+          bytes += generator.feed(2);
+          bytes += generator.cut();
+
+          final bool printResult =
+          await PrintBluetoothThermal.writeBytes(bytes);
+          await PrintBluetoothThermal.disconnect;
+
+          Navigator.of(context).pop();
+
+          if (printResult) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("KOT printed to Bluetooth printer!"),
+                backgroundColor: greenColor,
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Failed to send data to printer"),
+                backgroundColor: redColor,
+              ),
+            );
+          }
+        }
+      } else {
+        Navigator.of(context).pop();
+        throw Exception("Failed to capture KOT receipt image");
+      }
+    } catch (e) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("KOT Print failed: $e"),
+          backgroundColor: redColor,
+        ),
+      );
+    }
+  }
+/// generate and update order print
+  Future<void> printGenerateOrderReceipt() async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()),
+      );
+
+      List<Map<String, dynamic>> items = postGenerateOrderModel.order!.items!
+          .map((e) => {
+        'name': e.name,
+        'qty': e.quantity,
+        'price': (e.unitPrice ?? 0).toDouble(),
+        'total': ((e.quantity ?? 0) * (e.unitPrice ?? 0)).toDouble(),
+      })
+          .toList();
+      List<Map<String, dynamic>> kotItems = postGenerateOrderModel.invoice!.kot!
+          .map((e) => {
+        'name': e.name,
+        'qty': e.quantity,
+      })
+          .toList();
+      List<Map<String, dynamic>> finalTax =
+      postGenerateOrderModel.order!.finalTaxes!
+          .map((e) => {
+        'name': e.name,
+        'amt': e.amount,
+      })
+          .toList();
+
+      String businessName = postGenerateOrderModel.invoice!.businessName ?? '';
+      String address = postGenerateOrderModel.invoice!.address ?? '';
+      String gst = postGenerateOrderModel.invoice!.gstNumber ?? '';
+      double taxPercent = (postGenerateOrderModel.order!.tax ?? 0.0).toDouble();
+      String orderNumber = postGenerateOrderModel.order!.orderNumber ?? 'N/A';
+      String paymentMethod = postGenerateOrderModel.invoice!.paidBy ?? '';
+      String phone = postGenerateOrderModel.invoice!.phone ?? '';
+      double subTotal =
+      (postGenerateOrderModel.invoice!.subtotal ?? 0.0).toDouble();
+      double total = (postGenerateOrderModel.invoice!.total ?? 0.0).toDouble();
+      String orderType = postGenerateOrderModel.order!.orderType ?? '';
+      String orderStatus = postGenerateOrderModel.invoice!.orderStatus ?? '';
+      String tableName = orderType == 'LINE' || orderType == 'AC'
+          ? postGenerateOrderModel.invoice!.tableName.toString()
+          : 'N/A';
+      String waiterName = orderType == 'LINE' || orderType == 'AC'
+          ? postGenerateOrderModel.invoice!.waiterName.toString()
+          : 'N/A';
+      String date = formatInvoiceDate(postGenerateOrderModel.invoice?.date);
+      // ipController.text =
+      //     postGenerateOrderModel.invoice!.thermalIp.toString() ?? "";
+     // debugPrint("ip:${ipController.text}");
+      Navigator.of(context).pop();
+
+      await showDialog(
+        context: context,
+        builder: (_) => Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding:
+          const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+          child: SingleChildScrollView(
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.4,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: whiteColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  // KOT Receipt (for kitchen)
+                  if (postGenerateOrderModel.invoice!.kot!.isNotEmpty)
+                    RepaintBoundary(
+                      key: kotReceiptKey,
+                      child: getThermalReceiptKOTWidget(
+                        businessName: businessName,
+                        address: address,
+                        gst: gst,
+                        items: kotItems,
+                        paidBy: paymentMethod,
+                        tamilTagline: '',
+                        phone: phone,
+                        subtotal: subTotal,
+                        tax: taxPercent,
+                        total: total,
+                        orderNumber: orderNumber,
+                        tableName: tableName,
+                        waiterName: waiterName,
+                        orderType: orderType,
+                        date: date,
+                        status: orderStatus,
+                      ),
+                    ),
+
+                  const SizedBox(height: 20),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // if (postGenerateOrderModel.invoice!.kot!.isNotEmpty)
+                      //   ElevatedButton.icon(
+                      //     onPressed: () {
+                      //       _startKOTPrintingThermalOnly(
+                      //         context,
+                      //         ipController.text.trim(),
+                      //       );
+                      //     },
+                      //     icon: const Icon(Icons.print),
+                      //     label: const Text("KOT(LAN)"),
+                      //     style: ElevatedButton.styleFrom(
+                      //       backgroundColor: greenColor,
+                      //       foregroundColor: whiteColor,
+                      //     ),
+                      //   ),
+                      // horizontalSpace(width: 10),
+                      if (postGenerateOrderModel.invoice!.kot!.isNotEmpty)
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            _selectBluetoothPrinter(context);
+                          },
+                          icon: const Icon(Icons.bluetooth),
+                          label: const Text("KOT(BT)"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: greenColor,
+                            foregroundColor: whiteColor,
+                          ),
+                        ),
+                      horizontalSpace(width: 10),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.09,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text(
+                            "CLOSE",
+                            style: TextStyle(color: appPrimaryColor),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    } catch (e) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: ${e.toString()}")),
+      );
+    }
+  }
+
+  Future<void> printUpdateOrderReceipt() async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+      List<Map<String, dynamic>> items = updateGenerateOrderModel.order!.items!
+          .map((e) => {
+        'name': e.name,
+        'qty': e.quantity,
+        'price': (e.unitPrice ?? 0).toDouble(),
+        'total': ((e.quantity ?? 0) * (e.unitPrice ?? 0)).toDouble(),
+      })
+          .toList();
+      List<Map<String, dynamic>> kotItems =
+      updateGenerateOrderModel.invoice!.kot!
+          .map((e) => {
+        'name': e.name,
+        'qty': e.quantity,
+      })
+          .toList();
+      List<Map<String, dynamic>> finalTax =
+      updateGenerateOrderModel.invoice!.finalTaxes!
+          .map((e) => {
+        'name': e.name,
+        'amt': double.parse(e.amount.toString()),
+      })
+          .toList();
+      String businessName =
+          updateGenerateOrderModel.invoice!.businessName ?? '';
+      String address = updateGenerateOrderModel.invoice!.address ?? '';
+      String gst = updateGenerateOrderModel.invoice!.gstNumber ?? '';
+      double taxPercent =
+      (updateGenerateOrderModel.order!.tax ?? 0.0).toDouble();
+      String orderNumber = updateGenerateOrderModel.order!.orderNumber ?? 'N/A';
+      String paymentMethod = updateGenerateOrderModel.invoice!.paidBy ?? '';
+      String phone = updateGenerateOrderModel.invoice!.phone ?? '';
+      double subTotal =
+      (updateGenerateOrderModel.invoice!.subtotal ?? 0.0).toDouble();
+      double total =
+      (updateGenerateOrderModel.invoice!.total ?? 0.0).toDouble();
+      String orderType = updateGenerateOrderModel.order!.orderType ?? '';
+      String orderStatus = updateGenerateOrderModel.invoice!.orderStatus ?? '';
+      String tableName = orderType == 'LINE' || orderType == 'AC'
+          ? updateGenerateOrderModel.invoice!.tableName.toString()
+          : 'N/A';
+      String waiterName = orderType == 'LINE' || orderType == 'AC'
+          ? updateGenerateOrderModel.invoice!.waiterName.toString()
+          : 'N/A';
+      String date = formatInvoiceDate(updateGenerateOrderModel.invoice?.date);
+      // ipController.text =
+      //     updateGenerateOrderModel.invoice!.thermalIp.toString() ?? "";
+      // debugPrint("ip:${ipController.text}");
+      Navigator.of(context).pop();
+      await showDialog(
+        context: context,
+        builder: (_) => Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding:
+          const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+          child: SingleChildScrollView(
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.4,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: whiteColor,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  if (updateGenerateOrderModel.invoice!.kot!.isNotEmpty)
+                    RepaintBoundary(
+                      key: kotReceiptKey,
+                      child: getThermalReceiptKOTWidget(
+                        businessName: businessName,
+                        address: address,
+                        gst: gst,
+                        items: kotItems,
+                        paidBy: paymentMethod,
+                        tamilTagline: '',
+                        phone: phone,
+                        subtotal: subTotal,
+                        tax: taxPercent,
+                        total: total,
+                        orderNumber: orderNumber,
+                        tableName: tableName,
+                        waiterName: waiterName,
+                        orderType: orderType,
+                        date: date,
+                        status: orderStatus,
+                      ),
+                    ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // if (updateGenerateOrderModel.invoice!.kot!.isNotEmpty)
+                      //   ElevatedButton.icon(
+                      //     onPressed: () {
+                      //       _startKOTPrintingThermalOnly(
+                      //         context,
+                      //         ipController.text.trim(),
+                      //       );
+                      //     },
+                      //     icon: const Icon(Icons.print),
+                      //     label: const Text("KOT(LAN)"),
+                      //     style: ElevatedButton.styleFrom(
+                      //       backgroundColor: greenColor,
+                      //       foregroundColor: whiteColor,
+                      //     ),
+                      //   ),
+                      // horizontalSpace(width: 10),
+                      if (updateGenerateOrderModel.invoice!.kot!.isNotEmpty)
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            _selectBluetoothPrinter(context);
+                          },
+                          icon: const Icon(Icons.bluetooth),
+                          label: const Text("KOT(BT)"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: greenColor,
+                            foregroundColor: whiteColor,
+                          ),
+                        ),
+                      horizontalSpace(width: 10),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.09,
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text(
+                            "CLOSE",
+                            style: TextStyle(color: appPrimaryColor),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    } catch (e) {
+      Navigator.of(context).pop();
+      if (e is DioException) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error: ${e.message}"),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Something went wrong: ${e.toString()}"),
+          ),
+        );
+      }
+    }
+  }
+
   // Update this method to track products with addons
   void updateProductsWithAddons() {
     productsWithAddonsInCart.clear();
@@ -201,7 +724,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
     if (order == null || order.data == null) return;
     debugPrint("existOrderId:${widget.existingOrder?.data?.id}");
     final data = order.data!;
-
     setState(() {
       cartLoad = true;
       switch (data.orderType) {
@@ -242,6 +764,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
               "selectedAddons":
                   e.addons?.map((addonItem) {
                     final addon = addonItem.addon;
+                    debugPrint("addonsqty:${addonItem.quantity}");
                     return {
                       "_id": addon?.id,
                       "name": addon?.name,
@@ -428,57 +951,62 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
       }
 
 /// addons remove button disable for edit - order
-      bool isExistingAddon(String itemId, String addonId) {
-        if (widget.isEditingOrder != true || widget.existingOrder?.data?.items == null) {
+      bool shouldDisableRemoveButton(String itemId, String addonId) {
+        if (widget.isEditingOrder != true) return false;
+
+        final orderStatus = widget.existingOrder?.data?.orderStatus;
+        if (orderStatus != "WAITLIST" && orderStatus != "COMPLETED") return false;
+
+        // Check if addon exists in original order
+        bool isExistingAddon = false;
+        int originalQty = 0;
+        int currentQty = 0;
+
+        if (widget.existingOrder?.data?.items != null) {
+          try {
+            final existingItem = widget.existingOrder!.data!.items!.firstWhereOrNull(
+                  (item) => item.product!.id.toString() == itemId,
+            );
+
+            if (existingItem?.addons != null) {
+              final existingAddon = existingItem?.addons!.firstWhereOrNull(
+                    (addon) => addon.addon!.id.toString() == addonId,
+              );
+
+              if (existingAddon != null) {
+                isExistingAddon = true;
+                originalQty = int.parse(existingAddon.quantity.toString());
+              }
+            }
+          } catch (e) {
+            isExistingAddon = false;
+          }
+        }
+
+        if (!isExistingAddon) return false;
+
+        // Get current quantity from billing items
+        try {
+          final currentItem = billingItems.firstWhere(
+                (item) => item['_id'].toString() == itemId,
+          );
+          final addonsList = currentItem['selectedAddons'] as List;
+          final addon = addonsList.firstWhere(
+                (a) => a['_id'].toString() == addonId,
+          );
+          currentQty = addon['quantity'] as int? ?? 0;
+        } catch (e) {
           return false;
         }
 
-        final existingItem = widget.existingOrder!.data!.items!.firstWhereOrNull(
-              (item) => item.id.toString() == itemId,
-        );
-
-        if (existingItem == null || existingItem.addons == null) return false;
-
-        return existingItem.addons!.any((addon) => addon.id.toString() == addonId);
-      }
-
-      int getOriginalAddonQuantity(String itemId, String addonId) {
-        if (widget.isEditingOrder != true || widget.existingOrder?.data?.items == null) {
-          return 0;
-        }
-
-        final existingItem = widget.existingOrder!.data!.items!.firstWhereOrNull(
-              (item) => item.id.toString() == itemId,
-        );
-
-        if (existingItem == null || existingItem.addons == null) return 0;
-
-        final existingAddon = existingItem.addons!.firstWhereOrNull(
-              (addon) => addon.id.toString() == addonId,
-        );
-
-        return int.parse(existingAddon!.quantity.toString());
-      }
-
-      int getCurrentAddonQuantityFromBilling(String itemId, String addonId) {
-        final billingItem = billingItems.firstWhereOrNull(
-              (item) => item['_id'].toString() == itemId,
-        );
-
-        if (billingItem == null || billingItem['selectedAddons'] == null) return 0;
-
-        final addonsList = billingItem['selectedAddons'] as List;
-        final addon = addonsList.firstWhereOrNull(
-              (a) => a['_id'].toString() == addonId,
-        );
-
-        return addon?['quantity'] ?? 0;
+        return currentQty <= originalQty;
       }
       /// show dialog box for addons logic
       bool isProductInCart(String productId) {
         return billingItems.any((item) => item['_id'].toString() == productId);
       }
-/// disable addons remove option if edit
+/// disable addons remove option if edit - product
+
       int getOriginalAddonQty(String productId, String addonId) {
         final orderItem = widget.existingOrder?.data?.items
             ?.firstWhereOrNull((item) => item.product?.id == productId);
@@ -488,11 +1016,65 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
         final addon = orderItem.addons
             ?.firstWhereOrNull((a) => a.id == addonId);
 
-        // If addon not found or quantity is null → return 0
+        debugPrint("originaladdons:${addon?.quantity ?? 0}");
+
         if (addon == null || addon.quantity == null) return 0;
 
-        return addon.quantity is int ? addon.quantity as int : int.tryParse(addon.quantity.toString()) ?? 0;
+        return addon.quantity is int
+            ? addon.quantity as int
+            : int.tryParse(addon.quantity.toString()) ?? 0;
       }
+
+      bool isAddonRemoveDisabled(String productId, String addonId, int currentQty) {
+        final isEditing = widget.isEditingOrder == true;
+        final status = widget.existingOrder?.data?.orderStatus;
+
+        if (!isEditing) return false;
+
+        if (status != "COMPLETED" && status != "WAITLIST") return false;
+
+        final originalQty = getOriginalAddonQty(productId, addonId);
+
+        if (originalQty == 0) {
+          if (status == "COMPLETED" || status == "WAITLIST") {
+            return true;
+          } else {
+            return currentQty <= 0;
+          }
+        }
+        return currentQty <= originalQty;
+      }
+/// save button enable- while editing
+      bool haveAddonsChanged() {
+        final originalItems = widget.existingOrder?.data?.items ?? [];
+        final currentItems = billingItems;
+
+        for (final current in currentItems) {
+          final original = originalItems.firstWhereOrNull(
+                (o) => o.product?.id == current['_id'],
+          );
+
+          if (original == null) continue; // new product, skip
+
+          final originalAddons = original.addons ?? [];
+          final currentAddons = (current['selectedAddons'] ?? []) as List;
+
+          for (final addon in currentAddons) {
+            final originalAddon = originalAddons.firstWhereOrNull(
+                  (oa) => oa.addon?.id == addon['_id'],
+            );
+
+            final currentQty = addon['quantity'] ?? 0;
+            final originalQty = originalAddon?.quantity ?? 0;
+
+            if (currentQty != originalQty) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
 
 
       @override
@@ -524,26 +1106,40 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
         );
       }
 
-      return RefreshIndicator(
-        displacement: 60.0,
-        color: appPrimaryColor,
-        onRefresh: () async {
-          searchController.clear();
-          searchCodeController.clear();
-          context.read<FoodCategoryBloc>().add(FoodCategory());
-          context.read<FoodCategoryBloc>().add(
-            FoodProductItem(
-              selectedCatId.toString(),
-              searchController.text,
-              searchCodeController.text,
-            ),
-          );
-          categoryLoad = true;
-          setState(() {});
-        },
-        child: ResponsiveBuilder(
-          mobileBuilder: (context, constraints) {
-            return DefaultTabController(
+      return ResponsiveBuilder(
+        mobileBuilder: (context, constraints) {
+          return  RefreshIndicator(
+            displacement: 60.0,
+            color: appPrimaryColor,
+            onRefresh: () async {
+              searchController.clear();
+              searchCodeController.clear();
+              context.read<FoodCategoryBloc>().add(FoodCategory());
+              context.read<FoodCategoryBloc>().add(
+                FoodProductItem(
+                  selectedCatId.toString(),
+                  searchController.text,
+                  searchCodeController.text,
+                ),
+              );
+              context.read<FoodCategoryBloc>().add(TableDine());
+              context.read<FoodCategoryBloc>().add(WaiterDine());
+              context.read<FoodCategoryBloc>().add(StockDetails());
+
+              setState(() {
+                categoryLoad = true;
+              });
+              updateProductsWithAddons();
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (widget.isEditingOrder == true && widget.existingOrder != null) {
+                  loadExistingOrder(widget.existingOrder!);
+                } else {
+                  resetCartState();
+                }
+              });
+              setState(() {});
+            },
+            child: DefaultTabController(
               length: 2,
               child: Container(
                 margin: const EdgeInsets.symmetric(
@@ -2998,20 +3594,29 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                           Row(
                                                                                             children: [
                                                                                               IconButton(
-                                                                                                icon: const Icon(Icons.remove),
-                                                                                                onPressed: () {
-                                                                                                  final originalQty = (widget.isEditingOrder == true)
-                                                                                                      ? getOriginalAddonQty(p.id.toString(), e.id.toString())
-                                                                                                      : 0;
-
-                                                                                                  if (e.quantity > originalQty) {
-                                                                                                    setState(() {
-                                                                                                      e.quantity = e.quantity - 1;
-                                                                                                      if (e.quantity == 0) {
-                                                                                                        e.isSelected = false;
-                                                                                                      }
-                                                                                                    });
-                                                                                                  }
+                                                                                                icon: Icon(
+                                                                                                  Icons.remove,
+                                                                                                  color: isAddonRemoveDisabled(
+                                                                                                    p.id.toString(),
+                                                                                                    e.id.toString(),
+                                                                                                    int.parse(e.quantity.toString()),
+                                                                                                  )
+                                                                                                      ? Colors.grey
+                                                                                                      : Colors.black,
+                                                                                                ),
+                                                                                                onPressed: isAddonRemoveDisabled(
+                                                                                                  p.id.toString(),
+                                                                                                  e.id.toString(),
+                                                                                                  int.parse(e.quantity.toString()),
+                                                                                                )
+                                                                                                    ? null
+                                                                                                    : () {
+                                                                                                  setState(() {
+                                                                                                    e.quantity = (e.quantity ?? 0) - 1;
+                                                                                                    if (e.quantity == 0) {
+                                                                                                      e.isSelected = false;
+                                                                                                    }
+                                                                                                  });
                                                                                                 },
                                                                                               ),
                                                                                               Text(
@@ -5052,112 +5657,15 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                             ),
                                                                             Row(
                                                                               children: [
-                                                                                // IconButton(
-                                                                                //   icon: Icon(
-                                                                                //     Icons.remove_circle_outline,
-                                                                                //   ),
-                                                                                //   onPressed: () {
-                                                                                //     final currentItem = billingItems.firstWhere(
-                                                                                //       (
-                                                                                //         item,
-                                                                                //       ) =>
-                                                                                //           item['_id'] ==
-                                                                                //           e.id,
-                                                                                //     );
-                                                                                //     final addonsList =
-                                                                                //         currentItem['selectedAddons']
-                                                                                //             as List;
-                                                                                //     final addonIndex = addonsList.indexWhere(
-                                                                                //       (
-                                                                                //         a,
-                                                                                //       ) =>
-                                                                                //           a['_id'] ==
-                                                                                //           addon.id,
-                                                                                //     );
-                                                                                //
-                                                                                //     if (addonsList[addonIndex]['quantity'] >
-                                                                                //         1) {
-                                                                                //       setState(
-                                                                                //         () {
-                                                                                //           addonsList[addonIndex]['quantity'] =
-                                                                                //               addonsList[addonIndex]['quantity'] -
-                                                                                //               1;
-                                                                                //           if (billingItems.isEmpty ||
-                                                                                //               billingItems ==
-                                                                                //                   []) {
-                                                                                //             isDiscountApplied = false;
-                                                                                //             widget.isEditingOrder = false;
-                                                                                //             tableId = null;
-                                                                                //             waiterId = null;
-                                                                                //             selectedValue = null;
-                                                                                //             selectedValueWaiter = null;
-                                                                                //           }
-                                                                                //           context
-                                                                                //               .read<
-                                                                                //                 FoodCategoryBloc
-                                                                                //               >()
-                                                                                //               .add(
-                                                                                //                 AddToBilling(
-                                                                                //                   List.from(
-                                                                                //                     billingItems,
-                                                                                //                   ),
-                                                                                //                   isDiscountApplied,
-                                                                                //                   selectedOrderType,
-                                                                                //                 ),
-                                                                                //               );
-                                                                                //         },
-                                                                                //       );
-                                                                                //     } else {
-                                                                                //       setState(
-                                                                                //         () {
-                                                                                //           addonsList.removeAt(
-                                                                                //             addonIndex,
-                                                                                //           );
-                                                                                //           if (billingItems.isEmpty ||
-                                                                                //               billingItems ==
-                                                                                //                   []) {
-                                                                                //             isDiscountApplied = false;
-                                                                                //             widget.isEditingOrder = false;
-                                                                                //             tableId = null;
-                                                                                //             waiterId = null;
-                                                                                //             selectedValue = null;
-                                                                                //             selectedValueWaiter = null;
-                                                                                //           }
-                                                                                //           context
-                                                                                //               .read<
-                                                                                //                 FoodCategoryBloc
-                                                                                //               >()
-                                                                                //               .add(
-                                                                                //                 AddToBilling(
-                                                                                //                   List.from(
-                                                                                //                     billingItems,
-                                                                                //                   ),
-                                                                                //                   isDiscountApplied,
-                                                                                //                   selectedOrderType,
-                                                                                //                 ),
-                                                                                //               );
-                                                                                //         },
-                                                                                //       );
-                                                                                //     }
-                                                                                //   },
-                                                                                // ),
                                                                                 IconButton(
                                                                                   icon: Icon(
                                                                                     Icons.remove_circle_outline,
-                                                                                    color: (widget.isEditingOrder == true &&
-                                                                                        (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
-                                                                                            widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
-                                                                                        isExistingAddon(e.id.toString(), addon.id.toString()) &&
-                                                                                        getCurrentAddonQuantityFromBilling(e.id.toString(), addon.id.toString()) <= getOriginalAddonQuantity(e.id.toString(), addon.id.toString()))
-                                                                                        ? greyColor  // Disabled color
-                                                                                        : blackColor, // Enabled color
+                                                                                    color: shouldDisableRemoveButton(e.id.toString(), addon.id.toString())
+                                                                                        ? greyColor   // Disabled
+                                                                                        : blackColor, // Enabled
                                                                                   ),
-                                                                                  onPressed: (widget.isEditingOrder == true &&
-                                                                                      (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
-                                                                                          widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
-                                                                                      isExistingAddon(e.id.toString(), addon.id.toString()) &&
-                                                                                      getCurrentAddonQuantityFromBilling(e.id.toString(), addon.id.toString()) <= getOriginalAddonQuantity(e.id.toString(), addon.id.toString()))
-                                                                                      ? null  // Disable button
+                                                                                  onPressed: shouldDisableRemoveButton(e.id.toString(), addon.id.toString())
+                                                                                      ? null // Disabled state
                                                                                       : () {
                                                                                     final currentItem = billingItems.firstWhere(
                                                                                           (item) => item['_id'] == e.id,
@@ -5169,7 +5677,8 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
 
                                                                                     if (addonsList[addonIndex]['quantity'] > 1) {
                                                                                       setState(() {
-                                                                                        addonsList[addonIndex]['quantity'] = addonsList[addonIndex]['quantity'] - 1;
+                                                                                        addonsList[addonIndex]['quantity'] =
+                                                                                            addonsList[addonIndex]['quantity'] - 1;
 
                                                                                         if (billingItems.isEmpty || billingItems == []) {
                                                                                           isDiscountApplied = false;
@@ -5187,14 +5696,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                             selectedOrderType,
                                                                                           ),
                                                                                         );
-                                                                                        debugPrint("billingItem in addons in add :${List.from(
-                                                                                          billingItems,
-                                                                                        )}");
+                                                                                        debugPrint("billingItem in addons remove: ${List.from(billingItems)}");
                                                                                       });
                                                                                     } else {
                                                                                       setState(() {
                                                                                         addonsList.removeAt(addonIndex);
-
                                                                                         if (billingItems.isEmpty || billingItems == []) {
                                                                                           isDiscountApplied = false;
                                                                                           widget.isEditingOrder = false;
@@ -5211,9 +5717,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                             selectedOrderType,
                                                                                           ),
                                                                                         );
-                                                                                        debugPrint("billingItem in addons in add :${List.from(
-                                                                                          billingItems,
-                                                                                        )}");
+                                                                                        debugPrint("billingItem in addons remove: ${List.from(billingItems)}");
                                                                                       });
                                                                                     }
                                                                                   },
@@ -6072,16 +6576,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                               false,
                                                                         );
                                                                         return;
-                                                                      } else if (((widget.isEditingOrder ==
-                                                                                  null ||
-                                                                              widget.isEditingOrder ==
-                                                                                  false)) ||
-                                                                          (widget.isEditingOrder ==
-                                                                                  true &&
-                                                                              (postAddToBillingModel.total !=
-                                                                                      widget.existingOrder?.data!.total &&
-                                                                                  widget.existingOrder?.data!.orderStatus ==
-                                                                                      "WAITLIST"))) {
+                                                                      } else if ((widget.isEditingOrder == null || widget.isEditingOrder == false) ||
+                                                                          (widget.isEditingOrder == true &&
+                                                                              (((postAddToBillingModel.total != widget.existingOrder?.data!.total) ||
+                                                                                  haveAddonsChanged()) &&
+                                                                                  widget.existingOrder?.data!.orderStatus == "WAITLIST"))) {
                                                                         setState(() {
                                                                           isCompleteOrder =
                                                                               false;
@@ -6162,12 +6661,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                           orderLoad =
                                                                               true;
                                                                         });
-                                                                        if (widget.isEditingOrder ==
-                                                                                true &&
-                                                                            (postAddToBillingModel.total !=
-                                                                                    widget.existingOrder?.data!.total &&
-                                                                                widget.existingOrder?.data!.orderStatus ==
-                                                                                    "WAITLIST")) {
+                                                                        if ((widget.isEditingOrder == null || widget.isEditingOrder == false) ||
+                                                                      (widget.isEditingOrder == true &&
+                                                                      (((postAddToBillingModel.total != widget.existingOrder?.data!.total) ||
+                                                                      haveAddonsChanged()) &&
+                                                                      widget.existingOrder?.data!.orderStatus == "WAITLIST"))) {
                                                                           if (((selectedValue ==
                                                                                           null ||
                                                                                       selectedValue ==
@@ -6247,16 +6745,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                     },
                                                                     style: ElevatedButton.styleFrom(
                                                                       backgroundColor:
-                                                                          (widget.isEditingOrder ==
-                                                                                      null ||
-                                                                                  widget.isEditingOrder ==
-                                                                                      false) ||
-                                                                              (widget.isEditingOrder ==
-                                                                                      true &&
-                                                                                  (postAddToBillingModel.total !=
-                                                                                          widget.existingOrder?.data!.total &&
-                                                                                      widget.existingOrder?.data!.orderStatus ==
-                                                                                          "WAITLIST"))
+                                                                      (widget.isEditingOrder == null || widget.isEditingOrder == false) ||
+                                                                          (widget.isEditingOrder == true &&
+                                                                              (((postAddToBillingModel.total != widget.existingOrder?.data!.total) ||
+                                                                                  haveAddonsChanged()) &&
+                                                                                  widget.existingOrder?.data!.orderStatus == "WAITLIST"))
                                                                           ? appPrimaryColor
                                                                           : greyColor,
                                                                       minimumSize:
@@ -6275,16 +6768,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                       "Save Order",
                                                                       style: TextStyle(
                                                                         color:
-                                                                            (widget.isEditingOrder ==
-                                                                                        null ||
-                                                                                    widget.isEditingOrder ==
-                                                                                        false) ||
-                                                                                (widget.isEditingOrder ==
-                                                                                        true &&
-                                                                                    (postAddToBillingModel.total !=
-                                                                                            widget.existingOrder?.data!.total &&
-                                                                                        widget.existingOrder?.data!.orderStatus ==
-                                                                                            "WAITLIST"))
+                                                                            (widget.isEditingOrder == null || widget.isEditingOrder == false) ||
+                                                                            (widget.isEditingOrder == true &&
+                                                                            (((postAddToBillingModel.total != widget.existingOrder?.data!.total) ||
+                                                                            haveAddonsChanged()) &&
+                                                                            widget.existingOrder?.data!.orderStatus == "WAITLIST"))
                                                                             ? whiteColor
                                                                             : blackColor,
                                                                       ),
@@ -6474,8 +6962,8 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                   }
                                                                   if ((widget.isEditingOrder ==
                                                                           true &&
-                                                                      (postAddToBillingModel.total !=
-                                                                              widget.existingOrder?.data!.total &&
+                                                                      (((postAddToBillingModel.total != widget.existingOrder?.data!.total) ||
+                                                                          haveAddonsChanged()) &&
                                                                           widget.existingOrder?.data!.orderStatus ==
                                                                               "COMPLETED"))) {
                                                                     if (balance <
@@ -6928,12 +7416,8 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                     }
                                                     if ((widget.isEditingOrder ==
                                                             true &&
-                                                        (postAddToBillingModel
-                                                                    .total !=
-                                                                widget
-                                                                    .existingOrder
-                                                                    ?.data!
-                                                                    .total &&
+                                                        (((postAddToBillingModel.total != widget.existingOrder?.data!.total) ||
+                                                            haveAddonsChanged()) &&
                                                             widget
                                                                     .existingOrder
                                                                     ?.data!
@@ -7216,11 +7700,43 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                   ],
                 ),
               ),
-            );
-          },
-          tabletBuilder: (context, constraints) {
-            debugPrint("tabletView");
-            return DefaultTabController(
+            ),
+          );
+        },
+        tabletBuilder: (context, constraints) {
+          debugPrint("tabletView");
+          return  RefreshIndicator(
+            displacement: 60.0,
+            color: appPrimaryColor,
+            onRefresh: () async {
+              searchController.clear();
+              searchCodeController.clear();
+              context.read<FoodCategoryBloc>().add(FoodCategory());
+              context.read<FoodCategoryBloc>().add(
+                FoodProductItem(
+                  selectedCatId.toString(),
+                  searchController.text,
+                  searchCodeController.text,
+                ),
+              );
+              context.read<FoodCategoryBloc>().add(TableDine());
+              context.read<FoodCategoryBloc>().add(WaiterDine());
+              context.read<FoodCategoryBloc>().add(StockDetails());
+
+              setState(() {
+                categoryLoad = true;
+              });
+              updateProductsWithAddons();
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (widget.isEditingOrder == true && widget.existingOrder != null) {
+                  loadExistingOrder(widget.existingOrder!);
+                } else {
+                  resetCartState();
+                }
+              });
+              setState(() {});
+            },
+            child: DefaultTabController(
               length: 2,
               child: Container(
                 margin: const EdgeInsets.symmetric(
@@ -9670,34 +10186,30 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                             ),
                                                                                             Row(
                                                                                               children: [
-                                                                                                // IconButton(
-                                                                                                //   icon: const Icon(Icons.remove),
-                                                                                                //   onPressed: e.quantity > 0
-                                                                                                //       ? () {
-                                                                                                //     setState(() {
-                                                                                                //       e.quantity = e.quantity - 1;
-                                                                                                //       if (e.quantity == 0) {
-                                                                                                //         e.isSelected = false;
-                                                                                                //       }
-                                                                                                //     });
-                                                                                                //   }
-                                                                                                //       : null,
-                                                                                                // ),
                                                                                                 IconButton(
-                                                                                                  icon: const Icon(Icons.remove),
-                                                                                                  onPressed: () {
-                                                                                                    final originalQty = (widget.isEditingOrder == true)
-                                                                                                        ? getOriginalAddonQty(p.id.toString(), e.id.toString())
-                                                                                                        : 0;
-
-                                                                                                    if (e.quantity > originalQty) {
-                                                                                                      setState(() {
-                                                                                                        e.quantity = e.quantity - 1;
-                                                                                                        if (e.quantity == 0) {
-                                                                                                          e.isSelected = false;
-                                                                                                        }
-                                                                                                      });
-                                                                                                    }
+                                                                                                  icon: Icon(
+                                                                                                    Icons.remove,
+                                                                                                    color: isAddonRemoveDisabled(
+                                                                                                      p.id.toString(),
+                                                                                                      e.id.toString(),
+                                                                                                      int.parse(e.quantity.toString()),
+                                                                                                    )
+                                                                                                        ? Colors.grey
+                                                                                                        : Colors.black,
+                                                                                                  ),
+                                                                                                  onPressed: isAddonRemoveDisabled(
+                                                                                                    p.id.toString(),
+                                                                                                    e.id.toString(),
+                                                                                                    int.parse(e.quantity.toString()),
+                                                                                                  )
+                                                                                                      ? null
+                                                                                                      : () {
+                                                                                                    setState(() {
+                                                                                                      e.quantity = (e.quantity ?? 0) - 1;
+                                                                                                      if (e.quantity == 0) {
+                                                                                                        e.isSelected = false;
+                                                                                                      }
+                                                                                                    });
                                                                                                   },
                                                                                                 ),
                                                                                                 Text(
@@ -11700,112 +12212,15 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                   ),
                                                                   Row(
                                                                     children: [
-                                                                      // IconButton(
-                                                                      //   icon: Icon(
-                                                                      //     Icons.remove_circle_outline,
-                                                                      //   ),
-                                                                      //   onPressed: () {
-                                                                      //     final currentItem = billingItems.firstWhere(
-                                                                      //           (
-                                                                      //           item,
-                                                                      //           ) =>
-                                                                      //       item['_id'] ==
-                                                                      //           e.id,
-                                                                      //     );
-                                                                      //     final addonsList =
-                                                                      //     currentItem['selectedAddons']
-                                                                      //     as List;
-                                                                      //     final addonIndex = addonsList.indexWhere(
-                                                                      //           (
-                                                                      //           a,
-                                                                      //           ) =>
-                                                                      //       a['_id'] ==
-                                                                      //           addon.id,
-                                                                      //     );
-                                                                      //
-                                                                      //     if (addonsList[addonIndex]['quantity'] >
-                                                                      //         1) {
-                                                                      //       setState(
-                                                                      //             () {
-                                                                      //           addonsList[addonIndex]['quantity'] =
-                                                                      //               addonsList[addonIndex]['quantity'] -
-                                                                      //                   1;
-                                                                      //           if (billingItems.isEmpty ||
-                                                                      //               billingItems ==
-                                                                      //                   []) {
-                                                                      //             isDiscountApplied = false;
-                                                                      //             widget.isEditingOrder = false;
-                                                                      //             tableId = null;
-                                                                      //             waiterId = null;
-                                                                      //             selectedValue = null;
-                                                                      //             selectedValueWaiter = null;
-                                                                      //           }
-                                                                      //           context
-                                                                      //               .read<
-                                                                      //               FoodCategoryBloc
-                                                                      //           >()
-                                                                      //               .add(
-                                                                      //             AddToBilling(
-                                                                      //               List.from(
-                                                                      //                 billingItems,
-                                                                      //               ),
-                                                                      //               isDiscountApplied,
-                                                                      //               selectedOrderType,
-                                                                      //             ),
-                                                                      //           );
-                                                                      //         },
-                                                                      //       );
-                                                                      //     } else {
-                                                                      //       setState(
-                                                                      //             () {
-                                                                      //           addonsList.removeAt(
-                                                                      //             addonIndex,
-                                                                      //           );
-                                                                      //           if (billingItems.isEmpty ||
-                                                                      //               billingItems ==
-                                                                      //                   []) {
-                                                                      //             isDiscountApplied = false;
-                                                                      //             widget.isEditingOrder = false;
-                                                                      //             tableId = null;
-                                                                      //             waiterId = null;
-                                                                      //             selectedValue = null;
-                                                                      //             selectedValueWaiter = null;
-                                                                      //           }
-                                                                      //           context
-                                                                      //               .read<
-                                                                      //               FoodCategoryBloc
-                                                                      //           >()
-                                                                      //               .add(
-                                                                      //             AddToBilling(
-                                                                      //               List.from(
-                                                                      //                 billingItems,
-                                                                      //               ),
-                                                                      //               isDiscountApplied,
-                                                                      //               selectedOrderType,
-                                                                      //             ),
-                                                                      //           );
-                                                                      //         },
-                                                                      //       );
-                                                                      //     }
-                                                                      //   },
-                                                                      // ),
                                                                       IconButton(
                                                                         icon: Icon(
                                                                           Icons.remove_circle_outline,
-                                                                          color: (widget.isEditingOrder == true &&
-                                                                              (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
-                                                                                  widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
-                                                                              isExistingAddon(e.id.toString(), addon.id.toString()) &&
-                                                                              getCurrentAddonQuantityFromBilling(e.id.toString(), addon.id.toString()) <= getOriginalAddonQuantity(e.id.toString(), addon.id.toString()))
-                                                                              ? greyColor  // Disabled color
-                                                                              : blackColor, // Enabled color
+                                                                          color: shouldDisableRemoveButton(e.id.toString(), addon.id.toString())
+                                                                              ? greyColor   // Disabled
+                                                                              : blackColor, // Enabled
                                                                         ),
-                                                                        onPressed: (widget.isEditingOrder == true &&
-                                                                            (widget.existingOrder?.data?.orderStatus == "WAITLIST" ||
-                                                                                widget.existingOrder?.data?.orderStatus == "COMPLETED") &&
-                                                                            isExistingAddon(e.id.toString(), addon.id.toString()) &&
-                                                                            getCurrentAddonQuantityFromBilling(e.id.toString(), addon.id.toString()) <= getOriginalAddonQuantity(e.id.toString(), addon.id.toString()))
-                                                                            ? null  // Disable button
+                                                                        onPressed: shouldDisableRemoveButton(e.id.toString(), addon.id.toString())
+                                                                            ? null // Disabled state
                                                                             : () {
                                                                           final currentItem = billingItems.firstWhere(
                                                                                 (item) => item['_id'] == e.id,
@@ -11817,7 +12232,8 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
 
                                                                           if (addonsList[addonIndex]['quantity'] > 1) {
                                                                             setState(() {
-                                                                              addonsList[addonIndex]['quantity'] = addonsList[addonIndex]['quantity'] - 1;
+                                                                              addonsList[addonIndex]['quantity'] =
+                                                                                  addonsList[addonIndex]['quantity'] - 1;
 
                                                                               if (billingItems.isEmpty || billingItems == []) {
                                                                                 isDiscountApplied = false;
@@ -11835,11 +12251,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                   selectedOrderType,
                                                                                 ),
                                                                               );
+                                                                              debugPrint("billingItem in addons remove: ${List.from(billingItems)}");
                                                                             });
                                                                           } else {
                                                                             setState(() {
                                                                               addonsList.removeAt(addonIndex);
-
                                                                               if (billingItems.isEmpty || billingItems == []) {
                                                                                 isDiscountApplied = false;
                                                                                 widget.isEditingOrder = false;
@@ -11856,6 +12272,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                   selectedOrderType,
                                                                                 ),
                                                                               );
+                                                                              debugPrint("billingItem in addons remove: ${List.from(billingItems)}");
                                                                             });
                                                                           }
                                                                         },
@@ -12711,16 +13128,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                   false,
                                                 );
                                                 return;
-                                              } else if (((widget.isEditingOrder ==
-                                                  null ||
-                                                  widget.isEditingOrder ==
-                                                      false)) ||
-                                                  (widget.isEditingOrder ==
-                                                      true &&
-                                                      (postAddToBillingModel.total !=
-                                                          widget.existingOrder?.data!.total &&
-                                                          widget.existingOrder?.data!.orderStatus ==
-                                                              "WAITLIST"))) {
+                                              } else if ((widget.isEditingOrder == null || widget.isEditingOrder == false) ||
+                                                  (widget.isEditingOrder == true &&
+                                                      (((postAddToBillingModel.total != widget.existingOrder?.data!.total) ||
+                                                          haveAddonsChanged()) &&
+                                                          widget.existingOrder?.data!.orderStatus == "WAITLIST"))) {
                                                 setState(() {
                                                   isCompleteOrder =
                                                   false;
@@ -12801,12 +13213,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                   orderLoad =
                                                   true;
                                                 });
-                                                if (widget.isEditingOrder ==
-                                                    true &&
-                                                    (postAddToBillingModel.total !=
-                                                        widget.existingOrder?.data!.total &&
-                                                        widget.existingOrder?.data!.orderStatus ==
-                                                            "WAITLIST")) {
+                                                if ((widget.isEditingOrder == null || widget.isEditingOrder == false) ||
+                                                    (widget.isEditingOrder == true &&
+                                                        (((postAddToBillingModel.total != widget.existingOrder?.data!.total) ||
+                                                            haveAddonsChanged()) &&
+                                                            widget.existingOrder?.data!.orderStatus == "WAITLIST"))) {
                                                   if (((selectedValue ==
                                                       null ||
                                                       selectedValue ==
@@ -12886,16 +13297,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                             },
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor:
-                                              (widget.isEditingOrder ==
-                                                  null ||
-                                                  widget.isEditingOrder ==
-                                                      false) ||
-                                                  (widget.isEditingOrder ==
-                                                      true &&
-                                                      (postAddToBillingModel.total !=
-                                                          widget.existingOrder?.data!.total &&
-                                                          widget.existingOrder?.data!.orderStatus ==
-                                                              "WAITLIST"))
+                                              (widget.isEditingOrder == null || widget.isEditingOrder == false) ||
+                                                  (widget.isEditingOrder == true &&
+                                                      (((postAddToBillingModel.total != widget.existingOrder?.data!.total) ||
+                                                          haveAddonsChanged()) &&
+                                                          widget.existingOrder?.data!.orderStatus == "WAITLIST"))
                                                   ? appPrimaryColor
                                                   : greyColor,
                                               minimumSize:
@@ -12914,16 +13320,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                               "Save Order",
                                               style: TextStyle(
                                                 color:
-                                                (widget.isEditingOrder ==
-                                                    null ||
-                                                    widget.isEditingOrder ==
-                                                        false) ||
-                                                    (widget.isEditingOrder ==
-                                                        true &&
-                                                        (postAddToBillingModel.total !=
-                                                            widget.existingOrder?.data!.total &&
-                                                            widget.existingOrder?.data!.orderStatus ==
-                                                                "WAITLIST"))
+                                                (widget.isEditingOrder == null || widget.isEditingOrder == false) ||
+                                                    (widget.isEditingOrder == true &&
+                                                        (((postAddToBillingModel.total != widget.existingOrder?.data!.total) ||
+                                                            haveAddonsChanged()) &&
+                                                            widget.existingOrder?.data!.orderStatus == "WAITLIST"))
                                                     ? whiteColor
                                                     : blackColor,
                                               ),
@@ -13113,8 +13514,8 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                 }
                                                 if ((widget.isEditingOrder ==
                                                     true &&
-                                                    (postAddToBillingModel.total !=
-                                                        widget.existingOrder?.data!.total &&
+                                                    (((postAddToBillingModel.total != widget.existingOrder?.data!.total) ||
+                                                        haveAddonsChanged()) &&
                                                         widget.existingOrder?.data!.orderStatus ==
                                                             "COMPLETED"))) {
                                                   if (balance <
@@ -13567,12 +13968,8 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                         }
                                         if ((widget.isEditingOrder ==
                                             true &&
-                                            (postAddToBillingModel
-                                                .total !=
-                                                widget
-                                                    .existingOrder
-                                                    ?.data!
-                                                    .total &&
+                                            (((postAddToBillingModel.total != widget.existingOrder?.data!.total) ||
+                                                haveAddonsChanged()) &&
                                                 widget
                                                     .existingOrder
                                                     ?.data!
@@ -13855,9 +14252,9 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                   ],
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       );
     }
 

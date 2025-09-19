@@ -1009,110 +1009,126 @@ class Addon {
     String? id,
     String? name,
     num? maxQuantity,
-    num? price,
     bool? isAvailable,
+    num? price,
+    bool? isDefault,
     bool? isFree,
+    String? category,
     List<String>? products,
+    String? locationId,
     String? createdBy,
     String? createdAt,
     String? updatedAt,
     num? v,
-    String? category,
   }) {
     _id = id;
     _name = name;
     _maxQuantity = maxQuantity;
-    _price = price;
     _isAvailable = isAvailable;
+    _price = price;
+    _isDefault = isDefault;
     _isFree = isFree;
+    _category = category;
     _products = products;
+    _locationId = locationId;
     _createdBy = createdBy;
     _createdAt = createdAt;
     _updatedAt = updatedAt;
     _v = v;
-    _category = category;
   }
 
   Addon.fromJson(dynamic json) {
     _id = json['_id'];
     _name = json['name'];
     _maxQuantity = json['maxQuantity'];
-    _price = json['price'];
     _isAvailable = json['isAvailable'];
+    _price = json['price'];
+    _isDefault = json['isDefault'];
     _isFree = json['isFree'];
+    _category = json['category'];
     _products = json['products'] != null ? json['products'].cast<String>() : [];
+    _locationId = json['locationId'];
     _createdBy = json['createdBy'];
     _createdAt = json['createdAt'];
     _updatedAt = json['updatedAt'];
     _v = json['__v'];
-    _category = json['category'];
   }
   String? _id;
   String? _name;
   num? _maxQuantity;
-  num? _price;
   bool? _isAvailable;
+  num? _price;
+  bool? _isDefault;
   bool? _isFree;
+  String? _category;
   List<String>? _products;
+  String? _locationId;
   String? _createdBy;
   String? _createdAt;
   String? _updatedAt;
   num? _v;
-  String? _category;
   Addon copyWith({
     String? id,
     String? name,
     num? maxQuantity,
-    num? price,
     bool? isAvailable,
+    num? price,
+    bool? isDefault,
     bool? isFree,
+    String? category,
     List<String>? products,
+    String? locationId,
     String? createdBy,
     String? createdAt,
     String? updatedAt,
     num? v,
-    String? category,
   }) => Addon(
     id: id ?? _id,
     name: name ?? _name,
     maxQuantity: maxQuantity ?? _maxQuantity,
-    price: price ?? _price,
     isAvailable: isAvailable ?? _isAvailable,
+    price: price ?? _price,
+    isDefault: isDefault ?? _isDefault,
     isFree: isFree ?? _isFree,
+    category: category ?? _category,
     products: products ?? _products,
+    locationId: locationId ?? _locationId,
     createdBy: createdBy ?? _createdBy,
     createdAt: createdAt ?? _createdAt,
     updatedAt: updatedAt ?? _updatedAt,
     v: v ?? _v,
-    category: category ?? _category,
   );
   String? get id => _id;
   String? get name => _name;
   num? get maxQuantity => _maxQuantity;
-  num? get price => _price;
   bool? get isAvailable => _isAvailable;
+  num? get price => _price;
+  bool? get isDefault => _isDefault;
   bool? get isFree => _isFree;
+  String? get category => _category;
   List<String>? get products => _products;
+  String? get locationId => _locationId;
   String? get createdBy => _createdBy;
   String? get createdAt => _createdAt;
   String? get updatedAt => _updatedAt;
   num? get v => _v;
-  String? get category => _category;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     map['_id'] = _id;
     map['name'] = _name;
     map['maxQuantity'] = _maxQuantity;
-    map['price'] = _price;
     map['isAvailable'] = _isAvailable;
+    map['price'] = _price;
+    map['isDefault'] = _isDefault;
     map['isFree'] = _isFree;
+    map['category'] = _category;
     map['products'] = _products;
+    map['locationId'] = _locationId;
     map['createdBy'] = _createdBy;
     map['createdAt'] = _createdAt;
     map['updatedAt'] = _updatedAt;
     map['__v'] = _v;
-    map['category'] = _category;
     return map;
   }
 }
