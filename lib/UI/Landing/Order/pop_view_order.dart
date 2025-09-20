@@ -387,7 +387,7 @@ class _ThermalReceiptDialogState extends State<ThermalReceiptDialog> {
             ),
             child: SingleChildScrollView(
               child: Container(
-                width: size.width * 0.95,
+                width: size.width > 650 ? size.width * 0.4 : size.width * 0.95,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: whiteColor,
@@ -495,8 +495,7 @@ class _ThermalReceiptDialogState extends State<ThermalReceiptDialog> {
                           ),
                         horizontalSpace(width: 10),
                         SizedBox(
-                          width: size.width * 0.09,
-                          // height: size.height * 0.04,
+                          height: size.height * 0.05,
                           child: OutlinedButton(
                             onPressed: () => Navigator.pop(context),
                             child: const Text(

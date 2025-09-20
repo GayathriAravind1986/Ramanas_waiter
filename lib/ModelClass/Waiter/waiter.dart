@@ -1,22 +1,15 @@
-import 'package:ramanas_waiter/Bloc/Response/errorResponse.dart';
-
 /// success : true
-/// data : [{"id":"68a836ea93cf0435f3240c8d","name":"Bala","isAvailable":true,"locationId":{"_id":"68a6b3e9631aa889d193bc4b","name":"Ambasamudram"},"locationName":"Ambasamudram","createdBy":"Ramanas","createdAt":"2025-08-22","updatedAt":"2025-08-22T09:22:50.050Z","statusText":"Available"},{"id":"68a836e493cf0435f3240c84","name":"Raja","isAvailable":true,"locationId":{"_id":"68a6b3e9631aa889d193bc4b","name":"Ambasamudram"},"locationName":"Ambasamudram","createdBy":"Ramanas","createdAt":"2025-08-22","updatedAt":"2025-08-22T09:22:44.894Z","statusText":"Available"}]
-/// totalCount : 2
+/// data : [{"id":"68cd02cf1a7332e81546a053","name":"Waiter 4","isAvailable":true,"locationId":{"_id":"68903a7bf7a56be2b7654f2f","name":"ALANGULAM"},"locationName":"ALANGULAM","createdBy":"admin","createdAt":"2025-09-19","updatedAt":"2025-09-19T07:21:46.965Z","statusText":"Available","user":{"id":"68cd02cf1a7332e81546a051","name":"Waiter 4","email":"waiter4@gmail.com","isWaiter":true}},{"id":"68cbd8c9ea8e64d0329befe1","name":"Waiter 3","isAvailable":false,"locationId":{"_id":"68903a7bf7a56be2b7654f2f","name":"ALANGULAM"},"locationName":"ALANGULAM","createdBy":"admin","createdAt":"2025-09-18","updatedAt":"2025-09-20T08:48:41.230Z","statusText":"Unavailable","user":{}},{"id":"68cbd8c3ea8e64d0329befd8","name":"Waiter 2","isAvailable":false,"locationId":{"_id":"68903a7bf7a56be2b7654f2f","name":"ALANGULAM"},"locationName":"ALANGULAM","createdBy":"admin","createdAt":"2025-09-18","updatedAt":"2025-09-20T08:48:43.738Z","statusText":"Unavailable","user":{}},{"id":"68b1416975e6228152b8cee0","name":"Waiter 1","isAvailable":false,"locationId":{"_id":"68903a7bf7a56be2b7654f2f","name":"ALANGULAM"},"locationName":"ALANGULAM","createdBy":"admin","createdAt":"2025-08-29","updatedAt":"2025-09-20T08:48:46.032Z","statusText":"Unavailable","user":{}}]
+/// totalCount : 4
 
-class GetWaiterModel {
-  GetWaiterModel({
-    bool? success,
-    List<Data>? data,
-    num? totalCount,
-    ErrorResponse? errorResponse,
-  }) {
+class Waiter {
+  Waiter({bool? success, List<Data>? data, num? totalCount}) {
     _success = success;
     _data = data;
     _totalCount = totalCount;
   }
 
-  GetWaiterModel.fromJson(dynamic json) {
+  Waiter.fromJson(dynamic json) {
     _success = json['success'];
     if (json['data'] != null) {
       _data = [];
@@ -25,22 +18,15 @@ class GetWaiterModel {
       });
     }
     _totalCount = json['totalCount'];
-    if (json['errors'] != null && json['errors'] is Map<String, dynamic>) {
-      errorResponse = ErrorResponse.fromJson(json['errors']);
-    } else {
-      errorResponse = null;
-    }
   }
   bool? _success;
   List<Data>? _data;
   num? _totalCount;
-  ErrorResponse? errorResponse;
-  GetWaiterModel copyWith({bool? success, List<Data>? data, num? totalCount}) =>
-      GetWaiterModel(
-        success: success ?? _success,
-        data: data ?? _data,
-        totalCount: totalCount ?? _totalCount,
-      );
+  Waiter copyWith({bool? success, List<Data>? data, num? totalCount}) => Waiter(
+    success: success ?? _success,
+    data: data ?? _data,
+    totalCount: totalCount ?? _totalCount,
+  );
   bool? get success => _success;
   List<Data>? get data => _data;
   num? get totalCount => _totalCount;
@@ -52,22 +38,20 @@ class GetWaiterModel {
       map['data'] = _data?.map((v) => v.toJson()).toList();
     }
     map['totalCount'] = _totalCount;
-    if (errorResponse != null) {
-      map['errors'] = errorResponse!.toJson();
-    }
     return map;
   }
 }
 
-/// id : "68a836ea93cf0435f3240c8d"
-/// name : "Bala"
+/// id : "68cd02cf1a7332e81546a053"
+/// name : "Waiter 4"
 /// isAvailable : true
-/// locationId : {"_id":"68a6b3e9631aa889d193bc4b","name":"Ambasamudram"}
-/// locationName : "Ambasamudram"
-/// createdBy : "Ramanas"
-/// createdAt : "2025-08-22"
-/// updatedAt : "2025-08-22T09:22:50.050Z"
+/// locationId : {"_id":"68903a7bf7a56be2b7654f2f","name":"ALANGULAM"}
+/// locationName : "ALANGULAM"
+/// createdBy : "admin"
+/// createdAt : "2025-09-19"
+/// updatedAt : "2025-09-19T07:21:46.965Z"
 /// statusText : "Available"
+/// user : {"id":"68cd02cf1a7332e81546a051","name":"Waiter 4","email":"waiter4@gmail.com","isWaiter":true}
 
 class Data {
   Data({
@@ -172,6 +156,11 @@ class Data {
   }
 }
 
+/// id : "68cd02cf1a7332e81546a051"
+/// name : "Waiter 4"
+/// email : "waiter4@gmail.com"
+/// isWaiter : true
+
 class User {
   User({String? id, String? name, String? email, bool? isWaiter}) {
     _id = id;
@@ -212,8 +201,8 @@ class User {
   }
 }
 
-/// _id : "68a6b3e9631aa889d193bc4b"
-/// name : "Ambasamudram"
+/// _id : "68903a7bf7a56be2b7654f2f"
+/// name : "ALANGULAM"
 
 class LocationId {
   LocationId({String? id, String? name}) {

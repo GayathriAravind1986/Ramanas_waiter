@@ -222,7 +222,7 @@ class ApiProvider {
     try {
       var dio = Dio();
       var response = await dio.request(
-        '${Constants.baseUrl}api/tables',
+        '${Constants.baseUrl}api/tables?isDefault=true',
         options: Options(
           method: 'GET',
           headers: {'Authorization': 'Bearer $token'},
@@ -262,7 +262,7 @@ class ApiProvider {
     try {
       var dio = Dio();
       var response = await dio.request(
-        '${Constants.baseUrl}api/waiter',
+        '${Constants.baseUrl}api/waiter?isAvailable=true',
         options: Options(
           method: 'GET',
           headers: {'Authorization': 'Bearer $token'},
