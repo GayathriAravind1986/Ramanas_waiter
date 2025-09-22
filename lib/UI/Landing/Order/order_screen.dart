@@ -419,18 +419,18 @@ class OrderPageViewState extends State<OrderPageView>
                           ),
                         ),
                       ),
-                      // Expanded(
-                      //   child: Padding(
-                      //     padding: const EdgeInsets.all(8.0),
-                      //     child: Text(
-                      //       'Select Waiter',
-                      //       style: MyTextStyle.f14(
-                      //         blackColor,
-                      //         weight: FontWeight.bold,
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Select Waiter',
+                            style: MyTextStyle.f14(
+                              blackColor,
+                              weight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
                       // Expanded(
                       //   child: Padding(
                       //     padding: const EdgeInsets.all(8.0),
@@ -522,82 +522,82 @@ class OrderPageViewState extends State<OrderPageView>
                         ),
                       ),
                       // Waiter Dropdown
-                      // Expanded(
-                      //   child: Container(
-                      //     margin: const EdgeInsets.all(8),
-                      //     child: DropdownButtonFormField<String>(
-                      //       value:
-                      //           (getWaiterModel.data?.any(
-                      //                 (item) =>
-                      //                     item.name == selectedValueWaiter,
-                      //               ) ??
-                      //               false)
-                      //           ? selectedValueWaiter
-                      //           : null,
-                      //       icon: const Icon(
-                      //         Icons.arrow_drop_down,
-                      //         color: appPrimaryColor,
-                      //       ),
-                      //       isExpanded: true,
-                      //       decoration: InputDecoration(
-                      //         border: OutlineInputBorder(
-                      //           borderRadius: BorderRadius.circular(8),
-                      //           borderSide: const BorderSide(
-                      //             color: appPrimaryColor,
-                      //           ),
-                      //         ),
-                      //         enabledBorder: OutlineInputBorder(
-                      //           borderSide: BorderSide(
-                      //             color: appGreyColor,
-                      //             width: 1.5,
-                      //           ),
-                      //           borderRadius: BorderRadius.circular(8),
-                      //         ),
-                      //         focusedBorder: OutlineInputBorder(
-                      //           borderSide: BorderSide(
-                      //             color: appPrimaryColor,
-                      //             width: 1.5,
-                      //           ),
-                      //           borderRadius: BorderRadius.circular(8),
-                      //         ),
-                      //       ),
-                      //       items: getWaiterModel.data?.map((item) {
-                      //         return DropdownMenuItem<String>(
-                      //           value: item.name,
-                      //           child: Text(
-                      //             "${item.name}",
-                      //             style: MyTextStyle.f14(
-                      //               blackColor,
-                      //               weight: FontWeight.normal,
-                      //             ),
-                      //           ),
-                      //         );
-                      //       }).toList(),
-                      //       onChanged: (String? newValue) {
-                      //         if (newValue != null) {
-                      //           setState(() {
-                      //             selectedValueWaiter = newValue;
-                      //             final selectedItem = getWaiterModel.data
-                      //                 ?.firstWhere(
-                      //                   (item) => item.name == newValue,
-                      //                 );
-                      //             waiterId = selectedItem?.id.toString();
-                      //             userId = selectedItem?.user?.id.toString();
-                      //             debugPrint("userId:$userId");
-                      //           });
-                      //           _loadOrdersForCurrentTab();
-                      //         }
-                      //       },
-                      //       hint: Text(
-                      //         '-- Select Waiter --',
-                      //         style: MyTextStyle.f14(
-                      //           blackColor,
-                      //           weight: FontWeight.normal,
-                      //         ),
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.all(8),
+                          child: DropdownButtonFormField<String>(
+                            value:
+                                (getWaiterModel.data?.any(
+                                      (item) =>
+                                          item.name == selectedValueWaiter,
+                                    ) ??
+                                    false)
+                                ? selectedValueWaiter
+                                : null,
+                            icon: const Icon(
+                              Icons.arrow_drop_down,
+                              color: appPrimaryColor,
+                            ),
+                            isExpanded: true,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(
+                                  color: appPrimaryColor,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: appGreyColor,
+                                  width: 1.5,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: appPrimaryColor,
+                                  width: 1.5,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            items: getWaiterModel.data?.map((item) {
+                              return DropdownMenuItem<String>(
+                                value: item.name,
+                                child: Text(
+                                  "${item.name}",
+                                  style: MyTextStyle.f14(
+                                    blackColor,
+                                    weight: FontWeight.normal,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  selectedValueWaiter = newValue;
+                                  final selectedItem = getWaiterModel.data
+                                      ?.firstWhere(
+                                        (item) => item.name == newValue,
+                                      );
+                                  waiterId = selectedItem?.id.toString();
+                                  userId = selectedItem?.user?.id.toString();
+                                  debugPrint("userId:$userId");
+                                });
+                                _loadOrdersForCurrentTab();
+                              }
+                            },
+                            hint: Text(
+                              '-- Select Waiter --',
+                              style: MyTextStyle.f14(
+                                blackColor,
+                                weight: FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                       // User Dropdown
                       // Expanded(
                       //   child: Container(
@@ -773,18 +773,18 @@ class OrderPageViewState extends State<OrderPageView>
                           ),
                         ),
                       ),
-                      // Expanded(
-                      //   child: Padding(
-                      //     padding: const EdgeInsets.all(8.0),
-                      //     child: Text(
-                      //       'Select Waiter',
-                      //       style: MyTextStyle.f14(
-                      //         blackColor,
-                      //         weight: FontWeight.bold,
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Select Waiter',
+                            style: MyTextStyle.f14(
+                              blackColor,
+                              weight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
                       // Expanded(
                       //   child: Padding(
                       //     padding: const EdgeInsets.all(8.0),
@@ -876,82 +876,82 @@ class OrderPageViewState extends State<OrderPageView>
                         ),
                       ),
                       // Waiter Dropdown
-                      // Expanded(
-                      //   child: Container(
-                      //     margin: const EdgeInsets.all(8),
-                      //     child: DropdownButtonFormField<String>(
-                      //       value:
-                      //           (getWaiterModel.data?.any(
-                      //                 (item) =>
-                      //                     item.name == selectedValueWaiter,
-                      //               ) ??
-                      //               false)
-                      //           ? selectedValueWaiter
-                      //           : null,
-                      //       icon: const Icon(
-                      //         Icons.arrow_drop_down,
-                      //         color: appPrimaryColor,
-                      //       ),
-                      //       isExpanded: true,
-                      //       decoration: InputDecoration(
-                      //         border: OutlineInputBorder(
-                      //           borderRadius: BorderRadius.circular(8),
-                      //           borderSide: const BorderSide(
-                      //             color: appPrimaryColor,
-                      //           ),
-                      //         ),
-                      //         enabledBorder: OutlineInputBorder(
-                      //           borderSide: BorderSide(
-                      //             color: appGreyColor,
-                      //             width: 1.5,
-                      //           ),
-                      //           borderRadius: BorderRadius.circular(8),
-                      //         ),
-                      //         focusedBorder: OutlineInputBorder(
-                      //           borderSide: BorderSide(
-                      //             color: appPrimaryColor,
-                      //             width: 1.5,
-                      //           ),
-                      //           borderRadius: BorderRadius.circular(8),
-                      //         ),
-                      //       ),
-                      //       items: getWaiterModel.data?.map((item) {
-                      //         return DropdownMenuItem<String>(
-                      //           value: item.name,
-                      //           child: Text(
-                      //             "${item.name}",
-                      //             style: MyTextStyle.f14(
-                      //               blackColor,
-                      //               weight: FontWeight.normal,
-                      //             ),
-                      //           ),
-                      //         );
-                      //       }).toList(),
-                      //       onChanged: (String? newValue) {
-                      //         if (newValue != null) {
-                      //           setState(() {
-                      //             selectedValueWaiter = newValue;
-                      //             final selectedItem = getWaiterModel.data
-                      //                 ?.firstWhere(
-                      //                   (item) => item.name == newValue,
-                      //                 );
-                      //             waiterId = selectedItem?.id.toString();
-                      //             debugPrint("waiterId:$waiterId");
-                      //           });
-                      //
-                      //           _loadOrdersForCurrentTab();
-                      //         }
-                      //       },
-                      //       hint: Text(
-                      //         '-- Select Waiter --',
-                      //         style: MyTextStyle.f14(
-                      //           blackColor,
-                      //           weight: FontWeight.normal,
-                      //         ),
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.all(8),
+                          child: DropdownButtonFormField<String>(
+                            value:
+                                (getWaiterModel.data?.any(
+                                      (item) =>
+                                          item.name == selectedValueWaiter,
+                                    ) ??
+                                    false)
+                                ? selectedValueWaiter
+                                : null,
+                            icon: const Icon(
+                              Icons.arrow_drop_down,
+                              color: appPrimaryColor,
+                            ),
+                            isExpanded: true,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(
+                                  color: appPrimaryColor,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: appGreyColor,
+                                  width: 1.5,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: appPrimaryColor,
+                                  width: 1.5,
+                                ),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            items: getWaiterModel.data?.map((item) {
+                              return DropdownMenuItem<String>(
+                                value: item.name,
+                                child: Text(
+                                  "${item.name}",
+                                  style: MyTextStyle.f14(
+                                    blackColor,
+                                    weight: FontWeight.normal,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  selectedValueWaiter = newValue;
+                                  final selectedItem = getWaiterModel.data
+                                      ?.firstWhere(
+                                        (item) => item.name == newValue,
+                                      );
+                                  waiterId = selectedItem?.id.toString();
+                                  debugPrint("waiterId:$waiterId");
+                                });
+
+                                _loadOrdersForCurrentTab();
+                              }
+                            },
+                            hint: Text(
+                              '-- Select Waiter --',
+                              style: MyTextStyle.f14(
+                                blackColor,
+                                weight: FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                       // User Dropdown
                       // Expanded(
                       //   child: Container(

@@ -10,7 +10,15 @@ class FoodProductItem extends FoodCategoryEvent {
   String catId;
   String searchKey;
   String searchCode;
-  FoodProductItem(this.catId, this.searchKey, this.searchCode);
+  String limit;
+  String offset;
+  FoodProductItem(
+    this.catId,
+    this.searchKey,
+    this.searchCode,
+    this.limit,
+    this.offset,
+  );
 }
 
 class AddToBilling extends FoodCategoryEvent {
@@ -51,7 +59,13 @@ class FoodCategoryBloc extends Bloc<FoodCategoryEvent, dynamic> {
     });
     on<FoodProductItem>((event, emit) async {
       await ApiProvider()
-          .getProductItemAPI(event.catId, event.searchKey, event.searchCode)
+          .getProductItemAPI(
+            event.catId,
+            event.searchKey,
+            event.searchCode,
+            event.limit,
+            event.offset,
+          )
           .then((value) {
             emit(value);
           })

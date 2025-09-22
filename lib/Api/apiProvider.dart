@@ -25,8 +25,8 @@ class ApiProvider {
   /// dio use ApiProvider
   ApiProvider() {
     final options = BaseOptions(
-      connectTimeout: const Duration(milliseconds: 150000),
-      receiveTimeout: const Duration(milliseconds: 100000),
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 30),
     );
     _dio = Dio(options);
   }
@@ -124,13 +124,18 @@ class ApiProvider {
     String? catId,
     String? searchKey,
     String? searchCode,
+    String? limit,
+    String? offset,
   ) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     var token = sharedPreferences.getString("token");
+    debugPrint(
+      "urlproduct:${"${Constants.baseUrl}api/products/pos/category-products?categoryId=$catId&search=$searchKey&searchcode=$searchCode&limit=$limit&offset=$offset"}",
+    );
     try {
       var dio = Dio();
       var response = await dio.request(
-        '${Constants.baseUrl}api/products/pos/category-products?filter=false&categoryId=$catId&search=$searchKey&searchcode=$searchCode',
+        '${Constants.baseUrl}api/products/pos/category-products?categoryId=$catId&search=$searchKey&searchcode=$searchCode&limit=$limit&offset=$offset',
         options: Options(
           method: 'GET',
           headers: {'Authorization': 'Bearer $token'},

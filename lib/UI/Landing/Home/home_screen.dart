@@ -109,6 +109,13 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
   PostGenerateOrderModel postGenerateOrderModel = PostGenerateOrderModel();
   UpdateGenerateOrderModel updateGenerateOrderModel = UpdateGenerateOrderModel();
 
+  final ScrollController _scrollController = ScrollController();
+  List<Rows> allProducts = [];
+  bool isLoadingMore = false;
+  bool hasMoreData = true;
+  int currentOffset = 0;
+  final int limit = 6;
+
   TextEditingController searchController = TextEditingController();
   TextEditingController searchCodeController = TextEditingController();
   Map<String, TextEditingController> quantityControllers = {};
@@ -892,13 +899,8 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
       }
     });
     context.read<FoodCategoryBloc>().add(FoodCategory());
-    context.read<FoodCategoryBloc>().add(
-      FoodProductItem(
-        selectedCatId.toString(),
-        searchController.text,
-        searchCodeController.text,
-      ),
-    );
+    _scrollController.addListener(_scrollListener);
+    _loadInitialProducts();
     context.read<FoodCategoryBloc>().add(TableDine());
     context.read<FoodCategoryBloc>().add(WaiterDine());
     context.read<FoodCategoryBloc>().add(StockDetails());
@@ -924,8 +926,60 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
     }
     quantityControllers.clear();
     _tabController.dispose();
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
     super.dispose();
   }
+  void _scrollListener() {
+    debugPrint("Current pixels: ${_scrollController.position.pixels}");
+    debugPrint("Max extent: ${_scrollController.position.maxScrollExtent}");
+    debugPrint("80% threshold: ${_scrollController.position.maxScrollExtent * 0.8}");
+    debugPrint("Is loading more: $isLoadingMore");
+    debugPrint("Has more data: $hasMoreData");
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.8) {
+      if (!isLoadingMore && hasMoreData) {
+        debugPrint("Triggering load more products");
+        _loadMoreProducts();
+      }
+    }
+  }
+
+  void _loadInitialProducts() {
+    setState(() {
+      currentOffset = 0;
+      allProducts.clear();
+      hasMoreData = true;
+    });
+
+    context.read<FoodCategoryBloc>().add(
+      FoodProductItem(
+        selectedCatId.toString(),
+        searchController.text,
+        searchCodeController.text,
+        limit.toString(),
+        "0", // Reset offset to 0
+      ),
+    );
+  }
+
+  void _loadMoreProducts() {
+    debugPrint("loadmoreproduct");
+    setState(() {
+      isLoadingMore = true;
+    });
+
+    context.read<FoodCategoryBloc>().add(
+      FoodProductItem(
+        selectedCatId.toString(),
+        searchController.text,
+        searchCodeController.text,
+        limit.toString(),
+        currentOffset.toString(),
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -1079,25 +1133,16 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
           ) {
         final isEditing = widget.isEditingOrder == true;
         final status = widget.existingOrder?.data?.orderStatus;
-
         if (!isEditing) {
-          // normal flow: disable only when qty <= 0
           return currentQty <= 0;
         }
-
-        // when editing an existing order
         if (status == "COMPLETED" || status == "WAITLIST") {
           return true; // lock all removes
         }
-
         final originalQty = getOriginalAddonQty(productId, addonId);
-
         if (originalQty == 0) {
-          // addon was not in the saved order → treat normally
           return currentQty <= 0;
         }
-
-        // addon was already in saved order → don’t allow going below original
         return currentQty <= originalQty;
       }
 
@@ -1132,7 +1177,16 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
         return false;
       }
 
-
+      Widget buildLoadingIndicator() {
+        return Padding(
+          padding: EdgeInsets.all(16),
+          child: Center(
+            child: isLoadingMore
+                ? CircularProgressIndicator(color: appPrimaryColor)
+                : SizedBox.shrink(),
+          ),
+        );
+      }
 
       @override
       Widget price(String label, String value, {bool isBold = false}) {
@@ -1172,13 +1226,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
               searchController.clear();
               searchCodeController.clear();
               context.read<FoodCategoryBloc>().add(FoodCategory());
-              context.read<FoodCategoryBloc>().add(
-                FoodProductItem(
-                  selectedCatId.toString(),
-                  searchController.text,
-                  searchCodeController.text,
-                ),
-              );
+              _loadInitialProducts();
               context.read<FoodCategoryBloc>().add(TableDine());
               context.read<FoodCategoryBloc>().add(WaiterDine());
               context.read<FoodCategoryBloc>().add(StockDetails());
@@ -1222,7 +1270,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                         controller: _tabController,
                         children: [
                           /// category screen
-                          categoryLoad
+                          categoryLoad || orderLoad || completeLoad
                               ? Container(
                                   padding: EdgeInsets.only(
                                     top:
@@ -1301,20 +1349,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                     .length,
                                                           );
                                                     setState(() {
-                                                      context
-                                                          .read<
-                                                            FoodCategoryBloc
-                                                          >()
-                                                          .add(
-                                                            FoodProductItem(
-                                                              selectedCatId
-                                                                  .toString(),
-                                                              searchController
-                                                                  .text,
-                                                              searchCodeController
-                                                                  .text,
-                                                            ),
-                                                          );
+                                                      _loadInitialProducts();
                                                     });
                                                   },
                                                 ),
@@ -1377,20 +1412,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                     .length,
                                                           );
                                                     setState(() {
-                                                      context
-                                                          .read<
-                                                            FoodCategoryBloc
-                                                          >()
-                                                          .add(
-                                                            FoodProductItem(
-                                                              selectedCatId
-                                                                  .toString(),
-                                                              searchController
-                                                                  .text,
-                                                              searchCodeController
-                                                                  .text,
-                                                            ),
-                                                          );
+                                                      _loadInitialProducts();
                                                     });
                                                   },
                                                 ),
@@ -1421,13 +1443,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                 context
                                                     .read<FoodCategoryBloc>()
                                                     .add(FoodCategory());
-                                                context
-                                                    .read<FoodCategoryBloc>()
-                                                    .add(FoodProductItem(
-                                                    selectedCatId.toString(),
-                                                    searchController.text,
-                                                    searchCodeController
-                                                        .text));
+                                                _loadInitialProducts();
                                               },
                                               icon: const Icon(Icons.refresh),
                                             ),
@@ -1469,27 +1485,9 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                               category.id;
                                                           if (selectedCategory ==
                                                               'All') {
-                                                            context.read<FoodCategoryBloc>().add(
-                                                              FoodProductItem(
-                                                                selectedCatId
-                                                                    .toString(),
-                                                                searchController
-                                                                    .text,
-                                                                searchCodeController
-                                                                    .text,
-                                                              ),
-                                                            );
+                                                            _loadInitialProducts();
                                                           } else {
-                                                            context.read<FoodCategoryBloc>().add(
-                                                              FoodProductItem(
-                                                                selectedCatId
-                                                                    .toString(),
-                                                                searchController
-                                                                    .text,
-                                                                searchCodeController
-                                                                    .text,
-                                                              ),
-                                                            );
+                                                            _loadInitialProducts();
                                                           }
                                                         });
                                                       },
@@ -1503,15 +1501,10 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                           height: size.height * 0.35,
                                           width: size.width * 1.8,
                                           child:
-                                              getProductByCatIdModel.rows ==
-                                                      null ||
-                                                  getProductByCatIdModel.rows ==
-                                                      [] ||
-                                                  getProductByCatIdModel
-                                                      .rows!
-                                                      .isEmpty
+                                          allProducts.isEmpty
                                               ? Container()
                                               : GridView.builder(
+                                            controller: _scrollController,
                                                   padding: EdgeInsets.only(
                                                     top: 10,
                                                   ),
@@ -1568,11 +1561,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                         ? 0.72
                                                         : 0.95,
                                                   ),
-                                                  itemCount:
-                                                      getProductByCatIdModel
-                                                          .rows!
-                                                          .length,
+                                                  itemCount:allProducts.length + (hasMoreData ? 1 : 0),
                                                   itemBuilder: (_, index) {
+                                                    if (index == allProducts.length) {
+                                                      return buildLoadingIndicator();
+                                                    }
                                                     int getCurrentQuantity(
                                                       String productId,
                                                     ) {
@@ -1629,9 +1622,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                       }
                                                     }
 
-                                                    final p =
-                                                        getProductByCatIdModel
-                                                            .rows![index];
+                                                    final p = allProducts[index];
                                                     int currentQuantity =
                                                         getCurrentQuantity(
                                                           p.id.toString(),
@@ -6670,7 +6661,9 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                         setState(() {
                                                                           orderLoad = true;
                                                                         });
-                                                                        if (widget.isEditingOrder == true && ((postAddToBillingModel.total != widget.existingOrder?.data!.total && haveAddonsChanged()) && widget.existingOrder?.data!.orderStatus == "WAITLIST")) {
+                                                                        if (widget.isEditingOrder == true &&
+                                                                            ((postAddToBillingModel.total != widget.existingOrder?.data!.total || haveAddonsChanged())
+                                                                                && widget.existingOrder?.data!.orderStatus == "WAITLIST")) {
                                                                           if (((selectedValue == null || selectedValue == 'N/A') && selectedOrderType == OrderType.line) || (selectedValue == null || selectedValue == 'N/A') && selectedOrderType == OrderType.ac) {
                                                                             showToast("Table number is required for LINE/AC orders", context, color: false);
                                                                             setState(() {
@@ -7834,13 +7827,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
               searchController.clear();
               searchCodeController.clear();
               context.read<FoodCategoryBloc>().add(FoodCategory());
-              context.read<FoodCategoryBloc>().add(
-                FoodProductItem(
-                  selectedCatId.toString(),
-                  searchController.text,
-                  searchCodeController.text,
-                ),
-              );
+              _loadInitialProducts();
               context.read<FoodCategoryBloc>().add(TableDine());
               context.read<FoodCategoryBloc>().add(WaiterDine());
               context.read<FoodCategoryBloc>().add(StockDetails());
@@ -7884,7 +7871,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                         controller: _tabController,
                         children: [
                           /// category screen
-                          categoryLoad
+                          categoryLoad || orderLoad || completeLoad
                               ? Container(
                             padding: EdgeInsets.only(
                               top:
@@ -7963,20 +7950,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                       .length,
                                                 );
                                               setState(() {
-                                                context
-                                                    .read<
-                                                    FoodCategoryBloc
-                                                >()
-                                                    .add(
-                                                  FoodProductItem(
-                                                    selectedCatId
-                                                        .toString(),
-                                                    searchController
-                                                        .text,
-                                                    searchCodeController
-                                                        .text,
-                                                  ),
-                                                );
+                                                _loadInitialProducts();
                                               });
                                             },
                                           ),
@@ -8039,20 +8013,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                       .length,
                                                 );
                                               setState(() {
-                                                context
-                                                    .read<
-                                                    FoodCategoryBloc
-                                                >()
-                                                    .add(
-                                                  FoodProductItem(
-                                                    selectedCatId
-                                                        .toString(),
-                                                    searchController
-                                                        .text,
-                                                    searchCodeController
-                                                        .text,
-                                                  ),
-                                                );
+                                                _loadInitialProducts();
                                               });
                                             },
                                           ),
@@ -8080,16 +8041,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                             searchController.clear();
                                             searchCodeController.clear();
                                           });
-                                          context
-                                              .read<FoodCategoryBloc>()
-                                              .add(FoodCategory());
-                                          context
-                                              .read<FoodCategoryBloc>()
-                                              .add(FoodProductItem(
-                                              selectedCatId.toString(),
-                                              searchController.text,
-                                              searchCodeController
-                                                  .text));
+                                          _loadInitialProducts();
                                         },
                                         icon: const Icon(Icons.refresh),
                                       ),
@@ -8131,27 +8083,9 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                   category.id;
                                               if (selectedCategory ==
                                                   'All') {
-                                                context.read<FoodCategoryBloc>().add(
-                                                  FoodProductItem(
-                                                    selectedCatId
-                                                        .toString(),
-                                                    searchController
-                                                        .text,
-                                                    searchCodeController
-                                                        .text,
-                                                  ),
-                                                );
+                                                _loadInitialProducts();
                                               } else {
-                                                context.read<FoodCategoryBloc>().add(
-                                                  FoodProductItem(
-                                                    selectedCatId
-                                                        .toString(),
-                                                    searchController
-                                                        .text,
-                                                    searchCodeController
-                                                        .text,
-                                                  ),
-                                                );
+                                                _loadInitialProducts();
                                               }
                                             });
                                           },
@@ -8165,15 +8099,10 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                     height: size.height * 0.35,
                                     width: size.width * 1.8,
                                     child:
-                                    getProductByCatIdModel.rows ==
-                                        null ||
-                                        getProductByCatIdModel.rows ==
-                                            [] ||
-                                        getProductByCatIdModel
-                                            .rows!
-                                            .isEmpty
+                                    allProducts.isEmpty
                                         ? Container()
                                         : GridView.builder(
+                                      controller: _scrollController,
                                       padding: EdgeInsets.only(
                                         top: 10,
                                       ),
@@ -8232,10 +8161,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                             800 ?0.65:0.5,
                                       ),
                                       itemCount:
-                                      getProductByCatIdModel
-                                          .rows!
-                                          .length,
+                                      allProducts.length + (hasMoreData ? 1 : 0),
                                       itemBuilder: (_, index) {
+                                        if (index == allProducts.length) {
+                                          return buildLoadingIndicator();
+                                        }
                                         int getCurrentQuantity(
                                             String productId,
                                             ) {
@@ -8292,8 +8222,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                         }
 
                                         final p =
-                                        getProductByCatIdModel
-                                            .rows![index];
+                                        allProducts[index];
                                         int currentQuantity =
                                         getCurrentQuantity(
                                           p.id.toString(),
@@ -14620,7 +14549,22 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
             }
             if (getProductByCatIdModel.success == true) {
               setState(() {
+                if (currentOffset == 0) {
+                  allProducts = getProductByCatIdModel.rows ?? [];
+                  getProductByCatIdModel = current;
+                } else {
+                  if (getProductByCatIdModel.rows != null) {
+                    allProducts.addAll(getProductByCatIdModel.rows!);
+                    getProductByCatIdModel = getProductByCatIdModel.copyWith(
+                      rows: allProducts.cast<Rows>(),
+                      count: allProducts.length,
+                    );
+                  }
+                }
+                currentOffset += limit;
+                hasMoreData = (current.rows?.length ?? 0) == limit;
                 categoryLoad = false;
+                isLoadingMore = false;
               });
             }
             return true;
@@ -14741,10 +14685,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
 
             context.read<FoodCategoryBloc>().add(AddToBilling(
                 List.from(billingItems), isDiscountApplied, selectedOrderType));
-            context.read<FoodCategoryBloc>().add(FoodProductItem(
-                selectedCatId.toString(),
-                searchController.text,
-                searchCodeController.text));
+            // context.read<FoodCategoryBloc>().add(FoodProductItem(
+            //     selectedCatId.toString(),
+            //     searchController.text,
+            //     searchCodeController.text));
+            _loadInitialProducts();
             if (postGenerateOrderModel.message != null && postGenerateOrderModel.invoice!.kot!.isNotEmpty) {
               printGenerateOrderReceipt();
             } else {
@@ -14804,10 +14749,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
             });
             context.read<FoodCategoryBloc>().add(AddToBilling(
                 List.from(billingItems), isDiscountApplied, selectedOrderType));
-            context.read<FoodCategoryBloc>().add(FoodProductItem(
-                selectedCatId.toString(),
-                searchController.text,
-                searchCodeController.text));
+            // context.read<FoodCategoryBloc>().add(FoodProductItem(
+            //     selectedCatId.toString(),
+            //     searchController.text,
+            //     searchCodeController.text));
+            _loadInitialProducts();
             if (updateGenerateOrderModel.message != null && updateGenerateOrderModel.invoice!.kot!.isNotEmpty) {
               printUpdateOrderReceipt();
               // if (shouldPrintReceipt == true &&
