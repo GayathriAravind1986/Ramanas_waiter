@@ -422,13 +422,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
         'qty': e.quantity,
       })
           .toList();
-      List<Map<String, dynamic>> finalTax =
-      postGenerateOrderModel.order!.finalTaxes!
-          .map((e) => {
-        'name': e.name,
-        'amt': e.amount,
-      })
-          .toList();
 
       String businessName = postGenerateOrderModel.invoice!.businessName ?? '';
       String address = postGenerateOrderModel.invoice!.address ?? '';
@@ -449,9 +442,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
           ? postGenerateOrderModel.invoice!.waiterName.toString()
           : 'N/A';
       String date = formatInvoiceDate(postGenerateOrderModel.invoice?.date);
-      // ipController.text =
-      //     postGenerateOrderModel.invoice!.thermalIp.toString() ?? "";
-     // debugPrint("ip:${ipController.text}");
       Navigator.of(context).pop();
 
       await showDialog(
@@ -470,29 +460,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
               ),
               child: Column(
                 children: [
-                  // RepaintBoundary(
-                  //   key: normalReceiptKey,
-                  //   child: getThermalReceiptWidget(
-                  //     businessName: businessName,
-                  //     address: address,
-                  //     gst: gst,
-                  //     items: items,
-                  //     finalTax: finalTax,
-                  //     tax: taxPercent,
-                  //     paidBy: paymentMethod,
-                  //     tamilTagline: '',
-                  //     phone: phone,
-                  //     subtotal: subTotal,
-                  //     total: total,
-                  //     orderNumber: orderNumber,
-                  //     tableName: tableName,
-                  //     waiterName: waiterName,
-                  //     orderType: orderType,
-                  //     date: date,
-                  //     status: orderStatus,
-                  //   ),
-                  // ),
-                  // const SizedBox(height: 20),
                   // KOT Receipt (for kitchen)
                   if (postGenerateOrderModel.invoice!.kot!.isNotEmpty)
                     RepaintBoundary(
@@ -522,22 +489,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // if (postGenerateOrderModel.invoice!.kot!.isNotEmpty)
-                      //   ElevatedButton.icon(
-                      //     onPressed: () {
-                      //       _startKOTPrintingThermalOnly(
-                      //         context,
-                      //         ipController.text.trim(),
-                      //       );
-                      //     },
-                      //     icon: const Icon(Icons.print),
-                      //     label: const Text("KOT(LAN)"),
-                      //     style: ElevatedButton.styleFrom(
-                      //       backgroundColor: greenColor,
-                      //       foregroundColor: whiteColor,
-                      //     ),
-                      //   ),
-                      // horizontalSpace(width: 10),
                       if (postGenerateOrderModel.invoice!.kot!.isNotEmpty)
                         ElevatedButton.icon(
                           onPressed: () {
@@ -586,26 +537,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
           child: CircularProgressIndicator(),
         ),
       );
-      List<Map<String, dynamic>> items = updateGenerateOrderModel.order!.items!
-          .map((e) => {
-        'name': e.name,
-        'qty': e.quantity,
-        'price': (e.unitPrice ?? 0).toDouble(),
-        'total': ((e.quantity ?? 0) * (e.unitPrice ?? 0)).toDouble(),
-      })
-          .toList();
       List<Map<String, dynamic>> kotItems =
       updateGenerateOrderModel.invoice!.kot!
           .map((e) => {
         'name': e.name,
         'qty': e.quantity,
-      })
-          .toList();
-      List<Map<String, dynamic>> finalTax =
-      updateGenerateOrderModel.invoice!.finalTaxes!
-          .map((e) => {
-        'name': e.name,
-        'amt': double.parse(e.amount.toString()),
       })
           .toList();
       String businessName =
@@ -630,9 +566,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
           ? updateGenerateOrderModel.invoice!.waiterName.toString()
           : 'N/A';
       String date = formatInvoiceDate(updateGenerateOrderModel.invoice?.date);
-      // ipController.text =
-      //     updateGenerateOrderModel.invoice!.thermalIp.toString() ?? "";
-      // debugPrint("ip:${ipController.text}");
       Navigator.of(context).pop();
       await showDialog(
         context: context,
@@ -650,29 +583,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
               ),
               child: Column(
                 children: [
-                  // RepaintBoundary(
-                  //   key: normalReceiptKey,
-                  //   child: getThermalReceiptWidget(
-                  //     businessName: businessName,
-                  //     address: address,
-                  //     gst: gst,
-                  //     items: items,
-                  //     finalTax: finalTax,
-                  //     tax: taxPercent,
-                  //     paidBy: paymentMethod,
-                  //     tamilTagline: '',
-                  //     phone: phone,
-                  //     subtotal: subTotal,
-                  //     total: total,
-                  //     orderNumber: orderNumber,
-                  //     tableName: tableName,
-                  //     waiterName: waiterName,
-                  //     orderType: orderType,
-                  //     date: date,
-                  //     status: orderStatus,
-                  //   ),
-                  // ),
-                  // const SizedBox(height: 20),
                   if (updateGenerateOrderModel.invoice!.kot!.isNotEmpty)
                     RepaintBoundary(
                       key: kotReceiptKey,
@@ -699,22 +609,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // if (updateGenerateOrderModel.invoice!.kot!.isNotEmpty)
-                      //   ElevatedButton.icon(
-                      //     onPressed: () {
-                      //       _startKOTPrintingThermalOnly(
-                      //         context,
-                      //         ipController.text.trim(),
-                      //       );
-                      //     },
-                      //     icon: const Icon(Icons.print),
-                      //     label: const Text("KOT(LAN)"),
-                      //     style: ElevatedButton.styleFrom(
-                      //       backgroundColor: greenColor,
-                      //       foregroundColor: whiteColor,
-                      //     ),
-                      //   ),
-                      // horizontalSpace(width: 10),
                       if (updateGenerateOrderModel.invoice!.kot!.isNotEmpty)
                         ElevatedButton.icon(
                           onPressed: () {
@@ -931,15 +825,9 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
     super.dispose();
   }
   void _scrollListener() {
-    debugPrint("Current pixels: ${_scrollController.position.pixels}");
-    debugPrint("Max extent: ${_scrollController.position.maxScrollExtent}");
-    debugPrint("80% threshold: ${_scrollController.position.maxScrollExtent * 0.8}");
-    debugPrint("Is loading more: $isLoadingMore");
-    debugPrint("Has more data: $hasMoreData");
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent * 0.8) {
       if (!isLoadingMore && hasMoreData) {
-        debugPrint("Triggering load more products");
         _loadMoreProducts();
       }
     }
@@ -964,7 +852,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
   }
 
   void _loadMoreProducts() {
-    debugPrint("loadmoreproduct");
     setState(() {
       isLoadingMore = true;
     });
@@ -3660,7 +3547,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                                     ? null
                                                                                                     : () {
                                                                                                   setState(() {
-                                                                                                    e.quantity = (e.quantity ?? 0) - 1;
+                                                                                                    e.quantity = (e.quantity) - 1;
                                                                                                     if (e.quantity == 0) {
                                                                                                       e.isSelected = false;
                                                                                                     }
@@ -10256,7 +10143,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                                       ? null
                                                                                                       : () {
                                                                                                     setState(() {
-                                                                                                      e.quantity = (e.quantity ?? 0) - 1;
+                                                                                                      e.quantity = (e.quantity) - 1;
                                                                                                       if (e.quantity == 0) {
                                                                                                         e.isSelected = false;
                                                                                                       }

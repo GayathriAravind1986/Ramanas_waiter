@@ -129,9 +129,6 @@ class ApiProvider {
   ) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     var token = sharedPreferences.getString("token");
-    debugPrint(
-      "urlproduct:${"${Constants.baseUrl}api/products/pos/category-products?categoryId=$catId&search=$searchKey&searchcode=$searchCode&limit=$limit&offset=$offset"}",
-    );
     try {
       var dio = Dio();
       var response = await dio.request(
