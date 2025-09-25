@@ -5,6 +5,7 @@ import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_esc_pos_network/flutter_esc_pos_network.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
@@ -114,8 +115,9 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
   bool isLoadingMore = false;
   bool hasMoreData = true;
   int currentOffset = 0;
-  final int limit = 6;
+  final int limit = 10;
 
+  final TextEditingController ipController = TextEditingController();
   TextEditingController searchController = TextEditingController();
   TextEditingController searchCodeController = TextEditingController();
   Map<String, TextEditingController> quantityControllers = {};
@@ -399,6 +401,94 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
       );
     }
   }
+
+  /// LAN KOT Print
+  Future<void> _startKOTPrintingThermalOnly(
+      BuildContext context, String printerIp) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(color: appPrimaryColor),
+              SizedBox(height: 16),
+              Text("Preparing KOT for thermal printer...",
+                  style: TextStyle(color: whiteColor)),
+            ],
+          ),
+        ),
+      );
+
+      await Future.delayed(const Duration(milliseconds: 300));
+      await WidgetsBinding.instance.endOfFrame;
+
+      Uint8List? imageBytes = await captureMonochromeKOTReceipt(kotReceiptKey);
+
+      if (imageBytes != null) {
+        final printer = PrinterNetworkManager(printerIp);
+        final result = await printer.connect();
+
+        if (result == PosPrintResult.success) {
+          final profile = await CapabilityProfile.load();
+          final generator = Generator(PaperSize.mm58, profile);
+
+          final decodedImage = img.decodeImage(imageBytes);
+          if (decodedImage != null) {
+            final resizedImage = img.copyResize(
+              decodedImage,
+              width: 384, // 58mm = ~384 dots at 203 DPI
+              maintainAspect: true,
+            );
+            List<int> bytes = [];
+            bytes += generator.reset();
+            bytes += generator.imageRaster(
+              resizedImage,
+              align: PosAlign.center,
+              highDensityHorizontal: true, // Better quality
+              highDensityVertical: true,
+            );
+            bytes += generator.feed(2);
+            bytes += generator.cut();
+            await printer.printTicket(bytes);
+          }
+
+          await printer.disconnect();
+
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("KOT printed to thermal printer only!"),
+              backgroundColor: greenColor,
+            ),
+          );
+        } else {
+          // ❌ Failed to connect
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Failed to connect to printer ($result)"),
+              backgroundColor: redColor,
+            ),
+          );
+        }
+      } else {
+        Navigator.of(context).pop();
+        throw Exception("Failed to capture KOT receipt image");
+      }
+    } catch (e) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("KOT Print failed: $e"),
+          backgroundColor: redColor,
+        ),
+      );
+    }
+  }
+
 /// generate and update order print
   Future<void> printGenerateOrderReceipt() async {
     try {
@@ -442,6 +532,9 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
           ? postGenerateOrderModel.invoice!.waiterName.toString()
           : 'N/A';
       String date = formatInvoiceDate(postGenerateOrderModel.invoice?.date);
+      ipController.text =
+          postGenerateOrderModel.invoice!.thermalIp.toString() ?? "";
+      debugPrint("ip:${ipController.text}");
       Navigator.of(context).pop();
 
       await showDialog(
@@ -450,73 +543,108 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
           backgroundColor: Colors.transparent,
           insetPadding:
           const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-          child: SingleChildScrollView(
-            child: Container(
-              width: MediaQuery.of(context).size.width>=650?MediaQuery.of(context).size.width * 0.4:MediaQuery.of(context).size.width * 0.95,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: whiteColor,
-                borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            children: [
+              Padding(
+                padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.2),
+                child: SingleChildScrollView(
+                  child: Container(
+                    width: MediaQuery.of(context).size.width>=650?MediaQuery.of(context).size.width * 0.4:MediaQuery.of(context).size.width * 0.95,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: whiteColor,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      children: [
+                        // KOT Receipt (for kitchen)
+                        if (postGenerateOrderModel.invoice!.kot!.isNotEmpty)
+                          RepaintBoundary(
+                            key: kotReceiptKey,
+                            child: getThermalReceiptKOTWidget(
+                              businessName: businessName,
+                              address: address,
+                              gst: gst,
+                              items: kotItems,
+                              paidBy: paymentMethod,
+                              tamilTagline: '',
+                              phone: phone,
+                              subtotal: subTotal,
+                              tax: taxPercent,
+                              total: total,
+                              orderNumber: orderNumber,
+                              tableName: tableName,
+                              waiterName: waiterName,
+                              orderType: orderType,
+                              date: date,
+                              status: orderStatus,
+                            ),
+                          ),
+
+                        const SizedBox(height: 20),
+
+
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              child: Column(
+        Positioned(
+          bottom: 16,
+          left: 16,
+          right: 16,
+          child:  Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // KOT Receipt (for kitchen)
                   if (postGenerateOrderModel.invoice!.kot!.isNotEmpty)
-                    RepaintBoundary(
-                      key: kotReceiptKey,
-                      child: getThermalReceiptKOTWidget(
-                        businessName: businessName,
-                        address: address,
-                        gst: gst,
-                        items: kotItems,
-                        paidBy: paymentMethod,
-                        tamilTagline: '',
-                        phone: phone,
-                        subtotal: subTotal,
-                        tax: taxPercent,
-                        total: total,
-                        orderNumber: orderNumber,
-                        tableName: tableName,
-                        waiterName: waiterName,
-                        orderType: orderType,
-                        date: date,
-                        status: orderStatus,
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _startKOTPrintingThermalOnly(
+                          context,
+                          ipController.text.trim(),
+                        );
+                      },
+                      icon: const Icon(Icons.print),
+                      label: const Text("KOT(LAN)"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: greenColor,
+                        foregroundColor: whiteColor,
                       ),
                     ),
-
-                  const SizedBox(height: 20),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (postGenerateOrderModel.invoice!.kot!.isNotEmpty)
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            _selectBluetoothPrinter(context);
-                          },
-                          icon: const Icon(Icons.bluetooth),
-                          label: const Text("KOT(BT)"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: greenColor,
-                            foregroundColor: whiteColor,
-                          ),
-                        ),
-                      horizontalSpace(width: 10),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.05,
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text(
-                            "CLOSE",
-                            style: TextStyle(color: appPrimaryColor),
-                          ),
-                        ),
+                  horizontalSpace(width: 10),
+                  if (postGenerateOrderModel.invoice!.kot!.isNotEmpty)
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _selectBluetoothPrinter(context);
+                      },
+                      icon: const Icon(Icons.bluetooth),
+                      label: const Text("KOT(BT)"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: greenColor,
+                        foregroundColor: whiteColor,
                       ),
-                    ],
-                  ),
+                    ),
+                  horizontalSpace(width: 10),
+
                 ],
               ),
-            ),
+              verticalSpace(height:10),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                label: const Text("CLOSE"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: appPrimaryColor,
+                  foregroundColor: whiteColor,
+                ),
+              ),
+            ],
+          )
+        )
+          ],
           ),
         ),
       );
@@ -566,6 +694,9 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
           ? updateGenerateOrderModel.invoice!.waiterName.toString()
           : 'N/A';
       String date = formatInvoiceDate(updateGenerateOrderModel.invoice?.date);
+      ipController.text =
+          updateGenerateOrderModel.invoice!.thermalIp.toString() ?? "";
+      debugPrint("ip:${ipController.text}");
       Navigator.of(context).pop();
       await showDialog(
         context: context,
@@ -573,70 +704,104 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
           backgroundColor: Colors.transparent,
           insetPadding:
           const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-          child: SingleChildScrollView(
-            child: Container(
-              width:  MediaQuery.of(context).size.width>650?MediaQuery.of(context).size.width * 0.4:MediaQuery.of(context).size.width * 0.95,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: whiteColor,
-                borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            children: [
+              Padding(
+                padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.2),
+                child: SingleChildScrollView(
+                  child: Container(
+                    width:  MediaQuery.of(context).size.width>650?MediaQuery.of(context).size.width * 0.4:MediaQuery.of(context).size.width * 0.95,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: whiteColor,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      children: [
+                        if (updateGenerateOrderModel.invoice!.kot!.isNotEmpty)
+                          RepaintBoundary(
+                            key: kotReceiptKey,
+                            child: getThermalReceiptKOTWidget(
+                              businessName: businessName,
+                              address: address,
+                              gst: gst,
+                              items: kotItems,
+                              paidBy: paymentMethod,
+                              tamilTagline: '',
+                              phone: phone,
+                              subtotal: subTotal,
+                              tax: taxPercent,
+                              total: total,
+                              orderNumber: orderNumber,
+                              tableName: tableName,
+                              waiterName: waiterName,
+                              orderType: orderType,
+                              date: date,
+                              status: orderStatus,
+                            ),
+                          ),
+                        const SizedBox(height: 20),
+
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              child: Column(
+        Positioned(
+          bottom: 16,
+          left: 16,
+          right: 16,
+          child:Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (updateGenerateOrderModel.invoice!.kot!.isNotEmpty)
-                    RepaintBoundary(
-                      key: kotReceiptKey,
-                      child: getThermalReceiptKOTWidget(
-                        businessName: businessName,
-                        address: address,
-                        gst: gst,
-                        items: kotItems,
-                        paidBy: paymentMethod,
-                        tamilTagline: '',
-                        phone: phone,
-                        subtotal: subTotal,
-                        tax: taxPercent,
-                        total: total,
-                        orderNumber: orderNumber,
-                        tableName: tableName,
-                        waiterName: waiterName,
-                        orderType: orderType,
-                        date: date,
-                        status: orderStatus,
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _startKOTPrintingThermalOnly(
+                          context,
+                          ipController.text.trim(),
+                        );
+                      },
+                      icon: const Icon(Icons.print),
+                      label: const Text("KOT(LAN)"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: greenColor,
+                        foregroundColor: whiteColor,
                       ),
                     ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (updateGenerateOrderModel.invoice!.kot!.isNotEmpty)
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            _selectBluetoothPrinter(context);
-                          },
-                          icon: const Icon(Icons.bluetooth),
-                          label: const Text("KOT(BT)"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: greenColor,
-                            foregroundColor: whiteColor,
-                          ),
-                        ),
-                      horizontalSpace(width: 10),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.05,
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text(
-                            "CLOSE",
-                            style: TextStyle(color: appPrimaryColor),
-                          ),
-                        ),
+                  horizontalSpace(width: 10),
+                  if (updateGenerateOrderModel.invoice!.kot!.isNotEmpty)
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _selectBluetoothPrinter(context);
+                      },
+                      icon: const Icon(Icons.bluetooth),
+                      label: const Text("KOT(BT)"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: greenColor,
+                        foregroundColor: whiteColor,
                       ),
-                    ],
-                  ),
+                    ),
+                  horizontalSpace(width: 10),
+
                 ],
               ),
-            ),
+              verticalSpace(height: 10),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                label: const Text("CLOSE"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: appPrimaryColor,
+                  foregroundColor: whiteColor,
+                ),
+              ),
+            ],
+          ))
+          ],
           ),
         ),
       );
@@ -1308,7 +1473,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                           ],
                                         ),
                                         verticalSpace(
-                                          height: size.height * 0.02,
+                                          height: 2,
                                         ),
 
                                         Row(
@@ -1337,14 +1502,14 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                           ],
                                         ),
                                         verticalSpace(
-                                          height: size.height * 0.02,
+                                          height: 2,
                                         ),
 
                                         /// Category - list
                                         displayedCategories.isEmpty
                                             ? Container()
                                             : SizedBox(
-                                                height: size.height * 0.14,
+                                                height: size.height * 0.07,
                                                 width: size.width<500 ? size.width * 0.9: size.width * 1.38,
                                                 child: ListView.separated(
                                                   scrollDirection:
@@ -1385,7 +1550,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
 
                                         /// Product - list
                                         SizedBox(
-                                          height: size.height * 0.35,
+                                          height: size.height * 0.45,
                                           width: size.width * 1.8,
                                           child:
                                           allProducts.isEmpty
@@ -1419,9 +1584,12 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                     childAspectRatio:
                                                     MediaQuery.of(
                                                       context,
+                                                    ).size.width <=
+                                                        360?0.69:MediaQuery.of(
+                                                      context,
                                                     ).size.width <
                                                         500
-                                                        ?0.55:
+                                                        ?0.7:
                                                     MediaQuery.of(
                                                               context,
                                                             ).size.width <=
@@ -2198,31 +2366,15 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                 MainAxisSize
                                                                     .min,
                                                             children: [
-                                                              SizedBox(
-                                                                height:
-                                                                    size.height *
-                                                                    0.16,
-                                                                child: ClipRRect(
-                                                                  borderRadius: const BorderRadius.only(
-                                                                    topLeft:
-                                                                        Radius.circular(
-                                                                          15.0,
-                                                                        ),
-                                                                    topRight:
-                                                                        Radius.circular(
-                                                                          15.0,
-                                                                        ),
-                                                                  ),
+                                                              Padding(
+                                                                padding: const EdgeInsets.all(8.0),
+                                                                child: ClipOval(
                                                                   child: CachedNetworkImage(
                                                                     imageUrl:
                                                                         p.image ??
                                                                         "",
-                                                                    width:
-                                                                        size.width *
-                                                                        0.5,
-                                                                    height:
-                                                                        size.height *
-                                                                        0.15,
+                                                                    width: 55,
+                                                                    height: 55,
                                                                     fit: BoxFit
                                                                         .cover,
                                                                     errorWidget:
@@ -2253,13 +2405,10 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                   ),
                                                                 ),
                                                               ),
-                                                              verticalSpace(
-                                                                height: 5,
-                                                              ),
                                                               SizedBox(
                                                                 width:
                                                                     size.width *
-                                                                    0.25,
+                                                                    0.35,
                                                                 child: Text(
                                                                   p.name ?? '',
                                                                   style: MyTextStyle.f13(
@@ -2277,9 +2426,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                           .center,
                                                                 ),
                                                               ),
-                                                              // verticalSpace(
-                                                              //   height: 2,
-                                                              // ),
                                                               if (p.isStock ==
                                                                   true)
                                                                 SizedBox(
@@ -2356,35 +2502,37 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                   ),
                                                                 ),
                                                               ],
-                                                              if (currentQuantity ==
-                                                                          0 &&
-                                                                      (p.availableQuantity ??
-                                                                              0) >
-                                                                          0 ||
-                                                                  (currentQuantity ==
-                                                                          0 &&
-                                                                      p.isStock ==
-                                                                          false) ||
+                                                              if((currentQuantity ==
+                                                                  0 &&
+                                                                  p.isStock ==
+                                                                      false) ||(currentQuantity ==
+                                                                  0 &&
+                                                                  p.isStock ==
+                                                                      true) ||
                                                                   (currentQuantity !=
-                                                                          0 &&
+                                                                      0 &&
                                                                       p.isStock ==
-                                                                          false))
+                                                                          false) || (currentQuantity !=
+                                                                  0 &&
+                                                                  p.isStock ==
+                                                                      true))
                                                                 verticalSpace(
                                                                   height: 5,
                                                                 ),
-                                                              if (currentQuantity ==
-                                                                          0 &&
-                                                                      (p.availableQuantity ??
-                                                                              0) >
-                                                                          0 ||
-                                                                  (currentQuantity ==
+                                                              if((currentQuantity ==
                                                                           0 &&
                                                                       p.isStock ==
-                                                                          false) ||
+                                                                          false) ||(currentQuantity ==
+                                                                  0 &&
+                                                                  p.isStock ==
+                                                                      true) ||
                                                                   (currentQuantity !=
                                                                           0 &&
                                                                       p.isStock ==
-                                                                          false))
+                                                                          false) || (currentQuantity !=
+                                                                  0 &&
+                                                                  p.isStock ==
+                                                                      true))
                                                                 SizedBox(
                                                                   width:
                                                                       size.width *
@@ -2407,11 +2555,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                     ),
                                                                   ),
                                                                 ),
-                                                              if (currentQuantity !=
-                                                                      0 &&
-                                                                  (p.availableQuantity ??
-                                                                          0) >
-                                                                      0)
+                                                              // if (currentQuantity !=
+                                                              //         0 &&
+                                                              //     (p.availableQuantity ??
+                                                              //             0) >
+                                                              //         0)
                                                                 verticalSpace(
                                                                   height: 10,
                                                                 ),
@@ -7909,7 +8057,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                     ],
                                   ),
                                   verticalSpace(
-                                    height: size.height * 0.02,
+                                    height: 2,
                                   ),
 
                                   Row(
@@ -7935,7 +8083,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                     ],
                                   ),
                                   verticalSpace(
-                                    height: size.height * 0.02,
+                                    height: 2,
                                   ),
 
                                   /// Category - list
@@ -7983,7 +8131,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
 
                                   /// Product - list
                                   SizedBox(
-                                    height: size.height * 0.35,
+                                    height: size.height * 0.45,
                                     width: size.width * 1.8,
                                     child:
                                     allProducts.isEmpty
@@ -8797,31 +8945,17 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                 MainAxisSize
                                                     .min,
                                                 children: [
-                                                  SizedBox(
-                                                    height:
-                                                    size.height *
-                                                        0.16,
-                                                    child: ClipRRect(
-                                                      borderRadius: const BorderRadius.only(
-                                                        topLeft:
-                                                        Radius.circular(
-                                                          15.0,
-                                                        ),
-                                                        topRight:
-                                                        Radius.circular(
-                                                          15.0,
-                                                        ),
-                                                      ),
+                                              Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                                    child: ClipOval(
                                                       child: CachedNetworkImage(
                                                         imageUrl:
                                                         p.image ??
                                                             "",
                                                         width:
-                                                        size.width *
-                                                            0.5,
+                                                       55,
                                                         height:
-                                                        size.height *
-                                                            0.15,
+                                                        55,
                                                         fit: BoxFit
                                                             .cover,
                                                         errorWidget:
@@ -8852,13 +8986,10 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                       ),
                                                     ),
                                                   ),
-                                                  verticalSpace(
-                                                    height: 5,
-                                                  ),
                                                   SizedBox(
                                                     width:
                                                     size.width *
-                                                        0.25,
+                                                        0.35,
                                                     child: Text(
                                                       p.name ?? '',
                                                       style: MyTextStyle.f13(
@@ -8875,9 +9006,6 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                       TextAlign
                                                           .center,
                                                     ),
-                                                  ),
-                                                  verticalSpace(
-                                                    height: 5,
                                                   ),
                                                   if (p.isStock ==
                                                       true)
@@ -8955,35 +9083,37 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                       ),
                                                     ),
                                                   ],
-                                                  if (currentQuantity ==
+                                                  if((currentQuantity ==
                                                       0 &&
-                                                      (p.availableQuantity ??
-                                                          0) >
-                                                          0 ||
-                                                      (currentQuantity ==
-                                                          0 &&
-                                                          p.isStock ==
-                                                              false) ||
+                                                      p.isStock ==
+                                                          false) ||(currentQuantity ==
+                                                      0 &&
+                                                      p.isStock ==
+                                                          true) ||
                                                       (currentQuantity !=
                                                           0 &&
                                                           p.isStock ==
-                                                              false))
+                                                              false) || (currentQuantity !=
+                                                      0 &&
+                                                      p.isStock ==
+                                                          true))
                                                     verticalSpace(
                                                       height: 5,
                                                     ),
-                                                  if (currentQuantity ==
+                                                  if((currentQuantity ==
                                                       0 &&
-                                                      (p.availableQuantity ??
-                                                          0) >
-                                                          0 ||
-                                                      (currentQuantity ==
-                                                          0 &&
-                                                          p.isStock ==
-                                                              false) ||
+                                                      p.isStock ==
+                                                          false) ||(currentQuantity ==
+                                                      0 &&
+                                                      p.isStock ==
+                                                          true) ||
                                                       (currentQuantity !=
                                                           0 &&
                                                           p.isStock ==
-                                                              false))
+                                                              false) || (currentQuantity !=
+                                                      0 &&
+                                                      p.isStock ==
+                                                          true))
                                                     SizedBox(
                                                       width:
                                                       size.width *

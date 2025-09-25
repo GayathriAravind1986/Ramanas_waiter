@@ -582,8 +582,8 @@ class OrderPageViewState extends State<OrderPageView>
                                         (item) => item.name == newValue,
                                       );
                                   waiterId = selectedItem?.id.toString();
-                                  userId = selectedItem?.user?.id.toString();
-                                  debugPrint("userId:$userId");
+                                  // userId = selectedItem?.user?.id.toString();
+                                  // debugPrint("userId:$userId");
                                 });
                                 _loadOrdersForCurrentTab();
                               }

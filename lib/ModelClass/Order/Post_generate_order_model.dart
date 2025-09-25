@@ -28,8 +28,9 @@ class PostGenerateOrderModel {
         _payments?.add(Payments.fromJson(v));
       });
     }
-    _invoice =
-        json['invoice'] != null ? Invoice.fromJson(json['invoice']) : null;
+    _invoice = json['invoice'] != null
+        ? Invoice.fromJson(json['invoice'])
+        : null;
     if (json['errors'] != null && json['errors'] is Map<String, dynamic>) {
       errorResponse = ErrorResponse.fromJson(json['errors']);
     } else {
@@ -46,13 +47,12 @@ class PostGenerateOrderModel {
     Order? order,
     List<Payments>? payments,
     Invoice? invoice,
-  }) =>
-      PostGenerateOrderModel(
-        message: message ?? _message,
-        order: order ?? _order,
-        payments: payments ?? _payments,
-        invoice: invoice ?? _invoice,
-      );
+  }) => PostGenerateOrderModel(
+    message: message ?? _message,
+    order: order ?? _order,
+    payments: payments ?? _payments,
+    invoice: invoice ?? _invoice,
+  );
   String? get message => _message;
   Order? get order => _order;
   List<Payments>? get payments => _payments;
@@ -146,18 +146,17 @@ class Payments {
     String? id,
     String? updatedAt,
     num? v,
-  }) =>
-      Payments(
-        order: order ?? _order,
-        paymentMethod: paymentMethod ?? _paymentMethod,
-        amount: amount ?? _amount,
-        balanceAmount: balanceAmount ?? _balanceAmount,
-        status: status ?? _status,
-        createdAt: createdAt ?? _createdAt,
-        id: id ?? _id,
-        updatedAt: updatedAt ?? _updatedAt,
-        v: v ?? _v,
-      );
+  }) => Payments(
+    order: order ?? _order,
+    paymentMethod: paymentMethod ?? _paymentMethod,
+    amount: amount ?? _amount,
+    balanceAmount: balanceAmount ?? _balanceAmount,
+    status: status ?? _status,
+    createdAt: createdAt ?? _createdAt,
+    id: id ?? _id,
+    updatedAt: updatedAt ?? _updatedAt,
+    v: v ?? _v,
+  );
   String? get order => _order;
   String? get paymentMethod => _paymentMethod;
   num? get amount => _amount;
@@ -191,6 +190,7 @@ class Invoice {
     String? gstNumber,
     String? currencySymbol,
     String? printType,
+    String? thermalIp,
     List<InvoiceItems>? invoiceItems,
     num? subtotal,
     num? salesTax,
@@ -214,6 +214,7 @@ class Invoice {
     _gstNumber = gstNumber;
     _currencySymbol = currencySymbol;
     _printType = printType;
+    _thermalIp = thermalIp;
     _invoiceItems = invoiceItems;
     _subtotal = subtotal;
     _finalTaxes = finalTaxes;
@@ -239,6 +240,7 @@ class Invoice {
     _gstNumber = json['gstNumber'];
     _currencySymbol = json['currencySymbol'];
     _printType = json['printType'];
+    _thermalIp = json['thermalIp'];
     if (json['invoice_items'] != null) {
       _invoiceItems = [];
       json['invoice_items'].forEach((v) {
@@ -277,6 +279,7 @@ class Invoice {
   String? _gstNumber;
   String? _currencySymbol;
   String? _printType;
+  String? _thermalIp;
   List<InvoiceItems>? _invoiceItems;
   num? _subtotal;
   List<FinalTaxes>? _finalTaxes;
@@ -300,6 +303,7 @@ class Invoice {
     String? gstNumber,
     String? currencySymbol,
     String? printType,
+    String? thermalIp,
     List<InvoiceItems>? invoiceItems,
     num? subtotal,
     List<FinalTaxes>? finalTaxes,
@@ -316,37 +320,38 @@ class Invoice {
     String? waiterName,
     String? orderType,
     num? tipAmount,
-  }) =>
-      Invoice(
-        businessName: businessName ?? _businessName,
-        address: address ?? _address,
-        phone: phone ?? _phone,
-        gstNumber: gstNumber ?? _gstNumber,
-        currencySymbol: currencySymbol ?? _currencySymbol,
-        printType: printType ?? _printType,
-        invoiceItems: invoiceItems ?? _invoiceItems,
-        subtotal: subtotal ?? _subtotal,
-        finalTaxes: finalTaxes ?? _finalTaxes,
-        salesTax: salesTax ?? _salesTax,
-        total: total ?? _total,
-        orderNumber: orderNumber ?? _orderNumber,
-        orderStatus: orderStatus ?? _orderStatus,
-        kot: kot ?? _kot,
-        date: date ?? _date,
-        paidBy: paidBy ?? _paidBy,
-        transactionId: transactionId ?? _transactionId,
-        tableNum: tableNum ?? _tableNum,
-        tableName: tableName ?? _tableName,
-        waiterName: waiterName ?? _waiterName,
-        orderType: orderType ?? _orderType,
-        tipAmount: tipAmount ?? _tipAmount,
-      );
+  }) => Invoice(
+    businessName: businessName ?? _businessName,
+    address: address ?? _address,
+    phone: phone ?? _phone,
+    gstNumber: gstNumber ?? _gstNumber,
+    currencySymbol: currencySymbol ?? _currencySymbol,
+    printType: printType ?? _printType,
+    thermalIp: thermalIp ?? _thermalIp,
+    invoiceItems: invoiceItems ?? _invoiceItems,
+    subtotal: subtotal ?? _subtotal,
+    finalTaxes: finalTaxes ?? _finalTaxes,
+    salesTax: salesTax ?? _salesTax,
+    total: total ?? _total,
+    orderNumber: orderNumber ?? _orderNumber,
+    orderStatus: orderStatus ?? _orderStatus,
+    kot: kot ?? _kot,
+    date: date ?? _date,
+    paidBy: paidBy ?? _paidBy,
+    transactionId: transactionId ?? _transactionId,
+    tableNum: tableNum ?? _tableNum,
+    tableName: tableName ?? _tableName,
+    waiterName: waiterName ?? _waiterName,
+    orderType: orderType ?? _orderType,
+    tipAmount: tipAmount ?? _tipAmount,
+  );
   String? get businessName => _businessName;
   String? get address => _address;
   String? get phone => _phone;
   String? get gstNumber => _gstNumber;
   String? get currencySymbol => _currencySymbol;
   String? get printType => _printType;
+  String? get thermalIp => _thermalIp;
   List<InvoiceItems>? get invoiceItems => _invoiceItems;
   num? get subtotal => _subtotal;
   List<FinalTaxes>? get finalTaxes => _finalTaxes;
@@ -372,6 +377,7 @@ class Invoice {
     map['gstNumber'] = _gstNumber;
     map['currencySymbol'] = _currencySymbol;
     map['printType'] = _printType;
+    map['thermalIp'] = _thermalIp;
     if (_invoiceItems != null) {
       map['invoice_items'] = _invoiceItems?.map((v) => v.toJson()).toList();
     }
@@ -399,11 +405,7 @@ class Invoice {
 }
 
 class FinalTaxes {
-  FinalTaxes({
-    String? name,
-    num? percentage,
-    num? amount,
-  }) {
+  FinalTaxes({String? name, num? percentage, num? amount}) {
     _name = name;
     _percentage = percentage;
     _amount = amount;
@@ -417,11 +419,7 @@ class FinalTaxes {
   String? _name;
   num? _percentage;
   num? _amount;
-  FinalTaxes copyWith({
-    String? name,
-    num? percentage,
-    num? amount,
-  }) =>
+  FinalTaxes copyWith({String? name, num? percentage, num? amount}) =>
       FinalTaxes(
         name: name ?? _name,
         percentage: percentage ?? _percentage,
@@ -444,10 +442,7 @@ class FinalTaxes {
 /// quantity : 2
 
 class Kot {
-  Kot({
-    String? name,
-    num? quantity,
-  }) {
+  Kot({String? name, num? quantity}) {
     _name = name;
     _quantity = quantity;
   }
@@ -458,14 +453,8 @@ class Kot {
   }
   String? _name;
   num? _quantity;
-  Kot copyWith({
-    String? name,
-    num? quantity,
-  }) =>
-      Kot(
-        name: name ?? _name,
-        quantity: quantity ?? _quantity,
-      );
+  Kot copyWith({String? name, num? quantity}) =>
+      Kot(name: name ?? _name, quantity: quantity ?? _quantity);
   String? get name => _name;
   num? get quantity => _quantity;
 
@@ -521,15 +510,14 @@ class InvoiceItems {
     num? taxPrice,
     num? totalPrice,
     bool? isAddon,
-  }) =>
-      InvoiceItems(
-        name: name ?? _name,
-        basePrice: basePrice ?? _basePrice,
-        qty: qty ?? _qty,
-        taxPrice: taxPrice ?? _taxPrice,
-        totalPrice: totalPrice ?? _totalPrice,
-        isAddon: isAddon ?? _isAddon,
-      );
+  }) => InvoiceItems(
+    name: name ?? _name,
+    basePrice: basePrice ?? _basePrice,
+    qty: qty ?? _qty,
+    taxPrice: taxPrice ?? _taxPrice,
+    totalPrice: totalPrice ?? _totalPrice,
+    isAddon: isAddon ?? _isAddon,
+  );
   String? get name => _name;
   num? get basePrice => _basePrice;
   num? get qty => _qty;
@@ -620,18 +608,17 @@ class Order {
     num? tax,
     num? total,
     String? createdAt,
-  }) =>
-      Order(
-        id: id ?? _id,
-        orderNumber: orderNumber ?? _orderNumber,
-        items: items ?? _items,
-        finalTaxes: finalTaxes ?? _finalTaxes,
-        subtotal: subtotal ?? _subtotal,
-        orderType: orderType ?? _orderType,
-        tax: tax ?? _tax,
-        total: total ?? _total,
-        createdAt: createdAt ?? _createdAt,
-      );
+  }) => Order(
+    id: id ?? _id,
+    orderNumber: orderNumber ?? _orderNumber,
+    items: items ?? _items,
+    finalTaxes: finalTaxes ?? _finalTaxes,
+    subtotal: subtotal ?? _subtotal,
+    orderType: orderType ?? _orderType,
+    tax: tax ?? _tax,
+    total: total ?? _total,
+    createdAt: createdAt ?? _createdAt,
+  );
   String? get id => _id;
   String? get orderNumber => _orderNumber;
   List<Items>? get items => _items;
@@ -670,10 +657,7 @@ class Order {
 /// subtotal : 189.49
 /// _id : "687641b8ff518ce12520c9b4"
 class Kotitems {
-  Kotitems({
-    String? name,
-    num? quantity,
-  }) {
+  Kotitems({String? name, num? quantity}) {
     _name = name;
     _quantity = quantity;
   }
@@ -684,14 +668,8 @@ class Kotitems {
   }
   String? _name;
   num? _quantity;
-  Kotitems copyWith({
-    String? name,
-    num? quantity,
-  }) =>
-      Kotitems(
-        name: name ?? _name,
-        quantity: quantity ?? _quantity,
-      );
+  Kotitems copyWith({String? name, num? quantity}) =>
+      Kotitems(name: name ?? _name, quantity: quantity ?? _quantity);
   String? get name => _name;
   num? get quantity => _quantity;
 
@@ -756,17 +734,16 @@ class Items {
     num? tax,
     num? subtotal,
     String? id,
-  }) =>
-      Items(
-        product: product ?? _product,
-        name: name ?? _name,
-        quantity: quantity ?? _quantity,
-        unitPrice: unitPrice ?? _unitPrice,
-        addons: addons ?? _addons,
-        tax: tax ?? _tax,
-        subtotal: subtotal ?? _subtotal,
-        id: id ?? _id,
-      );
+  }) => Items(
+    product: product ?? _product,
+    name: name ?? _name,
+    quantity: quantity ?? _quantity,
+    unitPrice: unitPrice ?? _unitPrice,
+    addons: addons ?? _addons,
+    tax: tax ?? _tax,
+    subtotal: subtotal ?? _subtotal,
+    id: id ?? _id,
+  );
   String? get product => _product;
   String? get name => _name;
   num? get quantity => _quantity;
@@ -798,12 +775,7 @@ class Items {
 /// _id : "687641b8ff518ce12520c9b5"
 
 class Addons {
-  Addons({
-    String? addon,
-    String? name,
-    num? price,
-    String? id,
-  }) {
+  Addons({String? addon, String? name, num? price, String? id}) {
     _addon = addon;
     _name = name;
     _price = price;
@@ -820,12 +792,7 @@ class Addons {
   String? _name;
   num? _price;
   String? _id;
-  Addons copyWith({
-    String? addon,
-    String? name,
-    num? price,
-    String? id,
-  }) =>
+  Addons copyWith({String? addon, String? name, num? price, String? id}) =>
       Addons(
         addon: addon ?? _addon,
         name: name ?? _name,
