@@ -1301,9 +1301,9 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
               child: Container(
                 margin: const EdgeInsets.symmetric(
                   horizontal: 10,
-                  vertical: 15,
+                  vertical: 5,
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 5),
+               // padding: const EdgeInsets.symmetric(horizontal: 5),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -1337,805 +1337,1606 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                 )
                               : Container(
                                   margin: const EdgeInsets.only(top: 10),
-                                  child: SingleChildScrollView(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            Expanded(
-                                              child: SizedBox(
-                                                width: size.width * 0.5,
-                                                child: TextField(
-                                                  controller: searchController,
-                                                  decoration: InputDecoration(
-                                                    hintText: 'Search product',
-                                                    prefixIcon: Icon(
-                                                      Icons.search,
-                                                    ),
-                                                    contentPadding:
-                                                        EdgeInsets.symmetric(
-                                                          horizontal: 12,
-                                                        ),
-                                                    border: OutlineInputBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            30,
-                                                          ),
-                                                    ),
-                                                    enabledBorder:
-                                                        OutlineInputBorder(
-                                                          borderSide: BorderSide(
-                                                            color: appGreyColor,
-                                                            width: 1.5,
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                30,
-                                                              ),
-                                                        ),
-                                                    focusedBorder:
-                                                        OutlineInputBorder(
-                                                          borderSide: BorderSide(
-                                                            color:
-                                                                appPrimaryColor,
-                                                            width: 1.5,
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                30,
-                                                              ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            child: SizedBox(
+                                              width: size.width * 0.5,
+                                              child: TextField(
+                                                controller: searchController,
+                                                decoration: InputDecoration(
+                                                  hintText: 'Search product',
+                                                  prefixIcon: Icon(
+                                                    Icons.search,
+                                                  ),
+                                                  contentPadding:
+                                                      EdgeInsets.symmetric(
+                                                        horizontal: 12,
+                                                      ),
+                                                  border: OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          30,
                                                         ),
                                                   ),
-                                                  onChanged: (value) {
-                                                    searchController
-                                                      ..text = (value)
-                                                      ..selection =
-                                                          TextSelection.collapsed(
-                                                            offset:
-                                                                searchController
-                                                                    .text
-                                                                    .length,
-                                                          );
-                                                    setState(() {
-                                                      _loadInitialProducts();
-                                                    });
-                                                  },
-                                                ),
-                                              ),
-                                            ),
-                                            horizontalSpace(width: 10),
-                                            Expanded(
-                                              child: SizedBox(
-                                                width: size.width * 0.5,
-                                                child: TextField(
-                                                  controller:
-                                                      searchCodeController,
-                                                  decoration: InputDecoration(
-                                                    hintText: 'Search code',
-                                                    prefixIcon: Icon(
-                                                      Icons.search,
-                                                    ),
-                                                    contentPadding:
-                                                        EdgeInsets.symmetric(
-                                                          horizontal: 12,
+                                                  enabledBorder:
+                                                      OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: appGreyColor,
+                                                          width: 1.5,
                                                         ),
-                                                    border: OutlineInputBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            30,
-                                                          ),
-                                                    ),
-                                                    enabledBorder:
-                                                        OutlineInputBorder(
-                                                          borderSide: BorderSide(
-                                                            color: appGreyColor,
-                                                            width: 1.5,
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                30,
-                                                              ),
-                                                        ),
-                                                    focusedBorder:
-                                                        OutlineInputBorder(
-                                                          borderSide: BorderSide(
-                                                            color:
-                                                                appPrimaryColor,
-                                                            width: 1.5,
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                30,
-                                                              ),
-                                                        ),
-                                                  ),
-                                                  onChanged: (value) {
-                                                    searchCodeController
-                                                      ..text = (value)
-                                                      ..selection =
-                                                          TextSelection.collapsed(
-                                                            offset:
-                                                                searchCodeController
-                                                                    .text
-                                                                    .length,
-                                                          );
-                                                    setState(() {
-                                                      _loadInitialProducts();
-                                                    });
-                                                  },
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        verticalSpace(
-                                          height: 2,
-                                        ),
-
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              "Choose Category",
-                                              style: MyTextStyle.f18(
-                                                blackColor,
-                                                weight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            IconButton(
-                                              onPressed: () {
-                                                setState(() {
-                                                  searchController.clear();
-                                                  searchCodeController.clear();
-                                                });
-                                                context
-                                                    .read<FoodCategoryBloc>()
-                                                    .add(FoodCategory());
-                                                _loadInitialProducts();
-                                              },
-                                              icon: const Icon(Icons.refresh),
-                                            ),
-                                          ],
-                                        ),
-                                        verticalSpace(
-                                          height: 2,
-                                        ),
-
-                                        /// Category - list
-                                        displayedCategories.isEmpty
-                                            ? Container()
-                                            : SizedBox(
-                                                height: size.height * 0.07,
-                                                width: size.width<500 ? size.width * 0.9: size.width * 1.38,
-                                                child: ListView.separated(
-                                                  scrollDirection:
-                                                      Axis.horizontal,
-                                                  itemCount: displayedCategories
-                                                      .length,
-                                                  separatorBuilder: (_, _) =>
-                                                      SizedBox(width: 12),
-                                                  itemBuilder: (context, index) {
-                                                    final category =
-                                                        displayedCategories[index];
-                                                    final isSelected =
-                                                        category.name ==
-                                                        selectedCategory;
-                                                    return CategoryCard(
-                                                      label: category.name!,
-                                                      imagePath:
-                                                          category.image ?? "",
-                                                      isSelected: isSelected,
-                                                      onTap: () {
-                                                        setState(() {
-                                                          selectedCategory =
-                                                              category.name!;
-                                                          selectedCatId =
-                                                              category.id;
-                                                          if (selectedCategory ==
-                                                              'All') {
-                                                            _loadInitialProducts();
-                                                          } else {
-                                                            _loadInitialProducts();
-                                                          }
-                                                        });
-                                                      },
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-
-                                        /// Product - list
-                                        SizedBox(
-                                          height: size.height * 0.45,
-                                          width: size.width * 1.8,
-                                          child:
-                                          allProducts.isEmpty
-                                              ? Container()
-                                              : GridView.builder(
-                                            controller: _scrollController,
-                                                  padding: EdgeInsets.only(
-                                                    top: 10,
-                                                  ),
-                                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                                    crossAxisCount:
-                                                        MediaQuery.of(
-                                                              context,
-                                                            ).size.width <=
-                                                            500
-                                                        ? 2
-                                                        : MediaQuery.of(context)
-                                                                      .size
-                                                                      .width >=
-                                                                  560 ||
-                                                              MediaQuery.of(
-                                                                        context,
-                                                                      )
-                                                                      .size
-                                                                      .width >=
-                                                                  600
-                                                        ? 3
-                                                        : 2,
-                                                    crossAxisSpacing: 8,
-                                                    mainAxisSpacing: 8,
-                                                    childAspectRatio:
-                                                    MediaQuery.of(
-                                                      context,
-                                                    ).size.width <=
-                                                        360?0.69:MediaQuery.of(
-                                                      context,
-                                                    ).size.width <
-                                                        500
-                                                        ?0.7:
-                                                    MediaQuery.of(
-                                                              context,
-                                                            ).size.width <=
-                                                            500
-                                                        ? 0.86 :MediaQuery.of(
-                                                          context,
-                                                          ).size.width >
-                                                          500 && MediaQuery.of(
-                                                      context,
-                                                    ).size.width <
-                                                        560 ?0.75
-                                                        : MediaQuery.of(
-                                                                context,
-                                                              ).size.width >=
-                                                              560 && MediaQuery.of(
-                                                          context,
-                                                        ).size.width <=
-                                                            600
-                                                        ? 0.6
-                                                        : MediaQuery.of(
-                                                                context,
-                                                              ).size.width >
-                                                              600
-                                                        ? 0.72
-                                                        : 0.95,
-                                                  ),
-                                                  itemCount:allProducts.length + (hasMoreData ? 1 : 0),
-                                                  itemBuilder: (_, index) {
-                                                    if (index == allProducts.length) {
-                                                      return buildLoadingIndicator();
-                                                    }
-                                                    int getCurrentQuantity(
-                                                      String productId,
-                                                    ) {
-                                                      return billingItems
-                                                              .firstWhere(
-                                                                (item) =>
-                                                                    item['_id'] ==
-                                                                    productId,
-                                                                orElse: () =>
-                                                                    {},
-                                                              )['qty'] ??
-                                                          0;
-                                                    }
-
-                                                    debugPrint(
-                                                      "sizeWidth:${MediaQuery.of(context).size.width}",
-                                                    );
-                                                    debugPrint(
-                                                      "sizeHeight:${MediaQuery.of(context).size.height}",
-                                                    );
-
-                                                    TextEditingController
-                                                    getQuantityController(
-                                                      String productId,
-                                                    ) {
-                                                      if (!quantityControllers
-                                                          .containsKey(
-                                                            productId,
-                                                          )) {
-                                                        final currentQty =
-                                                            getCurrentQuantity(
-                                                              productId,
-                                                            );
-                                                        quantityControllers[productId] =
-                                                            TextEditingController(
-                                                              text: currentQty
-                                                                  .toString(),
-                                                            );
-                                                      }
-                                                      return quantityControllers[productId]!;
-                                                    }
-
-                                                    void updateControllerText(
-                                                      String productId,
-                                                      int quantity,
-                                                    ) {
-                                                      if (quantityControllers
-                                                          .containsKey(
-                                                            productId,
-                                                          )) {
-                                                        quantityControllers[productId]!
-                                                            .text = quantity
-                                                            .toString();
-                                                      }
-                                                    }
-
-                                                    final p = allProducts[index];
-                                                    int currentQuantity =
-                                                        getCurrentQuantity(
-                                                          p.id.toString(),
-                                                        );
-                                                    TextEditingController
-                                                    currentController =
-                                                        getQuantityController(
-                                                          p.id.toString(),
-                                                        );
-                                                    return InkWell(
-                                                      onTap: () {
-                                                        setState(() {
-                                                          currentQuantity = 1;
-                                                          if (p
-                                                              .addons!
-                                                              .isNotEmpty) {
-                                                            productExists = isProductInCart(p.id.toString());
-                                                            if(productExists == true) {
-                                                            final currentQtyInCart = getCurrentQuantity(p.id.toString());
-                                                            bool canAdd;
-
-                                                            if (p.isStock == true) {
-                                                            if ((widget.isEditingOrder == true &&
-                                                            widget.existingOrder?.data?.orderStatus == "COMPLETED") ||
-                                                            (widget.isEditingOrder == true &&
-                                                            widget.existingOrder?.data?.orderStatus == "WAITLIST")) {
-                                                            final paidQty = widget.existingOrder?.data?.items
-                                                                ?.firstWhereOrNull((item) => item.product?.id == p.id)
-                                                                ?.quantity ?? 0;
-                                                            canAdd = currentQtyInCart < ((p.availableQuantity ?? 0) + paidQty);
-                                                            } else {
-                                                            canAdd = currentQtyInCart < (p.availableQuantity ?? 0);
-                                                            }
-                                                            } else {
-                                                            canAdd = true;
-                                                            }
-
-                                                            if (!canAdd) {
-                                                            showToast(
-                                                            "Cannot add more items. Stock limit reached.",
-                                                            context,
-                                                            color: false,
-                                                            );
-                                                            return;
-                                                            }
-
-                                                            setState(() {
-                                                            isSplitPayment = false;
-                                                            if (widget.isEditingOrder != true) {
-                                                            selectedOrderType = OrderType.line;
-                                                            }
-
-                                                            final index = billingItems.indexWhere((item) => item['_id'] == p.id);
-                                                            if (index != -1) {
-                                                            billingItems[index]['qty'] = billingItems[index]['qty'] + 1;
-                                                            updateControllerText(
-                                                            p.id.toString(),
-                                                            billingItems[index]['qty'],
-                                                            );
-                                                            }
-
-                                                            context.read<FoodCategoryBloc>().add(
-                                                            AddToBilling(
-                                                            List.from(billingItems),
-                                                            isDiscountApplied,
-                                                            selectedOrderType,
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              30,
                                                             ),
-                                                            );
-                                                            });
-                                                            } else {
-                                                              final index = billingItems.indexWhere((item) => item['_id'] == p.id);
+                                                      ),
+                                                  focusedBorder:
+                                                      OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color:
+                                                              appPrimaryColor,
+                                                          width: 1.5,
+                                                        ),
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              30,
+                                                            ),
+                                                      ),
+                                                ),
+                                                onChanged: (value) {
+                                                  searchController
+                                                    ..text = (value)
+                                                    ..selection =
+                                                        TextSelection.collapsed(
+                                                          offset:
+                                                              searchController
+                                                                  .text
+                                                                  .length,
+                                                        );
+                                                  setState(() {
+                                                    _loadInitialProducts();
+                                                  });
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                          horizontalSpace(width: 10),
+                                          Expanded(
+                                            child: SizedBox(
+                                              width: size.width * 0.5,
+                                              child: TextField(
+                                                controller:
+                                                    searchCodeController,
+                                                decoration: InputDecoration(
+                                                  hintText: 'Search code',
+                                                  prefixIcon: Icon(
+                                                    Icons.search,
+                                                  ),
+                                                  contentPadding:
+                                                      EdgeInsets.symmetric(
+                                                        horizontal: 12,
+                                                      ),
+                                                  border: OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          30,
+                                                        ),
+                                                  ),
+                                                  enabledBorder:
+                                                      OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color: appGreyColor,
+                                                          width: 1.5,
+                                                        ),
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              30,
+                                                            ),
+                                                      ),
+                                                  focusedBorder:
+                                                      OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                          color:
+                                                              appPrimaryColor,
+                                                          width: 1.5,
+                                                        ),
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              30,
+                                                            ),
+                                                      ),
+                                                ),
+                                                onChanged: (value) {
+                                                  searchCodeController
+                                                    ..text = (value)
+                                                    ..selection =
+                                                        TextSelection.collapsed(
+                                                          offset:
+                                                              searchCodeController
+                                                                  .text
+                                                                  .length,
+                                                        );
+                                                  setState(() {
+                                                    _loadInitialProducts();
+                                                  });
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      verticalSpace(
+                                        height: 2,
+                                      ),
 
-                                                              if (index == -1) {
-                                                                for (var addon in p.addons!) {
-                                                                  addon.isSelected = false;
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "Choose Category",
+                                            style: MyTextStyle.f18(
+                                              blackColor,
+                                              weight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          IconButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                searchController.clear();
+                                                searchCodeController.clear();
+                                              });
+                                              context
+                                                  .read<FoodCategoryBloc>()
+                                                  .add(FoodCategory());
+                                              _loadInitialProducts();
+                                            },
+                                            icon: const Icon(Icons.refresh),
+                                          ),
+                                        ],
+                                      ),
+                                      verticalSpace(
+                                        height: 2,
+                                      ),
+
+                                      /// Category - list
+                                      displayedCategories.isEmpty
+                                          ? Container()
+                                          : SizedBox(
+                                              height: size.height * 0.07,
+                                              width: size.width<500 ? size.width * 0.9: size.width * 1.38,
+                                              child: ListView.separated(
+                                                scrollDirection:
+                                                    Axis.horizontal,
+                                                itemCount: displayedCategories
+                                                    .length,
+                                                separatorBuilder: (_, _) =>
+                                                    SizedBox(width: 12),
+                                                itemBuilder: (context, index) {
+                                                  final category =
+                                                      displayedCategories[index];
+                                                  final isSelected =
+                                                      category.name ==
+                                                      selectedCategory;
+                                                  return CategoryCard(
+                                                    label: category.name!,
+                                                    imagePath:
+                                                        category.image ?? "",
+                                                    isSelected: isSelected,
+                                                    onTap: () {
+                                                      setState(() {
+                                                        selectedCategory =
+                                                            category.name!;
+                                                        selectedCatId =
+                                                            category.id;
+                                                        if (selectedCategory ==
+                                                            'All') {
+                                                          _loadInitialProducts();
+                                                        } else {
+                                                          _loadInitialProducts();
+                                                        }
+                                                      });
+                                                    },
+                                                  );
+                                                },
+                                              ),
+                                            ),
+
+                                      /// Product - list
+                                      allProducts.isEmpty
+                                          ? Container()
+                                          : Expanded(
+                                            child: GridView.builder(
+                                              controller: _scrollController,
+                                              shrinkWrap: true,
+                                                padding: EdgeInsets.only(
+                                                  top: 10,
+                                                ),
+                                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                                  crossAxisCount:
+                                                      MediaQuery.of(
+                                                            context,
+                                                          ).size.width <=
+                                                          500
+                                                      ? 2
+                                                      :  3,
+                                                  crossAxisSpacing: 8,
+                                                  mainAxisSpacing: 8,
+                                                  childAspectRatio:0.7
+                                                ),
+                                                itemCount:allProducts.length + (hasMoreData ? 1 : 0),
+                                                itemBuilder: (_, index) {
+                                                  if (index == allProducts.length) {
+                                                    return buildLoadingIndicator();
+                                                  }
+                                                  int getCurrentQuantity(
+                                                    String productId,
+                                                  ) {
+                                                    return billingItems
+                                                            .firstWhere(
+                                                              (item) =>
+                                                                  item['_id'] ==
+                                                                  productId,
+                                                              orElse: () =>
+                                                                  {},
+                                                            )['qty'] ??
+                                                        0;
+                                                  }
+
+                                                  debugPrint(
+                                                    "sizeWidth:${MediaQuery.of(context).size.width}",
+                                                  );
+                                                  debugPrint(
+                                                    "sizeHeight:${MediaQuery.of(context).size.height}",
+                                                  );
+
+                                                  TextEditingController
+                                                  getQuantityController(
+                                                    String productId,
+                                                  ) {
+                                                    if (!quantityControllers
+                                                        .containsKey(
+                                                          productId,
+                                                        )) {
+                                                      final currentQty =
+                                                          getCurrentQuantity(
+                                                            productId,
+                                                          );
+                                                      quantityControllers[productId] =
+                                                          TextEditingController(
+                                                            text: currentQty
+                                                                .toString(),
+                                                          );
+                                                    }
+                                                    return quantityControllers[productId]!;
+                                                  }
+
+                                                  void updateControllerText(
+                                                    String productId,
+                                                    int quantity,
+                                                  ) {
+                                                    if (quantityControllers
+                                                        .containsKey(
+                                                          productId,
+                                                        )) {
+                                                      quantityControllers[productId]!
+                                                          .text = quantity
+                                                          .toString();
+                                                    }
+                                                  }
+
+                                                  final p = allProducts[index];
+                                                  int currentQuantity =
+                                                      getCurrentQuantity(
+                                                        p.id.toString(),
+                                                      );
+                                                  TextEditingController
+                                                  currentController =
+                                                      getQuantityController(
+                                                        p.id.toString(),
+                                                      );
+                                                  return InkWell(
+                                                    onTap: () {
+                                                      setState(() {
+                                                        currentQuantity = 1;
+                                                        if (p
+                                                            .addons!
+                                                            .isNotEmpty) {
+                                                          productExists = isProductInCart(p.id.toString());
+                                                          if(productExists == true) {
+                                                          final currentQtyInCart = getCurrentQuantity(p.id.toString());
+                                                          bool canAdd;
+
+                                                          if (p.isStock == true) {
+                                                          if ((widget.isEditingOrder == true &&
+                                                          widget.existingOrder?.data?.orderStatus == "COMPLETED") ||
+                                                          (widget.isEditingOrder == true &&
+                                                          widget.existingOrder?.data?.orderStatus == "WAITLIST")) {
+                                                          final paidQty = widget.existingOrder?.data?.items
+                                                              ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                              ?.quantity ?? 0;
+                                                          canAdd = currentQtyInCart < ((p.availableQuantity ?? 0) + paidQty);
+                                                          } else {
+                                                          canAdd = currentQtyInCart < (p.availableQuantity ?? 0);
+                                                          }
+                                                          } else {
+                                                          canAdd = true;
+                                                          }
+
+                                                          if (!canAdd) {
+                                                          showToast(
+                                                          "Cannot add more items. Stock limit reached.",
+                                                          context,
+                                                          color: false,
+                                                          );
+                                                          return;
+                                                          }
+
+                                                          setState(() {
+                                                          isSplitPayment = false;
+                                                          if (widget.isEditingOrder != true) {
+                                                          selectedOrderType = OrderType.line;
+                                                          }
+
+                                                          final index = billingItems.indexWhere((item) => item['_id'] == p.id);
+                                                          if (index != -1) {
+                                                          billingItems[index]['qty'] = billingItems[index]['qty'] + 1;
+                                                          updateControllerText(
+                                                          p.id.toString(),
+                                                          billingItems[index]['qty'],
+                                                          );
+                                                          }
+
+                                                          context.read<FoodCategoryBloc>().add(
+                                                          AddToBilling(
+                                                          List.from(billingItems),
+                                                          isDiscountApplied,
+                                                          selectedOrderType,
+                                                          ),
+                                                          );
+                                                          });
+                                                          } else {
+                                                            final index = billingItems.indexWhere((item) => item['_id'] == p.id);
+
+                                                            if (index == -1) {
+                                                              for (var addon in p.addons!) {
+                                                                addon.isSelected = false;
+                                                                addon.quantity = 0;
+                                                              }
+                                                            } else {
+                                                              final existingAddons = billingItems[index]['selectedAddons'] as List<dynamic>? ?? [];
+                                                              for (var addon in p.addons!) {
+                                                                final found = existingAddons.firstWhereOrNull(
+                                                                      (a) => a['_id'] == addon.id,
+                                                                );
+                                                                if (found != null) {
+                                                                  addon.quantity = 1;
+                                                                  addon.isSelected = true;
+                                                                  // addon.quantity = found['quantity'] as int? ?? addon.quantity;
+                                                                  // addon.isSelected = addon.quantity > 0;
+                                                                } else {
                                                                   addon.quantity = 0;
-                                                                }
-                                                              } else {
-                                                                final existingAddons = billingItems[index]['selectedAddons'] as List<dynamic>? ?? [];
-                                                                for (var addon in p.addons!) {
-                                                                  final found = existingAddons.firstWhereOrNull(
-                                                                        (a) => a['_id'] == addon.id,
-                                                                  );
-                                                                  if (found != null) {
-                                                                    addon.quantity = 1;
-                                                                    addon.isSelected = true;
-                                                                    // addon.quantity = found['quantity'] as int? ?? addon.quantity;
-                                                                    // addon.isSelected = addon.quantity > 0;
-                                                                  } else {
-                                                                    addon.quantity = 0;
-                                                                    addon.isSelected = false;
-                                                                  }
+                                                                  addon.isSelected = false;
                                                                 }
                                                               }
-                                                              showDialog(
-                                                                context: context,
-                                                                builder: (context2) {
-                                                                  return BlocProvider(
-                                                                    create:
-                                                                        (context,) =>
-                                                                        FoodCategoryBloc(),
-                                                                    child: BlocProvider.value(
-                                                                      value:
-                                                                      BlocProvider.of<
-                                                                          FoodCategoryBloc
-                                                                      >(
-                                                                        context,
-                                                                        listen:
-                                                                        false,
-                                                                      ),
-                                                                      child: StatefulBuilder(
-                                                                        builder:
-                                                                            (context,
-                                                                            setState,) {
-                                                                          return Dialog(
-                                                                            insetPadding: EdgeInsets.symmetric(
-                                                                              horizontal: 40,
-                                                                              vertical: 24,
+                                                            }
+                                                            showDialog(
+                                                              context: context,
+                                                              builder: (context2) {
+                                                                return BlocProvider(
+                                                                  create:
+                                                                      (context,) =>
+                                                                      FoodCategoryBloc(),
+                                                                  child: BlocProvider.value(
+                                                                    value:
+                                                                    BlocProvider.of<
+                                                                        FoodCategoryBloc
+                                                                    >(
+                                                                      context,
+                                                                      listen:
+                                                                      false,
+                                                                    ),
+                                                                    child: StatefulBuilder(
+                                                                      builder:
+                                                                          (context,
+                                                                          setState,) {
+                                                                        return Dialog(
+                                                                          insetPadding: EdgeInsets.symmetric(
+                                                                            horizontal: 40,
+                                                                            vertical: 24,
+                                                                          ),
+                                                                          shape: RoundedRectangleBorder(
+                                                                            borderRadius: BorderRadius.circular(
+                                                                              8,
                                                                             ),
-                                                                            shape: RoundedRectangleBorder(
-                                                                              borderRadius: BorderRadius.circular(
-                                                                                8,
-                                                                              ),
+                                                                          ),
+                                                                          child: Container(
+                                                                            constraints: BoxConstraints(
+                                                                              maxWidth:
+                                                                              size.width *
+                                                                                  0.4,
+                                                                              maxHeight:
+                                                                              size.height *
+                                                                                  0.6,
                                                                             ),
-                                                                            child: Container(
-                                                                              constraints: BoxConstraints(
-                                                                                maxWidth:
-                                                                                size.width *
-                                                                                    0.4,
-                                                                                maxHeight:
-                                                                                size.height *
-                                                                                    0.6,
-                                                                              ),
-                                                                              padding: EdgeInsets.all(
-                                                                                16,
-                                                                              ),
-                                                                              child: SingleChildScrollView(
-                                                                                child: Column(
-                                                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                  mainAxisSize: MainAxisSize.min,
-                                                                                  children: [
-                                                                                    ClipRRect(
-                                                                                      borderRadius: BorderRadius.circular(
-                                                                                        15.0,
-                                                                                      ),
-                                                                                      child: CachedNetworkImage(
-                                                                                        imageUrl: p.image ??
-                                                                                            "",
-                                                                                        width:
-                                                                                        size.width *
-                                                                                            0.9,
-                                                                                        height:
-                                                                                        size.height *
-                                                                                            0.2,
-                                                                                        fit: BoxFit.cover,
-                                                                                        errorWidget:
-                                                                                            (context,
-                                                                                            url,
-                                                                                            error,) {
-                                                                                          return const Icon(
-                                                                                            Icons.error,
-                                                                                            size: 30,
-                                                                                            color: appHomeTextColor,
-                                                                                          );
-                                                                                        },
-                                                                                        progressIndicatorBuilder:
-                                                                                            (context,
-                                                                                            url,
-                                                                                            downloadProgress,) =>
-                                                                                        const SpinKitCircle(
-                                                                                          color: appPrimaryColor,
-                                                                                          size: 30,
-                                                                                        ),
+                                                                            padding: EdgeInsets.all(
+                                                                              16,
+                                                                            ),
+                                                                            child: SingleChildScrollView(
+                                                                              child: Column(
+                                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                mainAxisSize: MainAxisSize.min,
+                                                                                children: [
+                                                                                  ClipRRect(
+                                                                                    borderRadius: BorderRadius.circular(
+                                                                                      15.0,
+                                                                                    ),
+                                                                                    child: CachedNetworkImage(
+                                                                                      imageUrl: p.image ??
+                                                                                          "",
+                                                                                      width:
+                                                                                      size.width *
+                                                                                          0.9,
+                                                                                      height:
+                                                                                      size.height *
+                                                                                          0.2,
+                                                                                      fit: BoxFit.cover,
+                                                                                      errorWidget:
+                                                                                          (context,
+                                                                                          url,
+                                                                                          error,) {
+                                                                                        return Image.asset(
+                                                                                          Images.all,
+                                                                                          width: 25,
+                                                                                          height: 25,
+                                                                                          fit: BoxFit.cover,
+                                                                                        );
+                                                                                      },
+                                                                                      progressIndicatorBuilder:
+                                                                                          (context,
+                                                                                          url,
+                                                                                          downloadProgress,) =>
+                                                                                      const SpinKitCircle(
+                                                                                        color: appPrimaryColor,
+                                                                                        size: 30,
                                                                                       ),
                                                                                     ),
-                                                                                    SizedBox(
-                                                                                      height: 16,
+                                                                                  ),
+                                                                                  SizedBox(
+                                                                                    height: 16,
+                                                                                  ),
+                                                                                  Text(
+                                                                                    'Choose Add‑Ons for ${p.name}',
+                                                                                    style: MyTextStyle.f16(
+                                                                                      weight: FontWeight.bold,
+                                                                                      blackColor,
                                                                                     ),
-                                                                                    Text(
-                                                                                      'Choose Add‑Ons for ${p.name}',
-                                                                                      style: MyTextStyle.f16(
-                                                                                        weight: FontWeight.bold,
-                                                                                        blackColor,
-                                                                                      ),
-                                                                                      textAlign: TextAlign.left,
-                                                                                    ),
-                                                                                    SizedBox(
-                                                                                      height: 12,
-                                                                                    ),
-                                                                                    Column(
-                                                                                      children: p.addons!.map(
-                                                                                            (e,) {
-                                                                                          return Padding(
-                                                                                            padding: const EdgeInsets.symmetric(
-                                                                                              vertical: 4.0,
+                                                                                    textAlign: TextAlign.left,
+                                                                                  ),
+                                                                                  SizedBox(
+                                                                                    height: 12,
+                                                                                  ),
+                                                                                  Column(
+                                                                                    children: p.addons!.map(
+                                                                                          (e,) {
+                                                                                        return Padding(
+                                                                                          padding: const EdgeInsets.symmetric(
+                                                                                            vertical: 4.0,
+                                                                                          ),
+                                                                                          child: Container(
+                                                                                            padding: const EdgeInsets.all(
+                                                                                              8,
                                                                                             ),
-                                                                                            child: Container(
-                                                                                              padding: const EdgeInsets.all(
+                                                                                            decoration: BoxDecoration(
+                                                                                              border: Border.all(
+                                                                                                color: blackColor,
+                                                                                              ),
+                                                                                              borderRadius: BorderRadius.circular(
                                                                                                 8,
                                                                                               ),
-                                                                                              decoration: BoxDecoration(
-                                                                                                border: Border.all(
-                                                                                                  color: blackColor,
-                                                                                                ),
-                                                                                                borderRadius: BorderRadius.circular(
-                                                                                                  8,
-                                                                                                ),
-                                                                                              ),
-                                                                                              child: Row(
-                                                                                                children: [
-                                                                                                  Expanded(
-                                                                                                    child: Column(
-                                                                                                      crossAxisAlignment: CrossAxisAlignment
-                                                                                                          .start,
-                                                                                                      children: [
-                                                                                                        Text(
-                                                                                                          e.name ??
-                                                                                                              '',
-                                                                                                          style: const TextStyle(
-                                                                                                            fontWeight: FontWeight
-                                                                                                                .bold,
-                                                                                                          ),
-                                                                                                        ),
-                                                                                                        const SizedBox(
-                                                                                                          height: 4,
-                                                                                                        ),
-                                                                                                        Text(
-                                                                                                          e.isFree ==
-                                                                                                              true
-                                                                                                              ? "Free (Max: ${e
-                                                                                                              .maxQuantity})"
-                                                                                                              : "₹ ${e.price
-                                                                                                              ?.toStringAsFixed(2) ??
-                                                                                                              '0.00'} (Max: ${e
-                                                                                                              .maxQuantity})",
-                                                                                                          style: TextStyle(
-                                                                                                            color: Colors.grey
-                                                                                                                .shade600,
-                                                                                                          ),
-                                                                                                        ),
-                                                                                                      ],
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                  Row(
+                                                                                            ),
+                                                                                            child: Row(
+                                                                                              children: [
+                                                                                                Expanded(
+                                                                                                  child: Column(
+                                                                                                    crossAxisAlignment: CrossAxisAlignment
+                                                                                                        .start,
                                                                                                     children: [
-                                                                                                      IconButton(
-                                                                                                        icon: const Icon(
-                                                                                                          Icons.remove,
+                                                                                                      Text(
+                                                                                                        e.name ??
+                                                                                                            '',
+                                                                                                        style: const TextStyle(
+                                                                                                          fontWeight: FontWeight
+                                                                                                              .bold,
                                                                                                         ),
-                                                                                                        onPressed:
-                                                                                                        (e.quantity) >
-                                                                                                            0
-                                                                                                            ? () {
-                                                                                                          setState(
-                                                                                                                () {
-                                                                                                              e.quantity =
-                                                                                                                  (e.quantity) -
-                                                                                                                      1;
-                                                                                                            },
-                                                                                                          );
-                                                                                                        }
-                                                                                                            : null,
+                                                                                                      ),
+                                                                                                      const SizedBox(
+                                                                                                        height: 4,
                                                                                                       ),
                                                                                                       Text(
-                                                                                                        '${e.quantity}',
-                                                                                                      ),
-                                                                                                      IconButton(
-                                                                                                        icon: const Icon(
-                                                                                                          Icons.add,
-                                                                                                          color: Colors.brown,
+                                                                                                        e.isFree ==
+                                                                                                            true
+                                                                                                            ? "Free (Max: ${e
+                                                                                                            .maxQuantity})"
+                                                                                                            : "₹ ${e.price
+                                                                                                            ?.toStringAsFixed(2) ??
+                                                                                                            '0.00'} (Max: ${e
+                                                                                                            .maxQuantity})",
+                                                                                                        style: TextStyle(
+                                                                                                          color: Colors.grey
+                                                                                                              .shade600,
                                                                                                         ),
-                                                                                                        onPressed:
-                                                                                                        (e.quantity) <
-                                                                                                            (e.maxQuantity ??
-                                                                                                                1)
-                                                                                                            ? () {
-                                                                                                          setState(
-                                                                                                                () {
-                                                                                                              e.quantity =
-                                                                                                                  (e.quantity) +
-                                                                                                                      1;
-                                                                                                            },
-                                                                                                          );
-                                                                                                        }
-                                                                                                            : null,
                                                                                                       ),
                                                                                                     ],
                                                                                                   ),
-                                                                                                ],
-                                                                                              ),
+                                                                                                ),
+                                                                                                Row(
+                                                                                                  children: [
+                                                                                                    IconButton(
+                                                                                                      icon: const Icon(
+                                                                                                        Icons.remove,
+                                                                                                      ),
+                                                                                                      onPressed:
+                                                                                                      (e.quantity) >
+                                                                                                          0
+                                                                                                          ? () {
+                                                                                                        setState(
+                                                                                                              () {
+                                                                                                            e.quantity =
+                                                                                                                (e.quantity) -
+                                                                                                                    1;
+                                                                                                          },
+                                                                                                        );
+                                                                                                      }
+                                                                                                          : null,
+                                                                                                    ),
+                                                                                                    Text(
+                                                                                                      '${e.quantity}',
+                                                                                                    ),
+                                                                                                    IconButton(
+                                                                                                      icon: const Icon(
+                                                                                                        Icons.add,
+                                                                                                        color: Colors.brown,
+                                                                                                      ),
+                                                                                                      onPressed:
+                                                                                                      (e.quantity) <
+                                                                                                          (e.maxQuantity ??
+                                                                                                              1)
+                                                                                                          ? () {
+                                                                                                        setState(
+                                                                                                              () {
+                                                                                                            e.quantity =
+                                                                                                                (e.quantity) +
+                                                                                                                    1;
+                                                                                                          },
+                                                                                                        );
+                                                                                                      }
+                                                                                                          : null,
+                                                                                                    ),
+                                                                                                  ],
+                                                                                                ),
+                                                                                              ],
                                                                                             ),
+                                                                                          ),
+                                                                                        );
+                                                                                      },
+                                                                                    ).toList(),
+                                                                                  ),
+                                                                                  SizedBox(
+                                                                                    height: 20,
+                                                                                  ),
+                                                                                  Row(
+                                                                                    mainAxisAlignment: MainAxisAlignment.end,
+                                                                                    children: [
+                                                                                      ElevatedButton(
+                                                                                        onPressed: () {
+                                                                                          setState(
+                                                                                                () {
+                                                                                              if (counter >
+                                                                                                  1 ||
+                                                                                                  counter ==
+                                                                                                      1) {
+                                                                                                counter--;
+                                                                                              }
+                                                                                            },
+                                                                                          );
+                                                                                          Navigator.of(
+                                                                                            context,
+                                                                                          ).pop();
+                                                                                        },
+                                                                                        style: ElevatedButton.styleFrom(
+                                                                                          backgroundColor: greyColor.shade400,
+                                                                                          minimumSize: Size(
+                                                                                            80,
+                                                                                            40,
+                                                                                          ),
+                                                                                          padding: EdgeInsets.all(
+                                                                                            20,
+                                                                                          ),
+                                                                                          shape: RoundedRectangleBorder(
+                                                                                            borderRadius: BorderRadius.circular(
+                                                                                              10,
+                                                                                            ),
+                                                                                          ),
+                                                                                        ),
+                                                                                        child: Text(
+                                                                                          'Cancel',
+                                                                                          style: MyTextStyle.f14(
+                                                                                            blackColor,
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                      SizedBox(
+                                                                                        width: 8,
+                                                                                      ),
+                                                                                      ElevatedButton(
+                                                                                        onPressed: () {
+                                                                                          final currentQtyInCart = getCurrentQuantity(
+                                                                                            p.id.toString(),
+                                                                                          );
+                                                                                          bool canAdd;
+
+                                                                                          if (p.isStock ==
+                                                                                              true) {
+                                                                                            if ((widget.isEditingOrder ==
+                                                                                                true &&
+                                                                                                widget.existingOrder?.data
+                                                                                                    ?.orderStatus ==
+                                                                                                    "COMPLETED") ||
+                                                                                                (widget.isEditingOrder ==
+                                                                                                    true &&
+                                                                                                    widget.existingOrder?.data
+                                                                                                        ?.orderStatus ==
+                                                                                                        "WAITLIST")) {
+                                                                                              final paidQty =
+                                                                                                  widget.existingOrder?.data?.items
+                                                                                                      ?.firstWhereOrNull(
+                                                                                                        (item,) =>
+                                                                                                    item.product?.id ==
+                                                                                                        p.id,
+                                                                                                  )
+                                                                                                      ?.quantity ??
+                                                                                                      0;
+                                                                                              canAdd =
+                                                                                                  currentQtyInCart <
+                                                                                                      ((p.availableQuantity ??
+                                                                                                          0) +
+                                                                                                          paidQty);
+                                                                                            } else {
+                                                                                              canAdd =
+                                                                                                  currentQtyInCart <
+                                                                                                      (p.availableQuantity ??
+                                                                                                          0);
+                                                                                            }
+                                                                                          } else {
+                                                                                            canAdd = true;
+                                                                                          }
+
+                                                                                          if (!canAdd) {
+                                                                                            showToast(
+                                                                                              "Cannot add more items. Stock limit reached.",
+                                                                                              context,
+                                                                                              color: false,
+                                                                                            );
+                                                                                            return;
+                                                                                          }
+
+                                                                                          setState(
+                                                                                                () {
+                                                                                              isSplitPayment = false;
+                                                                                              if (widget.isEditingOrder !=
+                                                                                                  true) {
+                                                                                                selectedOrderType = OrderType.line;
+                                                                                              }
+                                                                                              final index = billingItems.indexWhere(
+                                                                                                    (item,) =>
+                                                                                                item['_id'] ==
+                                                                                                    p.id,
+                                                                                              );
+                                                                                              if (index !=
+                                                                                                  -1) {
+                                                                                                billingItems[index]['qty'] =
+                                                                                                    billingItems[index]['qty'] +
+                                                                                                        1;
+                                                                                                updateControllerText(
+                                                                                                  p.id.toString(),
+                                                                                                  billingItems[index]['qty'],
+                                                                                                );
+                                                                                              } else {
+                                                                                                billingItems.add(
+                                                                                                  {
+                                                                                                    "_id": p.id,
+                                                                                                    "basePrice": p.basePrice,
+                                                                                                    "image": p.image,
+                                                                                                    "qty": 1,
+                                                                                                    "name": p.name,
+                                                                                                    "availableQuantity": p
+                                                                                                        .availableQuantity,
+                                                                                                    "selectedAddons": p.addons!
+                                                                                                        .where(
+                                                                                                          (addon,) =>
+                                                                                                      addon.quantity >
+                                                                                                          0,
+                                                                                                    )
+                                                                                                        .map(
+                                                                                                          (addon,) =>
+                                                                                                      {
+                                                                                                        "_id": addon.id,
+                                                                                                        "price": addon.price,
+                                                                                                        "quantity": addon.quantity,
+                                                                                                        "name": addon.name,
+                                                                                                        "isAvailable": addon
+                                                                                                            .isAvailable,
+                                                                                                        "maxQuantity": addon
+                                                                                                            .maxQuantity,
+                                                                                                        "isFree": addon.isFree,
+                                                                                                      },
+                                                                                                    )
+                                                                                                        .toList(),
+                                                                                                  },
+                                                                                                );
+                                                                                                updateControllerText(
+                                                                                                  p.id.toString(),
+                                                                                                  1,
+                                                                                                );
+                                                                                              }
+                                                                                              context
+                                                                                                  .read<
+                                                                                                  FoodCategoryBloc
+                                                                                              >()
+                                                                                                  .add(
+                                                                                                AddToBilling(
+                                                                                                  List.from(
+                                                                                                    billingItems,
+                                                                                                  ),
+                                                                                                  isDiscountApplied,
+                                                                                                  selectedOrderType,
+                                                                                                ),
+                                                                                              );
+
+                                                                                              Navigator.of(
+                                                                                                context,
+                                                                                              ).pop();
+                                                                                            },
                                                                                           );
                                                                                         },
-                                                                                      ).toList(),
-                                                                                    ),
-                                                                                    SizedBox(
-                                                                                      height: 20,
-                                                                                    ),
-                                                                                    Row(
-                                                                                      mainAxisAlignment: MainAxisAlignment.end,
-                                                                                      children: [
-                                                                                        ElevatedButton(
-                                                                                          onPressed: () {
-                                                                                            setState(
-                                                                                                  () {
-                                                                                                if (counter >
-                                                                                                    1 ||
-                                                                                                    counter ==
-                                                                                                        1) {
-                                                                                                  counter--;
-                                                                                                }
-                                                                                              },
-                                                                                            );
-                                                                                            Navigator.of(
-                                                                                              context,
-                                                                                            ).pop();
-                                                                                          },
-                                                                                          style: ElevatedButton.styleFrom(
-                                                                                            backgroundColor: greyColor.shade400,
-                                                                                            minimumSize: Size(
-                                                                                              80,
-                                                                                              40,
-                                                                                            ),
-                                                                                            padding: EdgeInsets.all(
-                                                                                              20,
-                                                                                            ),
-                                                                                            shape: RoundedRectangleBorder(
-                                                                                              borderRadius: BorderRadius.circular(
-                                                                                                10,
-                                                                                              ),
-                                                                                            ),
+                                                                                        style: ElevatedButton.styleFrom(
+                                                                                          backgroundColor: appPrimaryColor,
+                                                                                          minimumSize: Size(
+                                                                                            80,
+                                                                                            40,
                                                                                           ),
-                                                                                          child: Text(
-                                                                                            'Cancel',
-                                                                                            style: MyTextStyle.f14(
-                                                                                              blackColor,
+                                                                                          padding: EdgeInsets.all(
+                                                                                            20,
+                                                                                          ),
+                                                                                          shape: RoundedRectangleBorder(
+                                                                                            borderRadius: BorderRadius.circular(
+                                                                                              10,
                                                                                             ),
                                                                                           ),
                                                                                         ),
-                                                                                        SizedBox(
-                                                                                          width: 8,
+                                                                                        child: Text(
+                                                                                          'Add to Bill',
+                                                                                          style: MyTextStyle.f14(
+                                                                                            whiteColor,
+                                                                                          ),
                                                                                         ),
-                                                                                        ElevatedButton(
-                                                                                          onPressed: () {
-                                                                                            final currentQtyInCart = getCurrentQuantity(
-                                                                                              p.id.toString(),
-                                                                                            );
-                                                                                            bool canAdd;
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        );
+                                                                      },
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              },
+                                                            );
+                                                          }
+                                                        }
+                                                        else {
+                                                          final currentQtyInCart =
+                                                              getCurrentQuantity(
+                                                                p.id.toString(),
+                                                              );
+                                                          bool canAdd;
 
-                                                                                            if (p.isStock ==
+                                                          if (p.isStock ==
+                                                              true) {
+                                                            if ((widget.isEditingOrder ==
+                                                                        true &&
+                                                                    widget
+                                                                            .existingOrder
+                                                                            ?.data
+                                                                            ?.orderStatus ==
+                                                                        "COMPLETED") ||
+                                                                (widget.isEditingOrder ==
+                                                                        true &&
+                                                                    widget
+                                                                            .existingOrder
+                                                                            ?.data
+                                                                            ?.orderStatus ==
+                                                                        "WAITLIST")) {
+                                                              final paidQty =
+                                                                  widget
+                                                                      .existingOrder
+                                                                      ?.data
+                                                                      ?.items
+                                                                      ?.firstWhereOrNull(
+                                                                        (
+                                                                          item,
+                                                                        ) =>
+                                                                            item.product?.id ==
+                                                                            p.id,
+                                                                      )
+                                                                      ?.quantity ??
+                                                                  0;
+                                                              canAdd =
+                                                                  currentQtyInCart <
+                                                                  ((p.availableQuantity ??
+                                                                          0) +
+                                                                      paidQty);
+                                                            } else {
+                                                              canAdd =
+                                                                  currentQtyInCart <
+                                                                  (p.availableQuantity ??
+                                                                      0);
+                                                            }
+                                                          } else {
+                                                            canAdd = true;
+                                                          }
+
+                                                          if (!canAdd) {
+                                                            showToast(
+                                                              "Cannot add more items. Stock limit reached.",
+                                                              context,
+                                                              color: false,
+                                                            );
+                                                            return;
+                                                          }
+
+                                                          setState(() {
+                                                            isSplitPayment =
+                                                                false;
+                                                            if (widget
+                                                                    .isEditingOrder !=
+                                                                true) {
+                                                              selectedOrderType =
+                                                                  OrderType
+                                                                      .line;
+                                                            }
+                                                            final index =
+                                                                billingItems
+                                                                    .indexWhere(
+                                                                      (
+                                                                        item,
+                                                                      ) =>
+                                                                          item['_id'] ==
+                                                                          p.id,
+                                                                    );
+                                                            if (index != -1) {
+                                                              billingItems[index]['qty'] =
+                                                                  billingItems[index]['qty'] +
+                                                                  1;
+                                                              updateControllerText(
+                                                                p.id.toString(),
+                                                                billingItems[index]['qty'],
+                                                              );
+                                                            } else {
+                                                              billingItems.add({
+                                                                "_id": p.id,
+                                                                "basePrice": p
+                                                                    .basePrice,
+                                                                "image":
+                                                                    p.image,
+                                                                "qty": 1,
+                                                                "name":
+                                                                    p.name,
+                                                                "availableQuantity":
+                                                                    p.availableQuantity,
+                                                                "selectedAddons": p
+                                                                    .addons!
+                                                                    .where(
+                                                                      (
+                                                                        addon,
+                                                                      ) =>
+                                                                          addon.quantity >
+                                                                          0,
+                                                                    )
+                                                                    .map(
+                                                                      (
+                                                                        addon,
+                                                                      ) => {
+                                                                        "_id":
+                                                                            addon.id,
+                                                                        "price":
+                                                                            addon.price,
+                                                                        "quantity":
+                                                                            addon.quantity,
+                                                                        "name":
+                                                                            addon.name,
+                                                                        "isAvailable":
+                                                                            addon.isAvailable,
+                                                                        "maxQuantity":
+                                                                            addon.maxQuantity,
+                                                                        "isFree":
+                                                                            addon.isFree,
+                                                                      },
+                                                                    )
+                                                                    .toList(),
+                                                              });
+                                                              updateControllerText(
+                                                                p.id.toString(),
+                                                                1,
+                                                              );
+                                                            }
+                                                            context
+                                                                .read<
+                                                                  FoodCategoryBloc
+                                                                >()
+                                                                .add(
+                                                                  AddToBilling(
+                                                                    List.from(
+                                                                      billingItems,
+                                                                    ),
+                                                                    isDiscountApplied,
+                                                                    selectedOrderType,
+                                                                  ),
+                                                                );
+                                                          });
+                                                        }
+                                                      });
+                                                    },
+                                                    child: Opacity(
+                                                      opacity:
+                                                          (p.availableQuantity ??
+                                                                      0) >
+                                                                  0 ||
+                                                              p.isStock ==
+                                                                  false
+                                                          ? 1.0
+                                                          : 0.5,
+                                                      child: Card(
+                                                        color: whiteColor,
+                                                        elevation: 6,
+                                                        shadowColor:
+                                                            greyColor,
+                                                        shape: RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                12,
+                                                              ),
+                                                        ),
+                                                        child: Column(
+                                                          mainAxisSize:
+                                                              MainAxisSize
+                                                                  .min,
+                                                          children: [
+                                                            Padding(
+                                                              padding: const EdgeInsets.all(8.0),
+                                                              child: ClipOval(
+                                                                child: CachedNetworkImage(
+                                                                  imageUrl:
+                                                                      p.image ??
+                                                                      "",
+                                                                  width: 55,
+                                                                  height: 55,
+                                                                  fit: BoxFit
+                                                                      .cover,
+                                                                  errorWidget:
+                                                                      (
+                                                                        context,
+                                                                        url,
+                                                                        error,
+                                                                      ) {
+                                                                        return Image.asset(
+                                                                          Images.all,
+                                                                          width: 25,
+                                                                          height: 25,
+                                                                          fit: BoxFit.cover,
+                                                                        );
+                                                                      },
+                                                                  progressIndicatorBuilder:
+                                                                      (
+                                                                        context,
+                                                                        url,
+                                                                        downloadProgress,
+                                                                      ) => const SpinKitCircle(
+                                                                        color:
+                                                                            appPrimaryColor,
+                                                                        size:
+                                                                            30,
+                                                                      ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                              width:
+                                                                  size.width *
+                                                                  0.35,
+                                                              child: Text(
+                                                                p.name ?? '',
+                                                                style: MyTextStyle.f13(
+                                                                  blackColor,
+                                                                  weight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                                maxLines: 3,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                              ),
+                                                            ),
+                                                            if (p.isStock ==
+                                                                true)
+                                                              SizedBox(
+                                                                width:
+                                                                    size.width *
+                                                                    0.25,
+                                                                child: FittedBox(
+                                                                  fit: BoxFit
+                                                                      .scaleDown,
+                                                                  child: Row(
+                                                                    children: [
+                                                                      Text(
+                                                                        'Available: ',
+                                                                        style: MyTextStyle.f12(
+                                                                          greyColor,
+                                                                          weight:
+                                                                              FontWeight.w500,
+                                                                        ),
+                                                                        maxLines:
+                                                                            1,
+                                                                        overflow:
+                                                                            TextOverflow.ellipsis,
+                                                                      ),
+                                                                      Text(
+                                                                        '${p.availableQuantity ?? 0}',
+                                                                        style: MyTextStyle.f12(
+                                                                          (p.availableQuantity ??
+                                                                                      0) >
+                                                                                  0
+                                                                              ? greyColor
+                                                                              : redColor,
+                                                                          weight:
+                                                                              FontWeight.w500,
+                                                                        ),
+                                                                        maxLines:
+                                                                            1,
+                                                                        overflow:
+                                                                            TextOverflow.ellipsis,
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            if ((p.availableQuantity ??
+                                                                        0) <=
+                                                                    0 &&
+                                                                p.isStock ==
+                                                                    true) ...[
+                                                              verticalSpace(
+                                                                height: 5,
+                                                              ),
+                                                              Container(
+                                                                padding:
+                                                                    EdgeInsets.symmetric(
+                                                                      horizontal:
+                                                                          8,
+                                                                      vertical:
+                                                                          4,
+                                                                    ),
+                                                                decoration: BoxDecoration(
+                                                                  color: redColor200,
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(
+                                                                        4,
+                                                                      ),
+                                                                ),
+                                                                child: Text(
+                                                                  'Out of Stock',
+                                                                  style: MyTextStyle.f12(
+                                                                    redColor,
+                                                                    weight: FontWeight
+                                                                        .bold,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                            if((currentQuantity ==
+                                                                0 &&
+                                                                p.isStock ==
+                                                                    false) ||(currentQuantity ==
+                                                                0 &&
+                                                                p.isStock ==
+                                                                    true) ||
+                                                                (currentQuantity !=
+                                                                    0 &&
+                                                                    p.isStock ==
+                                                                        false) || (currentQuantity !=
+                                                                0 &&
+                                                                p.isStock ==
+                                                                    true))
+                                                              verticalSpace(
+                                                                height: 5,
+                                                              ),
+                                                            if((currentQuantity ==
+                                                                        0 &&
+                                                                    p.isStock ==
+                                                                        false) ||(currentQuantity ==
+                                                                0 &&
+                                                                p.isStock ==
+                                                                    true) ||
+                                                                (currentQuantity !=
+                                                                        0 &&
+                                                                    p.isStock ==
+                                                                        false) || (currentQuantity !=
+                                                                0 &&
+                                                                p.isStock ==
+                                                                    true))
+                                                              SizedBox(
+                                                                width:
+                                                                    size.width *
+                                                                    0.25,
+                                                                child: FittedBox(
+                                                                  fit: BoxFit
+                                                                      .scaleDown,
+                                                                  child: Text(
+                                                                    '₹ ${p.basePrice}',
+                                                                    style: MyTextStyle.f14(
+                                                                      blackColor,
+                                                                      weight:
+                                                                          FontWeight.w600,
+                                                                    ),
+                                                                    maxLines:
+                                                                        1,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            // if (currentQuantity !=
+                                                            //         0 &&
+                                                            //     (p.availableQuantity ??
+                                                            //             0) >
+                                                            //         0)
+                                                              verticalSpace(
+                                                                height: 10,
+                                                              ),
+                                                            if (currentQuantity !=
+                                                                    0 &&
+                                                                (p.availableQuantity ??
+                                                                        0) >
+                                                                    0)
+                                                              Padding(
+                                                                padding:
+                                                                    const EdgeInsets.only(
+                                                                      left:
+                                                                          5.0,
+                                                                      right:
+                                                                          5.0,
+                                                                    ),
+                                                                child: Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  children: [
+                                                                    CircleAvatar(
+                                                                      radius: 15,
+                                                                      backgroundColor: greyColor200,
+                                                                      child: IconButton(
+                                                                        icon: Icon(
+                                                                          Icons.remove,
+                                                                          size: 15,
+                                                                          color: blackColor,
+                                                                        ),
+                                                                        onPressed: () {
+                                                                          setState(() {
+                                                                            isSplitPayment = false;
+                                                                            if (widget.isEditingOrder != true) {
+                                                                              selectedOrderType = OrderType.line;
+                                                                            }
+                                                                            final index = billingItems.indexWhere(
+                                                                                  (item) => item['_id'] == p.id,
+                                                                            );
+
+                                                                            if (index != -1) {
+                                                                              final currentQty = billingItems[index]['qty'];
+
+                                                                              // 🔎 original quantity from existing order
+                                                                              final originalQty = widget.existingOrder?.data?.items
+                                                                                  ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                                                  ?.quantity ??
+                                                                                  0;
+
+                                                                              if (isOriginalOrderItem(p.id.toString())) {
+                                                                                // ✅ original item: only allow decrease if above originalQty
+                                                                                if (currentQty > originalQty) {
+                                                                                  billingItems[index]['qty'] = currentQty - 1;
+                                                                                  updateControllerText(
+                                                                                    p.id.toString(),
+                                                                                    billingItems[index]['qty'],
+                                                                                  );
+                                                                                } else {
+                                                                                  // show feedback if user tries to go below
+                                                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                                                    SnackBar(
+                                                                                      content: Text(
+                                                                                        "Cannot reduce below original ordered qty ($originalQty)",
+                                                                                      ),
+                                                                                    ),
+                                                                                  );
+                                                                                }
+                                                                              } else {
+                                                                                // ✅ new item: free to decrease/remove
+                                                                                if (currentQty > 1) {
+                                                                                  billingItems[index]['qty'] = currentQty - 1;
+                                                                                  updateControllerText(
+                                                                                    p.id.toString(),
+                                                                                    billingItems[index]['qty'],
+                                                                                  );
+                                                                                } else {
+                                                                                  billingItems.removeWhere((item) => item['_id'] == p.id);
+                                                                                  quantityControllers.remove(p.id);
+                                                                                  if (billingItems.isEmpty) {
+                                                                                    isDiscountApplied = false;
+                                                                                    widget.isEditingOrder = false;
+                                                                                    tableId = null;
+                                                                                    waiterId = null;
+                                                                                    selectedValue = null;
+                                                                                    selectedValueWaiter = null;
+                                                                                  }
+                                                                                }
+                                                                              }
+
+                                                                              context.read<FoodCategoryBloc>().add(
+                                                                                AddToBilling(
+                                                                                  List.from(billingItems),
+                                                                                  isDiscountApplied,
+                                                                                  selectedOrderType,
+                                                                                ),
+                                                                              );
+                                                                              if(billingItems.isEmpty || billingItems == []) {
+                                                                                for (var addon in p
+                                                                                    .addons!) {
+                                                                                  addon
+                                                                                      .isSelected =
+                                                                                  false;
+                                                                                  addon
+                                                                                      .quantity =
+                                                                                  0;
+                                                                                }
+                                                                              }
+                                                                            }
+                                                                          });
+                                                                        },
+                                                                      ),
+                                                                    ),
+                                                                    Container(
+                                                                      width: 45,
+                                                                      height: 32,
+                                                                      margin: const EdgeInsets.symmetric(horizontal: 12),
+                                                                      decoration: BoxDecoration(
+                                                                        border: Border.all(
+                                                                          color: (widget.isEditingOrder == true &&
+                                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                              isOriginalOrderItem(p.id.toString()))
+                                                                              ? greyColor200!
+                                                                              : greyColor,
+                                                                        ),
+                                                                        borderRadius: BorderRadius.circular(4),
+                                                                        color: (widget.isEditingOrder == true &&
+                                                                            (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                            isOriginalOrderItem(p.id.toString()))
+                                                                            ? greyColor200
+                                                                            : whiteColor,
+                                                                      ),
+                                                                      child: TextField(
+                                                                        controller: currentController,
+                                                                        textAlign: TextAlign.center,
+                                                                        keyboardType: TextInputType.number,
+                                                                        enabled: !(widget.isEditingOrder == true &&
+                                                                            (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                            isOriginalOrderItem(p.id.toString())), // Disable for original items
+                                                                        style: MyTextStyle.f16(
+                                                                          (widget.isEditingOrder == true &&
+                                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                              isOriginalOrderItem(p.id.toString()))
+                                                                              ? greyColor // Gray text for locked items
+                                                                              : blackColor,
+                                                                        ),
+                                                                        decoration: InputDecoration(
+                                                                          border: InputBorder.none,
+                                                                          isDense: true,
+                                                                          contentPadding: EdgeInsets.all(8),
+                                                                          hintText: (widget.isEditingOrder == true &&
+                                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                              isOriginalOrderItem(p.id.toString()))
+                                                                              ? "Locked"
+                                                                              : null,
+                                                                          hintStyle: TextStyle(color: greyColor, fontSize: 12),
+                                                                        ),
+                                                                        onChanged: (value) {
+                                                                          final newQty = int.tryParse(value);
+
+                                                                          // original order quantity (0 if not in existing order)
+                                                                          final originalQty = widget.existingOrder?.data?.items
+                                                                              ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                                              ?.quantity ??
+                                                                              0;
+
+                                                                          if (newQty != null && newQty > 0) {
+                                                                            bool canSetQuantity = true;
+
+                                                                            if (p.isStock == true) {
+                                                                              if ((widget.isEditingOrder == true &&
+                                                                                  (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                      widget.existingOrder?.data?.orderStatus == "WAITLIST"))) {
+                                                                                // For editing order, allow up to available stock + originalQty
+                                                                                canSetQuantity = newQty <= ((p.availableQuantity ?? 0) + originalQty);
+                                                                              } else {
+                                                                                canSetQuantity = newQty <= (p.availableQuantity ?? 0);
+                                                                              }
+                                                                            }
+
+                                                                            // 👇 extra rule: don't allow decreasing below originalQty
+                                                                            if (widget.isEditingOrder == true &&
+                                                                                isOriginalOrderItem(p.id.toString()) &&
+                                                                                newQty < originalQty) {
+                                                                              canSetQuantity = false;
+                                                                            }
+
+                                                                            if (canSetQuantity) {
+                                                                              setState(() {
+                                                                                isSplitPayment = false;
+                                                                                if (widget.isEditingOrder != true) {
+                                                                                  selectedOrderType = OrderType.line;
+                                                                                }
+
+                                                                                final index =
+                                                                                billingItems.indexWhere((item) => item['_id'] == p.id);
+                                                                                if (index != -1) {
+                                                                                  billingItems[index]['qty'] = newQty;
+                                                                                } else {
+                                                                                  billingItems.add({
+                                                                                    "_id": p.id,
+                                                                                    "basePrice": p.basePrice,
+                                                                                    "image": p.image,
+                                                                                    "qty": newQty,
+                                                                                    "name": p.name,
+                                                                                    "availableQuantity": p.availableQuantity,
+                                                                                    "selectedAddons": p.addons!
+                                                                                        .where((addon) => addon.quantity > 0)
+                                                                                        .map((addon) => {
+                                                                                      "_id": addon.id,
+                                                                                      "price": addon.price,
+                                                                                      "quantity": addon.quantity,
+                                                                                      "name": addon.name,
+                                                                                      "isAvailable": addon.isAvailable,
+                                                                                      "maxQuantity": addon.maxQuantity,
+                                                                                      "isFree": addon.isFree,
+                                                                                    })
+                                                                                        .toList(),
+                                                                                  });
+                                                                                }
+                                                                                context.read<FoodCategoryBloc>().add(
+                                                                                  AddToBilling(
+                                                                                    List.from(billingItems),
+                                                                                    isDiscountApplied,
+                                                                                    selectedOrderType,
+                                                                                  ),
+                                                                                );
+                                                                              });
+                                                                            } else {
+                                                                              // restore previous valid qty
+                                                                              currentController.text =
+                                                                                  getCurrentQuantity(p.id.toString()).toString();
+                                                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                                                SnackBar(
+                                                                                  content: Text(
+                                                                                    newQty < originalQty
+                                                                                        ? "Cannot reduce below original ordered qty ($originalQty)"
+                                                                                        : "Maximum available quantity is ${p.availableQuantity ?? 0}",
+                                                                                  ),
+                                                                                ),
+                                                                              );
+                                                                            }
+                                                                          } else if (newQty == 0 || value.isEmpty) {
+                                                                            // 👇 allow removal only if it's not an original order item
+                                                                            if (isOriginalOrderItem(p.id.toString())) {
+                                                                              currentController.text = originalQty.toString();
+                                                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                                                SnackBar(
+                                                                                  content: Text(
+                                                                                    "This item cannot be removed. Minimum qty is $originalQty",
+                                                                                  ),
+                                                                                ),
+                                                                              );
+                                                                            } else {
+                                                                              setState(() {
+                                                                                billingItems.removeWhere((item) => item['_id'] == p.id);
+                                                                                quantityControllers.remove(p.id);
+                                                                                if (billingItems.isEmpty) {
+                                                                                  isDiscountApplied = false;
+                                                                                  widget.isEditingOrder = false;
+                                                                                  tableId = null;
+                                                                                  waiterId = null;
+                                                                                  selectedValue = null;
+                                                                                  selectedValueWaiter = null;
+                                                                                }
+                                                                                context.read<FoodCategoryBloc>().add(
+                                                                                  AddToBilling(
+                                                                                    List.from(billingItems),
+                                                                                    isDiscountApplied,
+                                                                                    selectedOrderType,
+                                                                                  ),
+                                                                                );
+                                                                              });
+                                                                            }
+                                                                          }
+                                                                        },
+
+                                                                        onTap: () {
+                                                                          if (!(widget.isEditingOrder == true &&
+                                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                              isOriginalOrderItem(p.id.toString()))) {
+                                                                            currentController.selection = TextSelection(
+                                                                              baseOffset: 0,
+                                                                              extentOffset: currentController.text.length,
+                                                                            );
+                                                                          }
+                                                                        },
+                                                                      ),
+                                                                    ),
+                                                                    Builder(
+                                                                      builder:
+                                                                          (
+                                                                            context,
+                                                                          ) {
+                                                                            final currentQtyInCart = getCurrentQuantity(
+                                                                              p.id.toString(),
+                                                                            );
+                                                                            bool
+                                                                            canAddMore;
+                                                                            if (p.isStock ==
+                                                                                true) {
+                                                                              if ((widget.isEditingOrder ==
+                                                                                          true &&
+                                                                                      widget.existingOrder?.data?.orderStatus ==
+                                                                                          "COMPLETED") ||
+                                                                                  (widget.isEditingOrder ==
+                                                                                          true &&
+                                                                                      widget.existingOrder?.data?.orderStatus ==
+                                                                                          "WAITLIST")) {
+                                                                                final paidQty =
+                                                                                    widget.existingOrder?.data?.items
+                                                                                        ?.firstWhereOrNull(
+                                                                                          (
+                                                                                            item,
+                                                                                          ) =>
+                                                                                              item.product?.id ==
+                                                                                              p.id,
+                                                                                        )
+                                                                                        ?.quantity ??
+                                                                                    0;
+                                                                                canAddMore =
+                                                                                    currentQtyInCart <
+                                                                                    ((p.availableQuantity ??
+                                                                                            0) +
+                                                                                        paidQty);
+                                                                              } else {
+                                                                                canAddMore =
+                                                                                    (p.availableQuantity ??
+                                                                                            0) >
+                                                                                        0 &&
+                                                                                    currentQtyInCart <
+                                                                                        (p.availableQuantity ??
+                                                                                            0);
+                                                                              }
+                                                                            } else {
+                                                                              canAddMore = true;
+                                                                            }
+
+                                                                            return CircleAvatar(
+                                                                              radius: 15,
+                                                                              backgroundColor: canAddMore
+                                                                                  ? appPrimaryColor
+                                                                                  : greyColor,
+                                                                              child: IconButton(
+                                                                                icon: Icon(
+                                                                                  Icons.add,
+                                                                                  size: 16,
+                                                                                  color: canAddMore
+                                                                                      ? whiteColor
+                                                                                      : blackColor,
+                                                                                ),
+                                                                                onPressed: canAddMore
+                                                                                    ? () {
+                                                                                        setState(
+                                                                                          () {
+                                                                                            isSplitPayment = false;
+                                                                                            if (widget.isEditingOrder !=
                                                                                                 true) {
-                                                                                              if ((widget.isEditingOrder ==
-                                                                                                  true &&
-                                                                                                  widget.existingOrder?.data
-                                                                                                      ?.orderStatus ==
-                                                                                                      "COMPLETED") ||
-                                                                                                  (widget.isEditingOrder ==
-                                                                                                      true &&
-                                                                                                      widget.existingOrder?.data
-                                                                                                          ?.orderStatus ==
-                                                                                                          "WAITLIST")) {
-                                                                                                final paidQty =
-                                                                                                    widget.existingOrder?.data?.items
-                                                                                                        ?.firstWhereOrNull(
-                                                                                                          (item,) =>
-                                                                                                      item.product?.id ==
-                                                                                                          p.id,
-                                                                                                    )
-                                                                                                        ?.quantity ??
-                                                                                                        0;
-                                                                                                canAdd =
-                                                                                                    currentQtyInCart <
-                                                                                                        ((p.availableQuantity ??
-                                                                                                            0) +
-                                                                                                            paidQty);
-                                                                                              } else {
-                                                                                                canAdd =
-                                                                                                    currentQtyInCart <
-                                                                                                        (p.availableQuantity ??
-                                                                                                            0);
-                                                                                              }
-                                                                                            } else {
-                                                                                              canAdd = true;
+                                                                                              selectedOrderType = OrderType.line;
                                                                                             }
-
-                                                                                            if (!canAdd) {
-                                                                                              showToast(
-                                                                                                "Cannot add more items. Stock limit reached.",
-                                                                                                context,
-                                                                                                color: false,
-                                                                                              );
-                                                                                              return;
-                                                                                            }
-
-                                                                                            setState(
-                                                                                                  () {
-                                                                                                isSplitPayment = false;
-                                                                                                if (widget.isEditingOrder !=
-                                                                                                    true) {
-                                                                                                  selectedOrderType = OrderType.line;
-                                                                                                }
-                                                                                                final index = billingItems.indexWhere(
-                                                                                                      (item,) =>
+                                                                                            final index = billingItems.indexWhere(
+                                                                                              (
+                                                                                                item,
+                                                                                              ) =>
                                                                                                   item['_id'] ==
-                                                                                                      p.id,
-                                                                                                );
-                                                                                                if (index !=
-                                                                                                    -1) {
-                                                                                                  billingItems[index]['qty'] =
-                                                                                                      billingItems[index]['qty'] +
-                                                                                                          1;
-                                                                                                  updateControllerText(
-                                                                                                    p.id.toString(),
-                                                                                                    billingItems[index]['qty'],
-                                                                                                  );
-                                                                                                } else {
-                                                                                                  billingItems.add(
-                                                                                                    {
-                                                                                                      "_id": p.id,
-                                                                                                      "basePrice": p.basePrice,
-                                                                                                      "image": p.image,
-                                                                                                      "qty": 1,
-                                                                                                      "name": p.name,
-                                                                                                      "availableQuantity": p
-                                                                                                          .availableQuantity,
-                                                                                                      "selectedAddons": p.addons!
-                                                                                                          .where(
-                                                                                                            (addon,) =>
-                                                                                                        addon.quantity >
+                                                                                                  p.id,
+                                                                                            );
+                                                                                            if (index !=
+                                                                                                -1) {
+                                                                                              billingItems[index]['qty'] =
+                                                                                                  billingItems[index]['qty'] +
+                                                                                                  1;
+                                                                                              updateControllerText(
+                                                                                                p.id.toString(),
+                                                                                                billingItems[index]['qty'],
+                                                                                              );
+                                                                                            } else {
+                                                                                              billingItems.add(
+                                                                                                {
+                                                                                                  "_id": p.id,
+                                                                                                  "basePrice": p.basePrice,
+                                                                                                  "image": p.image,
+                                                                                                  "qty": 1,
+                                                                                                  "name": p.name,
+                                                                                                  "availableQuantity": p.availableQuantity,
+                                                                                                  "selectedAddons": p.addons!
+                                                                                                      .where(
+                                                                                                        (
+                                                                                                          addon,
+                                                                                                        ) =>
+                                                                                                            addon.quantity >
                                                                                                             0,
                                                                                                       )
-                                                                                                          .map(
-                                                                                                            (addon,) =>
-                                                                                                        {
+                                                                                                      .map(
+                                                                                                        (
+                                                                                                          addon,
+                                                                                                        ) => {
                                                                                                           "_id": addon.id,
                                                                                                           "price": addon.price,
                                                                                                           "quantity": addon.quantity,
                                                                                                           "name": addon.name,
-                                                                                                          "isAvailable": addon
-                                                                                                              .isAvailable,
-                                                                                                          "maxQuantity": addon
-                                                                                                              .maxQuantity,
+                                                                                                          "isAvailable": addon.isAvailable,
+                                                                                                          "maxQuantity": addon.maxQuantity,
                                                                                                           "isFree": addon.isFree,
                                                                                                         },
                                                                                                       )
-                                                                                                          .toList(),
-                                                                                                    },
-                                                                                                  );
-                                                                                                  updateControllerText(
-                                                                                                    p.id.toString(),
-                                                                                                    1,
-                                                                                                  );
-                                                                                                }
-                                                                                                context
-                                                                                                    .read<
-                                                                                                    FoodCategoryBloc
+                                                                                                      .toList(),
+                                                                                                },
+                                                                                              );
+                                                                                              updateControllerText(
+                                                                                                p.id.toString(),
+                                                                                                1,
+                                                                                              );
+                                                                                            }
+                                                                                            context
+                                                                                                .read<
+                                                                                                  FoodCategoryBloc
                                                                                                 >()
-                                                                                                    .add(
+                                                                                                .add(
                                                                                                   AddToBilling(
                                                                                                     List.from(
                                                                                                       billingItems,
@@ -2144,1823 +2945,974 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                                                                     selectedOrderType,
                                                                                                   ),
                                                                                                 );
-
-                                                                                                Navigator.of(
-                                                                                                  context,
-                                                                                                ).pop();
-                                                                                              },
-                                                                                            );
                                                                                           },
-                                                                                          style: ElevatedButton.styleFrom(
-                                                                                            backgroundColor: appPrimaryColor,
-                                                                                            minimumSize: Size(
-                                                                                              80,
-                                                                                              40,
-                                                                                            ),
-                                                                                            padding: EdgeInsets.all(
-                                                                                              20,
-                                                                                            ),
-                                                                                            shape: RoundedRectangleBorder(
-                                                                                              borderRadius: BorderRadius.circular(
-                                                                                                10,
-                                                                                              ),
-                                                                                            ),
-                                                                                          ),
-                                                                                          child: Text(
-                                                                                            'Add to Bill',
-                                                                                            style: MyTextStyle.f14(
-                                                                                              whiteColor,
-                                                                                            ),
-                                                                                          ),
-                                                                                        ),
-                                                                                      ],
-                                                                                    ),
-                                                                                  ],
-                                                                                ),
-                                                                              ),
-                                                                            ),
-                                                                          );
-                                                                        },
-                                                                      ),
-                                                                    ),
-                                                                  );
-                                                                },
-                                                              );
-                                                            }
-                                                          }
-                                                          else {
-                                                            final currentQtyInCart =
-                                                                getCurrentQuantity(
-                                                                  p.id.toString(),
-                                                                );
-                                                            bool canAdd;
-
-                                                            if (p.isStock ==
-                                                                true) {
-                                                              if ((widget.isEditingOrder ==
-                                                                          true &&
-                                                                      widget
-                                                                              .existingOrder
-                                                                              ?.data
-                                                                              ?.orderStatus ==
-                                                                          "COMPLETED") ||
-                                                                  (widget.isEditingOrder ==
-                                                                          true &&
-                                                                      widget
-                                                                              .existingOrder
-                                                                              ?.data
-                                                                              ?.orderStatus ==
-                                                                          "WAITLIST")) {
-                                                                final paidQty =
-                                                                    widget
-                                                                        .existingOrder
-                                                                        ?.data
-                                                                        ?.items
-                                                                        ?.firstWhereOrNull(
-                                                                          (
-                                                                            item,
-                                                                          ) =>
-                                                                              item.product?.id ==
-                                                                              p.id,
-                                                                        )
-                                                                        ?.quantity ??
-                                                                    0;
-                                                                canAdd =
-                                                                    currentQtyInCart <
-                                                                    ((p.availableQuantity ??
-                                                                            0) +
-                                                                        paidQty);
-                                                              } else {
-                                                                canAdd =
-                                                                    currentQtyInCart <
-                                                                    (p.availableQuantity ??
-                                                                        0);
-                                                              }
-                                                            } else {
-                                                              canAdd = true;
-                                                            }
-
-                                                            if (!canAdd) {
-                                                              showToast(
-                                                                "Cannot add more items. Stock limit reached.",
-                                                                context,
-                                                                color: false,
-                                                              );
-                                                              return;
-                                                            }
-
-                                                            setState(() {
-                                                              isSplitPayment =
-                                                                  false;
-                                                              if (widget
-                                                                      .isEditingOrder !=
-                                                                  true) {
-                                                                selectedOrderType =
-                                                                    OrderType
-                                                                        .line;
-                                                              }
-                                                              final index =
-                                                                  billingItems
-                                                                      .indexWhere(
-                                                                        (
-                                                                          item,
-                                                                        ) =>
-                                                                            item['_id'] ==
-                                                                            p.id,
-                                                                      );
-                                                              if (index != -1) {
-                                                                billingItems[index]['qty'] =
-                                                                    billingItems[index]['qty'] +
-                                                                    1;
-                                                                updateControllerText(
-                                                                  p.id.toString(),
-                                                                  billingItems[index]['qty'],
-                                                                );
-                                                              } else {
-                                                                billingItems.add({
-                                                                  "_id": p.id,
-                                                                  "basePrice": p
-                                                                      .basePrice,
-                                                                  "image":
-                                                                      p.image,
-                                                                  "qty": 1,
-                                                                  "name":
-                                                                      p.name,
-                                                                  "availableQuantity":
-                                                                      p.availableQuantity,
-                                                                  "selectedAddons": p
-                                                                      .addons!
-                                                                      .where(
-                                                                        (
-                                                                          addon,
-                                                                        ) =>
-                                                                            addon.quantity >
-                                                                            0,
-                                                                      )
-                                                                      .map(
-                                                                        (
-                                                                          addon,
-                                                                        ) => {
-                                                                          "_id":
-                                                                              addon.id,
-                                                                          "price":
-                                                                              addon.price,
-                                                                          "quantity":
-                                                                              addon.quantity,
-                                                                          "name":
-                                                                              addon.name,
-                                                                          "isAvailable":
-                                                                              addon.isAvailable,
-                                                                          "maxQuantity":
-                                                                              addon.maxQuantity,
-                                                                          "isFree":
-                                                                              addon.isFree,
-                                                                        },
-                                                                      )
-                                                                      .toList(),
-                                                                });
-                                                                updateControllerText(
-                                                                  p.id.toString(),
-                                                                  1,
-                                                                );
-                                                              }
-                                                              context
-                                                                  .read<
-                                                                    FoodCategoryBloc
-                                                                  >()
-                                                                  .add(
-                                                                    AddToBilling(
-                                                                      List.from(
-                                                                        billingItems,
-                                                                      ),
-                                                                      isDiscountApplied,
-                                                                      selectedOrderType,
-                                                                    ),
-                                                                  );
-                                                            });
-                                                          }
-                                                        });
-                                                      },
-                                                      child: Opacity(
-                                                        opacity:
-                                                            (p.availableQuantity ??
-                                                                        0) >
-                                                                    0 ||
-                                                                p.isStock ==
-                                                                    false
-                                                            ? 1.0
-                                                            : 0.5,
-                                                        child: Card(
-                                                          color: whiteColor,
-                                                          elevation: 6,
-                                                          shadowColor:
-                                                              greyColor,
-                                                          shape: RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                  12,
-                                                                ),
-                                                          ),
-                                                          child: Column(
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .min,
-                                                            children: [
-                                                              Padding(
-                                                                padding: const EdgeInsets.all(8.0),
-                                                                child: ClipOval(
-                                                                  child: CachedNetworkImage(
-                                                                    imageUrl:
-                                                                        p.image ??
-                                                                        "",
-                                                                    width: 55,
-                                                                    height: 55,
-                                                                    fit: BoxFit
-                                                                        .cover,
-                                                                    errorWidget:
-                                                                        (
-                                                                          context,
-                                                                          url,
-                                                                          error,
-                                                                        ) {
-                                                                          return const Icon(
-                                                                            Icons.error,
-                                                                            size:
-                                                                                30,
-                                                                            color:
-                                                                                appHomeTextColor,
-                                                                          );
-                                                                        },
-                                                                    progressIndicatorBuilder:
-                                                                        (
-                                                                          context,
-                                                                          url,
-                                                                          downloadProgress,
-                                                                        ) => const SpinKitCircle(
-                                                                          color:
-                                                                              appPrimaryColor,
-                                                                          size:
-                                                                              30,
-                                                                        ),
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              SizedBox(
-                                                                width:
-                                                                    size.width *
-                                                                    0.35,
-                                                                child: Text(
-                                                                  p.name ?? '',
-                                                                  style: MyTextStyle.f13(
-                                                                    blackColor,
-                                                                    weight:
-                                                                        FontWeight
-                                                                            .w500,
-                                                                  ),
-                                                                  maxLines: 3,
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis,
-                                                                  textAlign:
-                                                                      TextAlign
-                                                                          .center,
-                                                                ),
-                                                              ),
-                                                              if (p.isStock ==
-                                                                  true)
-                                                                SizedBox(
-                                                                  width:
-                                                                      size.width *
-                                                                      0.25,
-                                                                  child: FittedBox(
-                                                                    fit: BoxFit
-                                                                        .scaleDown,
-                                                                    child: Row(
-                                                                      children: [
-                                                                        Text(
-                                                                          'Available: ',
-                                                                          style: MyTextStyle.f12(
-                                                                            greyColor,
-                                                                            weight:
-                                                                                FontWeight.w500,
-                                                                          ),
-                                                                          maxLines:
-                                                                              1,
-                                                                          overflow:
-                                                                              TextOverflow.ellipsis,
-                                                                        ),
-                                                                        Text(
-                                                                          '${p.availableQuantity ?? 0}',
-                                                                          style: MyTextStyle.f12(
-                                                                            (p.availableQuantity ??
-                                                                                        0) >
-                                                                                    0
-                                                                                ? greyColor
-                                                                                : redColor,
-                                                                            weight:
-                                                                                FontWeight.w500,
-                                                                          ),
-                                                                          maxLines:
-                                                                              1,
-                                                                          overflow:
-                                                                              TextOverflow.ellipsis,
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              if ((p.availableQuantity ??
-                                                                          0) <=
-                                                                      0 &&
-                                                                  p.isStock ==
-                                                                      true) ...[
-                                                                verticalSpace(
-                                                                  height: 5,
-                                                                ),
-                                                                Container(
-                                                                  padding:
-                                                                      EdgeInsets.symmetric(
-                                                                        horizontal:
-                                                                            8,
-                                                                        vertical:
-                                                                            4,
-                                                                      ),
-                                                                  decoration: BoxDecoration(
-                                                                    color: redColor200,
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                          4,
-                                                                        ),
-                                                                  ),
-                                                                  child: Text(
-                                                                    'Out of Stock',
-                                                                    style: MyTextStyle.f12(
-                                                                      redColor,
-                                                                      weight: FontWeight
-                                                                          .bold,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                              if((currentQuantity ==
-                                                                  0 &&
-                                                                  p.isStock ==
-                                                                      false) ||(currentQuantity ==
-                                                                  0 &&
-                                                                  p.isStock ==
-                                                                      true) ||
-                                                                  (currentQuantity !=
-                                                                      0 &&
-                                                                      p.isStock ==
-                                                                          false) || (currentQuantity !=
-                                                                  0 &&
-                                                                  p.isStock ==
-                                                                      true))
-                                                                verticalSpace(
-                                                                  height: 5,
-                                                                ),
-                                                              if((currentQuantity ==
-                                                                          0 &&
-                                                                      p.isStock ==
-                                                                          false) ||(currentQuantity ==
-                                                                  0 &&
-                                                                  p.isStock ==
-                                                                      true) ||
-                                                                  (currentQuantity !=
-                                                                          0 &&
-                                                                      p.isStock ==
-                                                                          false) || (currentQuantity !=
-                                                                  0 &&
-                                                                  p.isStock ==
-                                                                      true))
-                                                                SizedBox(
-                                                                  width:
-                                                                      size.width *
-                                                                      0.25,
-                                                                  child: FittedBox(
-                                                                    fit: BoxFit
-                                                                        .scaleDown,
-                                                                    child: Text(
-                                                                      '₹ ${p.basePrice}',
-                                                                      style: MyTextStyle.f14(
-                                                                        blackColor,
-                                                                        weight:
-                                                                            FontWeight.w600,
-                                                                      ),
-                                                                      maxLines:
-                                                                          1,
-                                                                      overflow:
-                                                                          TextOverflow
-                                                                              .ellipsis,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              // if (currentQuantity !=
-                                                              //         0 &&
-                                                              //     (p.availableQuantity ??
-                                                              //             0) >
-                                                              //         0)
-                                                                verticalSpace(
-                                                                  height: 10,
-                                                                ),
-                                                              if (currentQuantity !=
-                                                                      0 &&
-                                                                  (p.availableQuantity ??
-                                                                          0) >
-                                                                      0)
-                                                                Padding(
-                                                                  padding:
-                                                                      const EdgeInsets.only(
-                                                                        left:
-                                                                            5.0,
-                                                                        right:
-                                                                            5.0,
-                                                                      ),
-                                                                  child: Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .center,
-                                                                    children: [
-                                                                      CircleAvatar(
-                                                                        radius: 15,
-                                                                        backgroundColor: greyColor200,
-                                                                        child: IconButton(
-                                                                          icon: Icon(
-                                                                            Icons.remove,
-                                                                            size: 15,
-                                                                            color: blackColor,
-                                                                          ),
-                                                                          onPressed: () {
-                                                                            setState(() {
-                                                                              isSplitPayment = false;
-                                                                              if (widget.isEditingOrder != true) {
-                                                                                selectedOrderType = OrderType.line;
-                                                                              }
-                                                                              final index = billingItems.indexWhere(
-                                                                                    (item) => item['_id'] == p.id,
-                                                                              );
-
-                                                                              if (index != -1) {
-                                                                                final currentQty = billingItems[index]['qty'];
-
-                                                                                // 🔎 original quantity from existing order
-                                                                                final originalQty = widget.existingOrder?.data?.items
-                                                                                    ?.firstWhereOrNull((item) => item.product?.id == p.id)
-                                                                                    ?.quantity ??
-                                                                                    0;
-
-                                                                                if (isOriginalOrderItem(p.id.toString())) {
-                                                                                  // ✅ original item: only allow decrease if above originalQty
-                                                                                  if (currentQty > originalQty) {
-                                                                                    billingItems[index]['qty'] = currentQty - 1;
-                                                                                    updateControllerText(
-                                                                                      p.id.toString(),
-                                                                                      billingItems[index]['qty'],
-                                                                                    );
-                                                                                  } else {
-                                                                                    // show feedback if user tries to go below
-                                                                                    ScaffoldMessenger.of(context).showSnackBar(
-                                                                                      SnackBar(
-                                                                                        content: Text(
-                                                                                          "Cannot reduce below original ordered qty ($originalQty)",
-                                                                                        ),
-                                                                                      ),
-                                                                                    );
-                                                                                  }
-                                                                                } else {
-                                                                                  // ✅ new item: free to decrease/remove
-                                                                                  if (currentQty > 1) {
-                                                                                    billingItems[index]['qty'] = currentQty - 1;
-                                                                                    updateControllerText(
-                                                                                      p.id.toString(),
-                                                                                      billingItems[index]['qty'],
-                                                                                    );
-                                                                                  } else {
-                                                                                    billingItems.removeWhere((item) => item['_id'] == p.id);
-                                                                                    quantityControllers.remove(p.id);
-                                                                                    if (billingItems.isEmpty) {
-                                                                                      isDiscountApplied = false;
-                                                                                      widget.isEditingOrder = false;
-                                                                                      tableId = null;
-                                                                                      waiterId = null;
-                                                                                      selectedValue = null;
-                                                                                      selectedValueWaiter = null;
-                                                                                    }
-                                                                                  }
-                                                                                }
-
-                                                                                context.read<FoodCategoryBloc>().add(
-                                                                                  AddToBilling(
-                                                                                    List.from(billingItems),
-                                                                                    isDiscountApplied,
-                                                                                    selectedOrderType,
-                                                                                  ),
-                                                                                );
-                                                                                if(billingItems.isEmpty || billingItems == []) {
-                                                                                  for (var addon in p
-                                                                                      .addons!) {
-                                                                                    addon
-                                                                                        .isSelected =
-                                                                                    false;
-                                                                                    addon
-                                                                                        .quantity =
-                                                                                    0;
-                                                                                  }
-                                                                                }
-                                                                              }
-                                                                            });
-                                                                          },
-                                                                        ),
-                                                                      ),
-                                                                      Container(
-                                                                        width: 45,
-                                                                        height: 32,
-                                                                        margin: const EdgeInsets.symmetric(horizontal: 12),
-                                                                        decoration: BoxDecoration(
-                                                                          border: Border.all(
-                                                                            color: (widget.isEditingOrder == true &&
-                                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                                isOriginalOrderItem(p.id.toString()))
-                                                                                ? greyColor200!
-                                                                                : greyColor,
-                                                                          ),
-                                                                          borderRadius: BorderRadius.circular(4),
-                                                                          color: (widget.isEditingOrder == true &&
-                                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                              isOriginalOrderItem(p.id.toString()))
-                                                                              ? greyColor200
-                                                                              : whiteColor,
-                                                                        ),
-                                                                        child: TextField(
-                                                                          controller: currentController,
-                                                                          textAlign: TextAlign.center,
-                                                                          keyboardType: TextInputType.number,
-                                                                          enabled: !(widget.isEditingOrder == true &&
-                                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                              isOriginalOrderItem(p.id.toString())), // Disable for original items
-                                                                          style: MyTextStyle.f16(
-                                                                            (widget.isEditingOrder == true &&
-                                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                                isOriginalOrderItem(p.id.toString()))
-                                                                                ? greyColor // Gray text for locked items
-                                                                                : blackColor,
-                                                                          ),
-                                                                          decoration: InputDecoration(
-                                                                            border: InputBorder.none,
-                                                                            isDense: true,
-                                                                            contentPadding: EdgeInsets.all(8),
-                                                                            hintText: (widget.isEditingOrder == true &&
-                                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                                isOriginalOrderItem(p.id.toString()))
-                                                                                ? "Locked"
-                                                                                : null,
-                                                                            hintStyle: TextStyle(color: greyColor, fontSize: 12),
-                                                                          ),
-                                                                          onChanged: (value) {
-                                                                            final newQty = int.tryParse(value);
-
-                                                                            // original order quantity (0 if not in existing order)
-                                                                            final originalQty = widget.existingOrder?.data?.items
-                                                                                ?.firstWhereOrNull((item) => item.product?.id == p.id)
-                                                                                ?.quantity ??
-                                                                                0;
-
-                                                                            if (newQty != null && newQty > 0) {
-                                                                              bool canSetQuantity = true;
-
-                                                                              if (p.isStock == true) {
-                                                                                if ((widget.isEditingOrder == true &&
-                                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST"))) {
-                                                                                  // For editing order, allow up to available stock + originalQty
-                                                                                  canSetQuantity = newQty <= ((p.availableQuantity ?? 0) + originalQty);
-                                                                                } else {
-                                                                                  canSetQuantity = newQty <= (p.availableQuantity ?? 0);
-                                                                                }
-                                                                              }
-
-                                                                              // 👇 extra rule: don't allow decreasing below originalQty
-                                                                              if (widget.isEditingOrder == true &&
-                                                                                  isOriginalOrderItem(p.id.toString()) &&
-                                                                                  newQty < originalQty) {
-                                                                                canSetQuantity = false;
-                                                                              }
-
-                                                                              if (canSetQuantity) {
-                                                                                setState(() {
-                                                                                  isSplitPayment = false;
-                                                                                  if (widget.isEditingOrder != true) {
-                                                                                    selectedOrderType = OrderType.line;
-                                                                                  }
-
-                                                                                  final index =
-                                                                                  billingItems.indexWhere((item) => item['_id'] == p.id);
-                                                                                  if (index != -1) {
-                                                                                    billingItems[index]['qty'] = newQty;
-                                                                                  } else {
-                                                                                    billingItems.add({
-                                                                                      "_id": p.id,
-                                                                                      "basePrice": p.basePrice,
-                                                                                      "image": p.image,
-                                                                                      "qty": newQty,
-                                                                                      "name": p.name,
-                                                                                      "availableQuantity": p.availableQuantity,
-                                                                                      "selectedAddons": p.addons!
-                                                                                          .where((addon) => addon.quantity > 0)
-                                                                                          .map((addon) => {
-                                                                                        "_id": addon.id,
-                                                                                        "price": addon.price,
-                                                                                        "quantity": addon.quantity,
-                                                                                        "name": addon.name,
-                                                                                        "isAvailable": addon.isAvailable,
-                                                                                        "maxQuantity": addon.maxQuantity,
-                                                                                        "isFree": addon.isFree,
-                                                                                      })
-                                                                                          .toList(),
-                                                                                    });
-                                                                                  }
-                                                                                  context.read<FoodCategoryBloc>().add(
-                                                                                    AddToBilling(
-                                                                                      List.from(billingItems),
-                                                                                      isDiscountApplied,
-                                                                                      selectedOrderType,
-                                                                                    ),
-                                                                                  );
-                                                                                });
-                                                                              } else {
-                                                                                // restore previous valid qty
-                                                                                currentController.text =
-                                                                                    getCurrentQuantity(p.id.toString()).toString();
-                                                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                                                  SnackBar(
-                                                                                    content: Text(
-                                                                                      newQty < originalQty
-                                                                                          ? "Cannot reduce below original ordered qty ($originalQty)"
-                                                                                          : "Maximum available quantity is ${p.availableQuantity ?? 0}",
-                                                                                    ),
-                                                                                  ),
-                                                                                );
-                                                                              }
-                                                                            } else if (newQty == 0 || value.isEmpty) {
-                                                                              // 👇 allow removal only if it's not an original order item
-                                                                              if (isOriginalOrderItem(p.id.toString())) {
-                                                                                currentController.text = originalQty.toString();
-                                                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                                                  SnackBar(
-                                                                                    content: Text(
-                                                                                      "This item cannot be removed. Minimum qty is $originalQty",
-                                                                                    ),
-                                                                                  ),
-                                                                                );
-                                                                              } else {
-                                                                                setState(() {
-                                                                                  billingItems.removeWhere((item) => item['_id'] == p.id);
-                                                                                  quantityControllers.remove(p.id);
-                                                                                  if (billingItems.isEmpty) {
-                                                                                    isDiscountApplied = false;
-                                                                                    widget.isEditingOrder = false;
-                                                                                    tableId = null;
-                                                                                    waiterId = null;
-                                                                                    selectedValue = null;
-                                                                                    selectedValueWaiter = null;
-                                                                                  }
-                                                                                  context.read<FoodCategoryBloc>().add(
-                                                                                    AddToBilling(
-                                                                                      List.from(billingItems),
-                                                                                      isDiscountApplied,
-                                                                                      selectedOrderType,
-                                                                                    ),
-                                                                                  );
-                                                                                });
-                                                                              }
-                                                                            }
-                                                                          },
-
-                                                                          onTap: () {
-                                                                            if (!(widget.isEditingOrder == true &&
-                                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                                isOriginalOrderItem(p.id.toString()))) {
-                                                                              currentController.selection = TextSelection(
-                                                                                baseOffset: 0,
-                                                                                extentOffset: currentController.text.length,
-                                                                              );
-                                                                            }
-                                                                          },
-                                                                        ),
-                                                                      ),
-                                                                      Builder(
-                                                                        builder:
-                                                                            (
-                                                                              context,
-                                                                            ) {
-                                                                              final currentQtyInCart = getCurrentQuantity(
-                                                                                p.id.toString(),
-                                                                              );
-                                                                              bool
-                                                                              canAddMore;
-                                                                              if (p.isStock ==
-                                                                                  true) {
-                                                                                if ((widget.isEditingOrder ==
-                                                                                            true &&
-                                                                                        widget.existingOrder?.data?.orderStatus ==
-                                                                                            "COMPLETED") ||
-                                                                                    (widget.isEditingOrder ==
-                                                                                            true &&
-                                                                                        widget.existingOrder?.data?.orderStatus ==
-                                                                                            "WAITLIST")) {
-                                                                                  final paidQty =
-                                                                                      widget.existingOrder?.data?.items
-                                                                                          ?.firstWhereOrNull(
-                                                                                            (
-                                                                                              item,
-                                                                                            ) =>
-                                                                                                item.product?.id ==
-                                                                                                p.id,
-                                                                                          )
-                                                                                          ?.quantity ??
-                                                                                      0;
-                                                                                  canAddMore =
-                                                                                      currentQtyInCart <
-                                                                                      ((p.availableQuantity ??
-                                                                                              0) +
-                                                                                          paidQty);
-                                                                                } else {
-                                                                                  canAddMore =
-                                                                                      (p.availableQuantity ??
-                                                                                              0) >
-                                                                                          0 &&
-                                                                                      currentQtyInCart <
-                                                                                          (p.availableQuantity ??
-                                                                                              0);
-                                                                                }
-                                                                              } else {
-                                                                                canAddMore = true;
-                                                                              }
-
-                                                                              return CircleAvatar(
-                                                                                radius: 15,
-                                                                                backgroundColor: canAddMore
-                                                                                    ? appPrimaryColor
-                                                                                    : greyColor,
-                                                                                child: IconButton(
-                                                                                  icon: Icon(
-                                                                                    Icons.add,
-                                                                                    size: 16,
-                                                                                    color: canAddMore
-                                                                                        ? whiteColor
-                                                                                        : blackColor,
-                                                                                  ),
-                                                                                  onPressed: canAddMore
-                                                                                      ? () {
-                                                                                          setState(
-                                                                                            () {
-                                                                                              isSplitPayment = false;
-                                                                                              if (widget.isEditingOrder !=
-                                                                                                  true) {
-                                                                                                selectedOrderType = OrderType.line;
-                                                                                              }
-                                                                                              final index = billingItems.indexWhere(
-                                                                                                (
-                                                                                                  item,
-                                                                                                ) =>
-                                                                                                    item['_id'] ==
-                                                                                                    p.id,
-                                                                                              );
-                                                                                              if (index !=
-                                                                                                  -1) {
-                                                                                                billingItems[index]['qty'] =
-                                                                                                    billingItems[index]['qty'] +
-                                                                                                    1;
-                                                                                                updateControllerText(
-                                                                                                  p.id.toString(),
-                                                                                                  billingItems[index]['qty'],
-                                                                                                );
-                                                                                              } else {
-                                                                                                billingItems.add(
-                                                                                                  {
-                                                                                                    "_id": p.id,
-                                                                                                    "basePrice": p.basePrice,
-                                                                                                    "image": p.image,
-                                                                                                    "qty": 1,
-                                                                                                    "name": p.name,
-                                                                                                    "availableQuantity": p.availableQuantity,
-                                                                                                    "selectedAddons": p.addons!
-                                                                                                        .where(
-                                                                                                          (
-                                                                                                            addon,
-                                                                                                          ) =>
-                                                                                                              addon.quantity >
-                                                                                                              0,
-                                                                                                        )
-                                                                                                        .map(
-                                                                                                          (
-                                                                                                            addon,
-                                                                                                          ) => {
-                                                                                                            "_id": addon.id,
-                                                                                                            "price": addon.price,
-                                                                                                            "quantity": addon.quantity,
-                                                                                                            "name": addon.name,
-                                                                                                            "isAvailable": addon.isAvailable,
-                                                                                                            "maxQuantity": addon.maxQuantity,
-                                                                                                            "isFree": addon.isFree,
-                                                                                                          },
-                                                                                                        )
-                                                                                                        .toList(),
-                                                                                                  },
-                                                                                                );
-                                                                                                updateControllerText(
-                                                                                                  p.id.toString(),
-                                                                                                  1,
-                                                                                                );
-                                                                                              }
-                                                                                              context
-                                                                                                  .read<
-                                                                                                    FoodCategoryBloc
-                                                                                                  >()
-                                                                                                  .add(
-                                                                                                    AddToBilling(
-                                                                                                      List.from(
-                                                                                                        billingItems,
-                                                                                                      ),
-                                                                                                      isDiscountApplied,
-                                                                                                      selectedOrderType,
-                                                                                                    ),
-                                                                                                  );
-                                                                                            },
-                                                                                          );
-                                                                                        }
-                                                                                      : () {
-                                                                                          if (p.isStock ==
-                                                                                                  true &&
-                                                                                              (p.availableQuantity ??
-                                                                                                      0) ==
-                                                                                                  0) {
-                                                                                            ScaffoldMessenger.of(
-                                                                                              context,
-                                                                                            ).showSnackBar(
-                                                                                              const SnackBar(
-                                                                                                content: Text(
-                                                                                                  "Out of stock",
-                                                                                                ),
-                                                                                              ),
-                                                                                            );
-                                                                                          }
-                                                                                        },
-                                                                                ),
-                                                                              );
-                                                                            },
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              if (currentQuantity !=
-                                                                      0 &&
-                                                                  p.isStock ==
-                                                                      false)
-                                                                verticalSpace(
-                                                                  height: 10,
-                                                                ),
-                                                              if (currentQuantity !=
-                                                                      0 &&
-                                                                  p.isStock ==
-                                                                      false)
-                                                                Padding(
-                                                                  padding:
-                                                                      const EdgeInsets.only(
-                                                                        left:
-                                                                            5.0,
-                                                                        right:
-                                                                            5.0,
-                                                                      ),
-                                                                  child: Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .center,
-                                                                    children: [
-                                                                      CircleAvatar(
-                                                                        radius: 15,
-                                                                        backgroundColor: greyColor200,
-                                                                        child: IconButton(
-                                                                          icon: Icon(
-                                                                            Icons.remove,
-                                                                            size: 15,
-                                                                            color: blackColor,
-                                                                          ),
-                                                                          onPressed: () {
-                                                                            setState(() {
-                                                                              isSplitPayment = false;
-                                                                              if (widget.isEditingOrder != true) {
-                                                                                selectedOrderType = OrderType.line;
-                                                                              }
-                                                                              final index = billingItems.indexWhere(
-                                                                                    (item) => item['_id'] == p.id,
-                                                                              );
-
-                                                                              if (index != -1) {
-                                                                                final currentQty = billingItems[index]['qty'];
-
-                                                                                // 🔎 original quantity from existing order
-                                                                                final originalQty = widget.existingOrder?.data?.items
-                                                                                    ?.firstWhereOrNull((item) => item.product?.id == p.id)
-                                                                                    ?.quantity ??
-                                                                                    0;
-
-                                                                                if (isOriginalOrderItem(p.id.toString())) {
-                                                                                  // ✅ original item: only allow decrease if above originalQty
-                                                                                  if (currentQty > originalQty) {
-                                                                                    billingItems[index]['qty'] = currentQty - 1;
-                                                                                    updateControllerText(
-                                                                                      p.id.toString(),
-                                                                                      billingItems[index]['qty'],
-                                                                                    );
-                                                                                  } else {
-                                                                                    // show feedback if user tries to go below
-                                                                                    ScaffoldMessenger.of(context).showSnackBar(
-                                                                                      SnackBar(
-                                                                                        content: Text(
-                                                                                          "Cannot reduce below original ordered qty ($originalQty)",
-                                                                                        ),
-                                                                                      ),
-                                                                                    );
-                                                                                  }
-                                                                                } else {
-                                                                                  // ✅ new item: free to decrease/remove
-                                                                                  if (currentQty > 1) {
-                                                                                    billingItems[index]['qty'] = currentQty - 1;
-                                                                                    updateControllerText(
-                                                                                      p.id.toString(),
-                                                                                      billingItems[index]['qty'],
-                                                                                    );
-                                                                                  } else {
-                                                                                    billingItems.removeWhere((item) => item['_id'] == p.id);
-                                                                                    quantityControllers.remove(p.id);
-                                                                                    if (billingItems.isEmpty) {
-                                                                                      isDiscountApplied = false;
-                                                                                      widget.isEditingOrder = false;
-                                                                                      tableId = null;
-                                                                                      waiterId = null;
-                                                                                      selectedValue = null;
-                                                                                      selectedValueWaiter = null;
-                                                                                    }
-                                                                                  }
-                                                                                }
-
-                                                                                context.read<FoodCategoryBloc>().add(
-                                                                                  AddToBilling(
-                                                                                    List.from(billingItems),
-                                                                                    isDiscountApplied,
-                                                                                    selectedOrderType,
-                                                                                  ),
-                                                                                );
-                                                                                if(billingItems.isEmpty || billingItems == []) {
-                                                                                      for (var addon in p
-                                                                                          .addons!) {
-                                                                                        addon
-                                                                                            .isSelected =
-                                                                                        false;
-                                                                                        addon
-                                                                                            .quantity =
-                                                                                        0;
+                                                                                        );
                                                                                       }
-                                                                                    }
-
-                                                                              }
-                                                                            });
-                                                                          },
-                                                                        ),
-                                                                      ),
-
-                                                                      Container(
-                                                                        width: 45,
-                                                                        height: 32,
-                                                                        margin: const EdgeInsets.symmetric(horizontal: 12),
-                                                                        decoration: BoxDecoration(
-                                                                          border: Border.all(
-                                                                            color: (widget.isEditingOrder == true &&
-                                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                                isOriginalOrderItem(p.id.toString()))
-                                                                                ? greyColor200!
-                                                                                : greyColor,
-                                                                          ),
-                                                                          borderRadius: BorderRadius.circular(4),
-                                                                          color: (widget.isEditingOrder == true &&
-                                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                              isOriginalOrderItem(p.id.toString()))
-                                                                              ? greyColor200
-                                                                              : whiteColor,
-                                                                        ),
-                                                                        child: TextField(
-                                                                          controller: currentController,
-                                                                          textAlign: TextAlign.center,
-                                                                          keyboardType: TextInputType.number,
-                                                                          enabled: !(widget.isEditingOrder == true &&
-                                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                              isOriginalOrderItem(p.id.toString())), // Disable for original items
-                                                                          style: MyTextStyle.f16(
-                                                                            (widget.isEditingOrder == true &&
-                                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                                isOriginalOrderItem(p.id.toString()))
-                                                                                ? greyColor // Gray text for locked items
-                                                                                : blackColor,
-                                                                          ),
-                                                                          decoration: InputDecoration(
-                                                                            border: InputBorder.none,
-                                                                            isDense: true,
-                                                                            contentPadding: EdgeInsets.all(8),
-                                                                            hintText: (widget.isEditingOrder == true &&
-                                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                                isOriginalOrderItem(p.id.toString()))
-                                                                                ? "Locked"
-                                                                                : null,
-                                                                            hintStyle: TextStyle(color: greyColor, fontSize: 12),
-                                                                          ),
-                                                                          onChanged: (value) {
-                                                                            final newQty = int.tryParse(value);
-
-                                                                            // original order quantity (0 if not in existing order)
-                                                                            final originalQty = widget.existingOrder?.data?.items
-                                                                                ?.firstWhereOrNull((item) => item.product?.id == p.id)
-                                                                                ?.quantity ??
-                                                                                0;
-
-                                                                            if (newQty != null && newQty > 0) {
-                                                                              bool canSetQuantity = true;
-
-                                                                              if (p.isStock == true) {
-                                                                                if ((widget.isEditingOrder == true &&
-                                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST"))) {
-                                                                                  // For editing order, allow up to available stock + originalQty
-                                                                                  canSetQuantity = newQty <= ((p.availableQuantity ?? 0) + originalQty);
-                                                                                } else {
-                                                                                  canSetQuantity = newQty <= (p.availableQuantity ?? 0);
-                                                                                }
-                                                                              }
-
-                                                                              // 👇 extra rule: don't allow decreasing below originalQty
-                                                                              if (widget.isEditingOrder == true &&
-                                                                                  isOriginalOrderItem(p.id.toString()) &&
-                                                                                  newQty < originalQty) {
-                                                                                canSetQuantity = false;
-                                                                              }
-
-                                                                              if (canSetQuantity) {
-                                                                                setState(() {
-                                                                                  isSplitPayment = false;
-                                                                                  if (widget.isEditingOrder != true) {
-                                                                                    selectedOrderType = OrderType.line;
-                                                                                  }
-
-                                                                                  final index =
-                                                                                  billingItems.indexWhere((item) => item['_id'] == p.id);
-                                                                                  if (index != -1) {
-                                                                                    billingItems[index]['qty'] = newQty;
-                                                                                  } else {
-                                                                                    billingItems.add({
-                                                                                      "_id": p.id,
-                                                                                      "basePrice": p.basePrice,
-                                                                                      "image": p.image,
-                                                                                      "qty": newQty,
-                                                                                      "name": p.name,
-                                                                                      "availableQuantity": p.availableQuantity,
-                                                                                      "selectedAddons": p.addons!
-                                                                                          .where((addon) => addon.quantity > 0)
-                                                                                          .map((addon) => {
-                                                                                        "_id": addon.id,
-                                                                                        "price": addon.price,
-                                                                                        "quantity": addon.quantity,
-                                                                                        "name": addon.name,
-                                                                                        "isAvailable": addon.isAvailable,
-                                                                                        "maxQuantity": addon.maxQuantity,
-                                                                                        "isFree": addon.isFree,
-                                                                                      })
-                                                                                          .toList(),
-                                                                                    });
-                                                                                  }
-                                                                                  context.read<FoodCategoryBloc>().add(
-                                                                                    AddToBilling(
-                                                                                      List.from(billingItems),
-                                                                                      isDiscountApplied,
-                                                                                      selectedOrderType,
-                                                                                    ),
-                                                                                  );
-                                                                                });
-                                                                              } else {
-                                                                                // restore previous valid qty
-                                                                                currentController.text =
-                                                                                    getCurrentQuantity(p.id.toString()).toString();
-                                                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                                                  SnackBar(
-                                                                                    content: Text(
-                                                                                      newQty < originalQty
-                                                                                          ? "Cannot reduce below original ordered qty ($originalQty)"
-                                                                                          : "Maximum available quantity is ${p.availableQuantity ?? 0}",
-                                                                                    ),
-                                                                                  ),
-                                                                                );
-                                                                              }
-                                                                            } else if (newQty == 0 || value.isEmpty) {
-                                                                              // 👇 allow removal only if it's not an original order item
-                                                                              if (isOriginalOrderItem(p.id.toString())) {
-                                                                                currentController.text = originalQty.toString();
-                                                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                                                  SnackBar(
-                                                                                    content: Text(
-                                                                                      "This item cannot be removed. Minimum qty is $originalQty",
-                                                                                    ),
-                                                                                  ),
-                                                                                );
-                                                                              } else {
-                                                                                setState(() {
-                                                                                  billingItems.removeWhere((item) => item['_id'] == p.id);
-                                                                                  quantityControllers.remove(p.id);
-                                                                                  if (billingItems.isEmpty) {
-                                                                                    isDiscountApplied = false;
-                                                                                    widget.isEditingOrder = false;
-                                                                                    tableId = null;
-                                                                                    waiterId = null;
-                                                                                    selectedValue = null;
-                                                                                    selectedValueWaiter = null;
-                                                                                  }
-                                                                                  context.read<FoodCategoryBloc>().add(
-                                                                                    AddToBilling(
-                                                                                      List.from(billingItems),
-                                                                                      isDiscountApplied,
-                                                                                      selectedOrderType,
-                                                                                    ),
-                                                                                  );
-                                                                                });
-                                                                              }
-                                                                            }
-                                                                          },
-
-                                                                          onTap: () {
-                                                                            if (!(widget.isEditingOrder == true &&
-                                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                                isOriginalOrderItem(p.id.toString()))) {
-                                                                              currentController.selection = TextSelection(
-                                                                                baseOffset: 0,
-                                                                                extentOffset: currentController.text.length,
-                                                                              );
-                                                                            }
-                                                                          },
-                                                                        ),
-                                                                      ),
-                                                                      Builder(
-                                                                        builder:
-                                                                            (
-                                                                              context,
-                                                                            ) {
-                                                                              final currentQtyInCart = getCurrentQuantity(
-                                                                                p.id.toString(),
-                                                                              );
-                                                                              bool
-                                                                              canAddMore;
-                                                                              if (p.isStock ==
-                                                                                  true) {
-                                                                                if ((widget.isEditingOrder ==
-                                                                                            true &&
-                                                                                        widget.existingOrder?.data?.orderStatus ==
-                                                                                            "COMPLETED") ||
-                                                                                    (widget.isEditingOrder ==
-                                                                                            true &&
-                                                                                        widget.existingOrder?.data?.orderStatus ==
-                                                                                            "WAITLIST")) {
-                                                                                  final paidQty =
-                                                                                      widget.existingOrder?.data?.items
-                                                                                          ?.firstWhereOrNull(
-                                                                                            (
-                                                                                              item,
-                                                                                            ) =>
-                                                                                                item.product?.id ==
-                                                                                                p.id,
-                                                                                          )
-                                                                                          ?.quantity ??
-                                                                                      0;
-                                                                                  canAddMore =
-                                                                                      currentQtyInCart <
-                                                                                      ((p.availableQuantity ??
-                                                                                              0) +
-                                                                                          paidQty);
-                                                                                } else {
-                                                                                  canAddMore =
-                                                                                      (p.availableQuantity ??
-                                                                                              0) >
-                                                                                          0 &&
-                                                                                      currentQtyInCart <
-                                                                                          (p.availableQuantity ??
-                                                                                              0);
-                                                                                }
-                                                                              } else {
-                                                                                canAddMore = true;
-                                                                              }
-
-                                                                              return CircleAvatar(
-                                                                                radius: 15,
-                                                                                backgroundColor: canAddMore
-                                                                                    ? appPrimaryColor
-                                                                                    : greyColor,
-                                                                                child: IconButton(
-                                                                                  icon: Icon(
-                                                                                    Icons.add,
-                                                                                    size: 15,
-                                                                                    color: canAddMore
-                                                                                        ? whiteColor
-                                                                                        : blackColor,
-                                                                                  ),
-                                                                                  onPressed: canAddMore
-                                                                                      ? () {
-                                                                                          setState(
-                                                                                            () {
-                                                                                              isSplitPayment = false;
-                                                                                              if (widget.isEditingOrder !=
-                                                                                                  true) {
-                                                                                                selectedOrderType = OrderType.line;
-                                                                                              }
-                                                                                              final index = billingItems.indexWhere(
-                                                                                                (
-                                                                                                  item,
-                                                                                                ) =>
-                                                                                                    item['_id'] ==
-                                                                                                    p.id,
-                                                                                              );
-                                                                                              if (index !=
-                                                                                                  -1) {
-                                                                                                billingItems[index]['qty'] =
-                                                                                                    billingItems[index]['qty'] +
-                                                                                                    1;
-                                                                                                updateControllerText(
-                                                                                                  p.id.toString(),
-                                                                                                  billingItems[index]['qty'],
-                                                                                                );
-                                                                                              } else {
-                                                                                                billingItems.add(
-                                                                                                  {
-                                                                                                    "_id": p.id,
-                                                                                                    "basePrice": p.basePrice,
-                                                                                                    "image": p.image,
-                                                                                                    "qty": 1,
-                                                                                                    "name": p.name,
-                                                                                                    "availableQuantity": p.availableQuantity,
-                                                                                                    "selectedAddons": p.addons!
-                                                                                                        .where(
-                                                                                                          (
-                                                                                                            addon,
-                                                                                                          ) =>
-                                                                                                              addon.quantity >
-                                                                                                              0,
-                                                                                                        )
-                                                                                                        .map(
-                                                                                                          (
-                                                                                                            addon,
-                                                                                                          ) => {
-                                                                                                            "_id": addon.id,
-                                                                                                            "price": addon.price,
-                                                                                                            "quantity": addon.quantity,
-                                                                                                            "name": addon.name,
-                                                                                                            "isAvailable": addon.isAvailable,
-                                                                                                            "maxQuantity": addon.maxQuantity,
-                                                                                                            "isFree": addon.isFree,
-                                                                                                          },
-                                                                                                        )
-                                                                                                        .toList(),
-                                                                                                  },
-                                                                                                );
-                                                                                                updateControllerText(
-                                                                                                  p.id.toString(),
-                                                                                                  1,
-                                                                                                );
-                                                                                              }
-                                                                                              context
-                                                                                                  .read<
-                                                                                                    FoodCategoryBloc
-                                                                                                  >()
-                                                                                                  .add(
-                                                                                                    AddToBilling(
-                                                                                                      List.from(
-                                                                                                        billingItems,
-                                                                                                      ),
-                                                                                                      isDiscountApplied,
-                                                                                                      selectedOrderType,
-                                                                                                    ),
-                                                                                                  );
-                                                                                            },
+                                                                                    : () {
+                                                                                        if (p.isStock ==
+                                                                                                true &&
+                                                                                            (p.availableQuantity ??
+                                                                                                    0) ==
+                                                                                                0) {
+                                                                                          ScaffoldMessenger.of(
+                                                                                            context,
+                                                                                          ).showSnackBar(
+                                                                                            const SnackBar(
+                                                                                              content: Text(
+                                                                                                "Out of stock",
+                                                                                              ),
+                                                                                            ),
                                                                                           );
                                                                                         }
-                                                                                      : () {
-                                                                                          if (p.isStock ==
-                                                                                                  true &&
-                                                                                              (p.availableQuantity ??
-                                                                                                      0) ==
-                                                                                                  0) {
-                                                                                            ScaffoldMessenger.of(
-                                                                                              context,
-                                                                                            ).showSnackBar(
-                                                                                              const SnackBar(
-                                                                                                content: Text(
-                                                                                                  "Out of stock",
-                                                                                                ),
-                                                                                              ),
-                                                                                            );
-                                                                                          }
-                                                                                        },
-                                                                                ),
-                                                                              );
-                                                                            },
-                                                                      ),
-                                                                    ],
-                                                                  ),
+                                                                                      },
+                                                                              ),
+                                                                            );
+                                                                          },
+                                                                    ),
+                                                                  ],
                                                                 ),
-                                                              if (currentQuantity >
-                                                                  0 && p
-                                                                  .addons!
-                                                                  .isNotEmpty)
+                                                              ),
+                                                            if (currentQuantity !=
+                                                                    0 &&
+                                                                p.isStock ==
+                                                                    false)
                                                               verticalSpace(
                                                                 height: 10,
                                                               ),
-                                                              if ( currentQuantity >
-                                                                  0 && p
-                                                                  .addons!
-                                                                  .isNotEmpty )
-                                                                ElevatedButton(
-                                                    onPressed: () {
-                                                      final index = billingItems.indexWhere((item) => item['_id'] == p.id);
+                                                            if (currentQuantity !=
+                                                                    0 &&
+                                                                p.isStock ==
+                                                                    false)
+                                                              Padding(
+                                                                padding:
+                                                                    const EdgeInsets.only(
+                                                                      left:
+                                                                          5.0,
+                                                                      right:
+                                                                          5.0,
+                                                                    ),
+                                                                child: Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  children: [
+                                                                    CircleAvatar(
+                                                                      radius: 15,
+                                                                      backgroundColor: greyColor200,
+                                                                      child: IconButton(
+                                                                        icon: Icon(
+                                                                          Icons.remove,
+                                                                          size: 15,
+                                                                          color: blackColor,
+                                                                        ),
+                                                                        onPressed: () {
+                                                                          setState(() {
+                                                                            isSplitPayment = false;
+                                                                            if (widget.isEditingOrder != true) {
+                                                                              selectedOrderType = OrderType.line;
+                                                                            }
+                                                                            final index = billingItems.indexWhere(
+                                                                                  (item) => item['_id'] == p.id,
+                                                                            );
 
-                                                      if (index == -1) {
-                                                        for (var addon in p.addons!) {
-                                                          addon.isSelected = false;
-                                                          addon.quantity = 0;
+                                                                            if (index != -1) {
+                                                                              final currentQty = billingItems[index]['qty'];
+
+                                                                              // 🔎 original quantity from existing order
+                                                                              final originalQty = widget.existingOrder?.data?.items
+                                                                                  ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                                                  ?.quantity ??
+                                                                                  0;
+
+                                                                              if (isOriginalOrderItem(p.id.toString())) {
+                                                                                // ✅ original item: only allow decrease if above originalQty
+                                                                                if (currentQty > originalQty) {
+                                                                                  billingItems[index]['qty'] = currentQty - 1;
+                                                                                  updateControllerText(
+                                                                                    p.id.toString(),
+                                                                                    billingItems[index]['qty'],
+                                                                                  );
+                                                                                } else {
+                                                                                  // show feedback if user tries to go below
+                                                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                                                    SnackBar(
+                                                                                      content: Text(
+                                                                                        "Cannot reduce below original ordered qty ($originalQty)",
+                                                                                      ),
+                                                                                    ),
+                                                                                  );
+                                                                                }
+                                                                              } else {
+                                                                                // ✅ new item: free to decrease/remove
+                                                                                if (currentQty > 1) {
+                                                                                  billingItems[index]['qty'] = currentQty - 1;
+                                                                                  updateControllerText(
+                                                                                    p.id.toString(),
+                                                                                    billingItems[index]['qty'],
+                                                                                  );
+                                                                                } else {
+                                                                                  billingItems.removeWhere((item) => item['_id'] == p.id);
+                                                                                  quantityControllers.remove(p.id);
+                                                                                  if (billingItems.isEmpty) {
+                                                                                    isDiscountApplied = false;
+                                                                                    widget.isEditingOrder = false;
+                                                                                    tableId = null;
+                                                                                    waiterId = null;
+                                                                                    selectedValue = null;
+                                                                                    selectedValueWaiter = null;
+                                                                                  }
+                                                                                }
+                                                                              }
+
+                                                                              context.read<FoodCategoryBloc>().add(
+                                                                                AddToBilling(
+                                                                                  List.from(billingItems),
+                                                                                  isDiscountApplied,
+                                                                                  selectedOrderType,
+                                                                                ),
+                                                                              );
+                                                                              if(billingItems.isEmpty || billingItems == []) {
+                                                                                    for (var addon in p
+                                                                                        .addons!) {
+                                                                                      addon
+                                                                                          .isSelected =
+                                                                                      false;
+                                                                                      addon
+                                                                                          .quantity =
+                                                                                      0;
+                                                                                    }
+                                                                                  }
+
+                                                                            }
+                                                                          });
+                                                                        },
+                                                                      ),
+                                                                    ),
+
+                                                                    Container(
+                                                                      width: 45,
+                                                                      height: 32,
+                                                                      margin: const EdgeInsets.symmetric(horizontal: 12),
+                                                                      decoration: BoxDecoration(
+                                                                        border: Border.all(
+                                                                          color: (widget.isEditingOrder == true &&
+                                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                              isOriginalOrderItem(p.id.toString()))
+                                                                              ? greyColor200!
+                                                                              : greyColor,
+                                                                        ),
+                                                                        borderRadius: BorderRadius.circular(4),
+                                                                        color: (widget.isEditingOrder == true &&
+                                                                            (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                            isOriginalOrderItem(p.id.toString()))
+                                                                            ? greyColor200
+                                                                            : whiteColor,
+                                                                      ),
+                                                                      child: TextField(
+                                                                        controller: currentController,
+                                                                        textAlign: TextAlign.center,
+                                                                        keyboardType: TextInputType.number,
+                                                                        enabled: !(widget.isEditingOrder == true &&
+                                                                            (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                            isOriginalOrderItem(p.id.toString())), // Disable for original items
+                                                                        style: MyTextStyle.f16(
+                                                                          (widget.isEditingOrder == true &&
+                                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                              isOriginalOrderItem(p.id.toString()))
+                                                                              ? greyColor // Gray text for locked items
+                                                                              : blackColor,
+                                                                        ),
+                                                                        decoration: InputDecoration(
+                                                                          border: InputBorder.none,
+                                                                          isDense: true,
+                                                                          contentPadding: EdgeInsets.all(8),
+                                                                          hintText: (widget.isEditingOrder == true &&
+                                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                              isOriginalOrderItem(p.id.toString()))
+                                                                              ? "Locked"
+                                                                              : null,
+                                                                          hintStyle: TextStyle(color: greyColor, fontSize: 12),
+                                                                        ),
+                                                                        onChanged: (value) {
+                                                                          final newQty = int.tryParse(value);
+
+                                                                          // original order quantity (0 if not in existing order)
+                                                                          final originalQty = widget.existingOrder?.data?.items
+                                                                              ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                                              ?.quantity ??
+                                                                              0;
+
+                                                                          if (newQty != null && newQty > 0) {
+                                                                            bool canSetQuantity = true;
+
+                                                                            if (p.isStock == true) {
+                                                                              if ((widget.isEditingOrder == true &&
+                                                                                  (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                      widget.existingOrder?.data?.orderStatus == "WAITLIST"))) {
+                                                                                // For editing order, allow up to available stock + originalQty
+                                                                                canSetQuantity = newQty <= ((p.availableQuantity ?? 0) + originalQty);
+                                                                              } else {
+                                                                                canSetQuantity = newQty <= (p.availableQuantity ?? 0);
+                                                                              }
+                                                                            }
+
+                                                                            // 👇 extra rule: don't allow decreasing below originalQty
+                                                                            if (widget.isEditingOrder == true &&
+                                                                                isOriginalOrderItem(p.id.toString()) &&
+                                                                                newQty < originalQty) {
+                                                                              canSetQuantity = false;
+                                                                            }
+
+                                                                            if (canSetQuantity) {
+                                                                              setState(() {
+                                                                                isSplitPayment = false;
+                                                                                if (widget.isEditingOrder != true) {
+                                                                                  selectedOrderType = OrderType.line;
+                                                                                }
+
+                                                                                final index =
+                                                                                billingItems.indexWhere((item) => item['_id'] == p.id);
+                                                                                if (index != -1) {
+                                                                                  billingItems[index]['qty'] = newQty;
+                                                                                } else {
+                                                                                  billingItems.add({
+                                                                                    "_id": p.id,
+                                                                                    "basePrice": p.basePrice,
+                                                                                    "image": p.image,
+                                                                                    "qty": newQty,
+                                                                                    "name": p.name,
+                                                                                    "availableQuantity": p.availableQuantity,
+                                                                                    "selectedAddons": p.addons!
+                                                                                        .where((addon) => addon.quantity > 0)
+                                                                                        .map((addon) => {
+                                                                                      "_id": addon.id,
+                                                                                      "price": addon.price,
+                                                                                      "quantity": addon.quantity,
+                                                                                      "name": addon.name,
+                                                                                      "isAvailable": addon.isAvailable,
+                                                                                      "maxQuantity": addon.maxQuantity,
+                                                                                      "isFree": addon.isFree,
+                                                                                    })
+                                                                                        .toList(),
+                                                                                  });
+                                                                                }
+                                                                                context.read<FoodCategoryBloc>().add(
+                                                                                  AddToBilling(
+                                                                                    List.from(billingItems),
+                                                                                    isDiscountApplied,
+                                                                                    selectedOrderType,
+                                                                                  ),
+                                                                                );
+                                                                              });
+                                                                            } else {
+                                                                              // restore previous valid qty
+                                                                              currentController.text =
+                                                                                  getCurrentQuantity(p.id.toString()).toString();
+                                                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                                                SnackBar(
+                                                                                  content: Text(
+                                                                                    newQty < originalQty
+                                                                                        ? "Cannot reduce below original ordered qty ($originalQty)"
+                                                                                        : "Maximum available quantity is ${p.availableQuantity ?? 0}",
+                                                                                  ),
+                                                                                ),
+                                                                              );
+                                                                            }
+                                                                          } else if (newQty == 0 || value.isEmpty) {
+                                                                            // 👇 allow removal only if it's not an original order item
+                                                                            if (isOriginalOrderItem(p.id.toString())) {
+                                                                              currentController.text = originalQty.toString();
+                                                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                                                SnackBar(
+                                                                                  content: Text(
+                                                                                    "This item cannot be removed. Minimum qty is $originalQty",
+                                                                                  ),
+                                                                                ),
+                                                                              );
+                                                                            } else {
+                                                                              setState(() {
+                                                                                billingItems.removeWhere((item) => item['_id'] == p.id);
+                                                                                quantityControllers.remove(p.id);
+                                                                                if (billingItems.isEmpty) {
+                                                                                  isDiscountApplied = false;
+                                                                                  widget.isEditingOrder = false;
+                                                                                  tableId = null;
+                                                                                  waiterId = null;
+                                                                                  selectedValue = null;
+                                                                                  selectedValueWaiter = null;
+                                                                                }
+                                                                                context.read<FoodCategoryBloc>().add(
+                                                                                  AddToBilling(
+                                                                                    List.from(billingItems),
+                                                                                    isDiscountApplied,
+                                                                                    selectedOrderType,
+                                                                                  ),
+                                                                                );
+                                                                              });
+                                                                            }
+                                                                          }
+                                                                        },
+
+                                                                        onTap: () {
+                                                                          if (!(widget.isEditingOrder == true &&
+                                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                              isOriginalOrderItem(p.id.toString()))) {
+                                                                            currentController.selection = TextSelection(
+                                                                              baseOffset: 0,
+                                                                              extentOffset: currentController.text.length,
+                                                                            );
+                                                                          }
+                                                                        },
+                                                                      ),
+                                                                    ),
+                                                                    Builder(
+                                                                      builder:
+                                                                          (
+                                                                            context,
+                                                                          ) {
+                                                                            final currentQtyInCart = getCurrentQuantity(
+                                                                              p.id.toString(),
+                                                                            );
+                                                                            bool
+                                                                            canAddMore;
+                                                                            if (p.isStock ==
+                                                                                true) {
+                                                                              if ((widget.isEditingOrder ==
+                                                                                          true &&
+                                                                                      widget.existingOrder?.data?.orderStatus ==
+                                                                                          "COMPLETED") ||
+                                                                                  (widget.isEditingOrder ==
+                                                                                          true &&
+                                                                                      widget.existingOrder?.data?.orderStatus ==
+                                                                                          "WAITLIST")) {
+                                                                                final paidQty =
+                                                                                    widget.existingOrder?.data?.items
+                                                                                        ?.firstWhereOrNull(
+                                                                                          (
+                                                                                            item,
+                                                                                          ) =>
+                                                                                              item.product?.id ==
+                                                                                              p.id,
+                                                                                        )
+                                                                                        ?.quantity ??
+                                                                                    0;
+                                                                                canAddMore =
+                                                                                    currentQtyInCart <
+                                                                                    ((p.availableQuantity ??
+                                                                                            0) +
+                                                                                        paidQty);
+                                                                              } else {
+                                                                                canAddMore =
+                                                                                    (p.availableQuantity ??
+                                                                                            0) >
+                                                                                        0 &&
+                                                                                    currentQtyInCart <
+                                                                                        (p.availableQuantity ??
+                                                                                            0);
+                                                                              }
+                                                                            } else {
+                                                                              canAddMore = true;
+                                                                            }
+
+                                                                            return CircleAvatar(
+                                                                              radius: 15,
+                                                                              backgroundColor: canAddMore
+                                                                                  ? appPrimaryColor
+                                                                                  : greyColor,
+                                                                              child: IconButton(
+                                                                                icon: Icon(
+                                                                                  Icons.add,
+                                                                                  size: 15,
+                                                                                  color: canAddMore
+                                                                                      ? whiteColor
+                                                                                      : blackColor,
+                                                                                ),
+                                                                                onPressed: canAddMore
+                                                                                    ? () {
+                                                                                        setState(
+                                                                                          () {
+                                                                                            isSplitPayment = false;
+                                                                                            if (widget.isEditingOrder !=
+                                                                                                true) {
+                                                                                              selectedOrderType = OrderType.line;
+                                                                                            }
+                                                                                            final index = billingItems.indexWhere(
+                                                                                              (
+                                                                                                item,
+                                                                                              ) =>
+                                                                                                  item['_id'] ==
+                                                                                                  p.id,
+                                                                                            );
+                                                                                            if (index !=
+                                                                                                -1) {
+                                                                                              billingItems[index]['qty'] =
+                                                                                                  billingItems[index]['qty'] +
+                                                                                                  1;
+                                                                                              updateControllerText(
+                                                                                                p.id.toString(),
+                                                                                                billingItems[index]['qty'],
+                                                                                              );
+                                                                                            } else {
+                                                                                              billingItems.add(
+                                                                                                {
+                                                                                                  "_id": p.id,
+                                                                                                  "basePrice": p.basePrice,
+                                                                                                  "image": p.image,
+                                                                                                  "qty": 1,
+                                                                                                  "name": p.name,
+                                                                                                  "availableQuantity": p.availableQuantity,
+                                                                                                  "selectedAddons": p.addons!
+                                                                                                      .where(
+                                                                                                        (
+                                                                                                          addon,
+                                                                                                        ) =>
+                                                                                                            addon.quantity >
+                                                                                                            0,
+                                                                                                      )
+                                                                                                      .map(
+                                                                                                        (
+                                                                                                          addon,
+                                                                                                        ) => {
+                                                                                                          "_id": addon.id,
+                                                                                                          "price": addon.price,
+                                                                                                          "quantity": addon.quantity,
+                                                                                                          "name": addon.name,
+                                                                                                          "isAvailable": addon.isAvailable,
+                                                                                                          "maxQuantity": addon.maxQuantity,
+                                                                                                          "isFree": addon.isFree,
+                                                                                                        },
+                                                                                                      )
+                                                                                                      .toList(),
+                                                                                                },
+                                                                                              );
+                                                                                              updateControllerText(
+                                                                                                p.id.toString(),
+                                                                                                1,
+                                                                                              );
+                                                                                            }
+                                                                                            context
+                                                                                                .read<
+                                                                                                  FoodCategoryBloc
+                                                                                                >()
+                                                                                                .add(
+                                                                                                  AddToBilling(
+                                                                                                    List.from(
+                                                                                                      billingItems,
+                                                                                                    ),
+                                                                                                    isDiscountApplied,
+                                                                                                    selectedOrderType,
+                                                                                                  ),
+                                                                                                );
+                                                                                          },
+                                                                                        );
+                                                                                      }
+                                                                                    : () {
+                                                                                        if (p.isStock ==
+                                                                                                true &&
+                                                                                            (p.availableQuantity ??
+                                                                                                    0) ==
+                                                                                                0) {
+                                                                                          ScaffoldMessenger.of(
+                                                                                            context,
+                                                                                          ).showSnackBar(
+                                                                                            const SnackBar(
+                                                                                              content: Text(
+                                                                                                "Out of stock",
+                                                                                              ),
+                                                                                            ),
+                                                                                          );
+                                                                                        }
+                                                                                      },
+                                                                              ),
+                                                                            );
+                                                                          },
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            if (currentQuantity >
+                                                                0 && p
+                                                                .addons!
+                                                                .isNotEmpty)
+                                                            verticalSpace(
+                                                              height: 10,
+                                                            ),
+                                                            if ( currentQuantity >
+                                                                0 && p
+                                                                .addons!
+                                                                .isNotEmpty )
+                                                              ElevatedButton(
+                                                  onPressed: () {
+                                                    final index = billingItems.indexWhere((item) => item['_id'] == p.id);
+
+                                                    if (index == -1) {
+                                                      for (var addon in p.addons!) {
+                                                        addon.isSelected = false;
+                                                        addon.quantity = 0;
+                                                      }
+                                                    } else {
+                                                      final existingAddons = billingItems[index]['selectedAddons'] as List<dynamic>? ?? [];
+                                                      for (var addon in p.addons!) {
+                                                        final found = existingAddons.firstWhereOrNull(
+                                                              (a) => a['_id'] == addon.id,
+                                                        );
+                                                        if (found != null) {
+                                                         // if(widget.isEditingOrder == true){
+                                                            addon.quantity = found['quantity'] as int? ?? addon.quantity;
+                                                            addon.isSelected = addon.quantity > 0;
+                                                          // }
+                                                          // else {
+                                                          //   addon.quantity = 1;
+                                                          //   addon.isSelected = true;
+                                                          // }
                                                         }
-                                                      } else {
-                                                        final existingAddons = billingItems[index]['selectedAddons'] as List<dynamic>? ?? [];
-                                                        for (var addon in p.addons!) {
-                                                          final found = existingAddons.firstWhereOrNull(
-                                                                (a) => a['_id'] == addon.id,
-                                                          );
-                                                          if (found != null) {
-                                                           // if(widget.isEditingOrder == true){
-                                                              addon.quantity = found['quantity'] as int? ?? addon.quantity;
-                                                              addon.isSelected = addon.quantity > 0;
-                                                            // }
-                                                            // else {
-                                                            //   addon.quantity = 1;
-                                                            //   addon.isSelected = true;
-                                                            // }
-                                                          }
-                                                          else {
-                                                            addon.quantity = 0;
-                                                            addon.isSelected = false;
-                                                          }
+                                                        else {
+                                                          addon.quantity = 0;
+                                                          addon.isSelected = false;
                                                         }
                                                       }
-                                                      showDialog(
-                                                        context: context,
-                                                        builder: (context2) {
-                                                          return BlocProvider(
-                                                            create:
-                                                                (context,) =>
-                                                                FoodCategoryBloc(),
-                                                            child: BlocProvider.value(
-                                                              value:
-                                                              BlocProvider.of<
-                                                                  FoodCategoryBloc
-                                                              >(
-                                                                context,
-                                                                listen:
-                                                                false,
-                                                              ),
-                                                              child: StatefulBuilder(
-                                                                builder:
-                                                                    (context,
-                                                                    setState,) {
-                                                                  return Dialog(
-                                                                    insetPadding: EdgeInsets.symmetric(
-                                                                      horizontal: 40,
-                                                                      vertical: 24,
+                                                    }
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (context2) {
+                                                        return BlocProvider(
+                                                          create:
+                                                              (context,) =>
+                                                              FoodCategoryBloc(),
+                                                          child: BlocProvider.value(
+                                                            value:
+                                                            BlocProvider.of<
+                                                                FoodCategoryBloc
+                                                            >(
+                                                              context,
+                                                              listen:
+                                                              false,
+                                                            ),
+                                                            child: StatefulBuilder(
+                                                              builder:
+                                                                  (context,
+                                                                  setState,) {
+                                                                return Dialog(
+                                                                  insetPadding: EdgeInsets.symmetric(
+                                                                    horizontal: 40,
+                                                                    vertical: 24,
+                                                                  ),
+                                                                  shape: RoundedRectangleBorder(
+                                                                    borderRadius: BorderRadius.circular(
+                                                                      8,
                                                                     ),
-                                                                    shape: RoundedRectangleBorder(
-                                                                      borderRadius: BorderRadius.circular(
-                                                                        8,
-                                                                      ),
+                                                                  ),
+                                                                  child: Container(
+                                                                    constraints: BoxConstraints(
+                                                                      maxWidth:
+                                                                      size.width *
+                                                                          0.4,
+                                                                      maxHeight:
+                                                                      size.height *
+                                                                          0.6,
                                                                     ),
-                                                                    child: Container(
-                                                                      constraints: BoxConstraints(
-                                                                        maxWidth:
-                                                                        size.width *
-                                                                            0.4,
-                                                                        maxHeight:
-                                                                        size.height *
-                                                                            0.6,
-                                                                      ),
-                                                                      padding: EdgeInsets.all(
-                                                                        16,
-                                                                      ),
-                                                                      child: SingleChildScrollView(
-                                                                        child: Column(
-                                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                                          mainAxisSize: MainAxisSize.min,
-                                                                          children: [
-                                                                            ClipRRect(
-                                                                              borderRadius: BorderRadius.circular(
-                                                                                15.0,
-                                                                              ),
-                                                                              child: CachedNetworkImage(
-                                                                                imageUrl: p.image ??
-                                                                                    "",
-                                                                                width:
-                                                                                size.width *
-                                                                                    0.9,
-                                                                                height:
-                                                                                size.height *
-                                                                                    0.2,
-                                                                                fit: BoxFit.cover,
-                                                                                errorWidget:
-                                                                                    (context,
-                                                                                    url,
-                                                                                    error,) {
-                                                                                  return const Icon(
-                                                                                    Icons.error,
-                                                                                    size: 30,
-                                                                                    color: appHomeTextColor,
-                                                                                  );
-                                                                                },
-                                                                                progressIndicatorBuilder:
-                                                                                    (context,
-                                                                                    url,
-                                                                                    downloadProgress,) =>
-                                                                                const SpinKitCircle(
-                                                                                  color: appPrimaryColor,
-                                                                                  size: 30,
-                                                                                ),
+                                                                    padding: EdgeInsets.all(
+                                                                      16,
+                                                                    ),
+                                                                    child: SingleChildScrollView(
+                                                                      child: Column(
+                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                        mainAxisSize: MainAxisSize.min,
+                                                                        children: [
+                                                                          ClipRRect(
+                                                                            borderRadius: BorderRadius.circular(
+                                                                              15.0,
+                                                                            ),
+                                                                            child: CachedNetworkImage(
+                                                                              imageUrl: p.image ??
+                                                                                  "",
+                                                                              width:size.width *
+                                                                                  0.9,
+                                                                              height:
+                                                                              size.height *
+                                                                                  0.2,
+                                                                              fit: BoxFit.cover,
+                                                                              errorWidget:
+                                                                                  (context,
+                                                                                  url,
+                                                                                  error,) {
+                                                                                return Image.asset(
+                                                                                  Images.all,
+                                                                                  width: 25,
+                                                                                  height: 25,
+                                                                                  fit: BoxFit.cover,
+                                                                                );
+                                                                              },
+                                                                              progressIndicatorBuilder:
+                                                                                  (context,
+                                                                                  url,
+                                                                                  downloadProgress,) =>
+                                                                              const SpinKitCircle(
+                                                                                color: appPrimaryColor,
+                                                                                size: 30,
                                                                               ),
                                                                             ),
-                                                                            SizedBox(
-                                                                              height: 16,
+                                                                          ),
+                                                                          SizedBox(
+                                                                            height: 16,
+                                                                          ),
+                                                                          Text(
+                                                                            'Choose Add‑Ons for ${p.name}',
+                                                                            style: MyTextStyle.f16(
+                                                                              weight: FontWeight.bold,
+                                                                              blackColor,
                                                                             ),
-                                                                            Text(
-                                                                              'Choose Add‑Ons for ${p.name}',
-                                                                              style: MyTextStyle.f16(
-                                                                                weight: FontWeight.bold,
-                                                                                blackColor,
-                                                                              ),
-                                                                              textAlign: TextAlign.left,
-                                                                            ),
-                                                                            SizedBox(
-                                                                              height: 12,
-                                                                            ),
-                                                                            Column(
-                                                                              children: p.addons!.map(
-                                                                                    (e,) {
-                                                                                  return Padding(
-                                                                                    padding: const EdgeInsets.symmetric(
-                                                                                      vertical: 4.0,
+                                                                            textAlign: TextAlign.left,
+                                                                          ),
+                                                                          SizedBox(
+                                                                            height: 12,
+                                                                          ),
+                                                                          Column(
+                                                                            children: p.addons!.map(
+                                                                                  (e,) {
+                                                                                return Padding(
+                                                                                  padding: const EdgeInsets.symmetric(
+                                                                                    vertical: 4.0,
+                                                                                  ),
+                                                                                  child: Container(
+                                                                                    padding: const EdgeInsets.all(
+                                                                                      8,
                                                                                     ),
-                                                                                    child: Container(
-                                                                                      padding: const EdgeInsets.all(
+                                                                                    decoration: BoxDecoration(
+                                                                                      border: Border.all(
+                                                                                        color: blackColor,
+                                                                                      ),
+                                                                                      borderRadius: BorderRadius.circular(
                                                                                         8,
                                                                                       ),
-                                                                                      decoration: BoxDecoration(
-                                                                                        border: Border.all(
-                                                                                          color: blackColor,
-                                                                                        ),
-                                                                                        borderRadius: BorderRadius.circular(
-                                                                                          8,
-                                                                                        ),
-                                                                                      ),
-                                                                                      child: Row(
-                                                                                        children: [
-                                                                                          Expanded(
-                                                                                            child: Column(
-                                                                                              crossAxisAlignment: CrossAxisAlignment
-                                                                                                  .start,
-                                                                                              children: [
-                                                                                                Text(
-                                                                                                  e.name ??
-                                                                                                      '',
-                                                                                                  style: const TextStyle(
-                                                                                                    fontWeight: FontWeight
-                                                                                                        .bold,
-                                                                                                  ),
-                                                                                                ),
-                                                                                                const SizedBox(
-                                                                                                  height: 4,
-                                                                                                ),
-                                                                                                Text(
-                                                                                                  e.isFree ==
-                                                                                                      true
-                                                                                                      ? "Free (Max: ${e
-                                                                                                      .maxQuantity})"
-                                                                                                      : "₹ ${e.price
-                                                                                                      ?.toStringAsFixed(2) ??
-                                                                                                      '0.00'} (Max: ${e
-                                                                                                      .maxQuantity})",
-                                                                                                  style: TextStyle(
-                                                                                                    color: Colors.grey
-                                                                                                        .shade600,
-                                                                                                  ),
-                                                                                                ),
-                                                                                              ],
-                                                                                            ),
-                                                                                          ),
-                                                                                          Row(
+                                                                                    ),
+                                                                                    child: Row(
+                                                                                      children: [
+                                                                                        Expanded(
+                                                                                          child: Column(
+                                                                                            crossAxisAlignment: CrossAxisAlignment
+                                                                                                .start,
                                                                                             children: [
-                                                                                              IconButton(
-                                                                                                icon: Icon(
-                                                                                                  Icons.remove,
-                                                                                                  color: isAddonRemoveDisabled(
-                                                                                                    p.id.toString(),
-                                                                                                    e.id.toString(),
-                                                                                                    int.parse(e.quantity.toString()),
-                                                                                                  )
-                                                                                                      ? Colors.grey
-                                                                                                      : Colors.black,
+                                                                                              Text(
+                                                                                                e.name ??
+                                                                                                    '',
+                                                                                                style: const TextStyle(
+                                                                                                  fontWeight: FontWeight
+                                                                                                      .bold,
                                                                                                 ),
-                                                                                                onPressed: isAddonRemoveDisabled(
-                                                                                                  p.id.toString(),
-                                                                                                  e.id.toString(),
-                                                                                                  int.parse(e.quantity.toString())
-                                                                                                )
-                                                                                                    ? null
-                                                                                                    : () {
-                                                                                                  setState(() {
-                                                                                                    e.quantity = (e.quantity) - 1;
-                                                                                                    if (e.quantity == 0) {
-                                                                                                      e.isSelected = false;
-                                                                                                    }
-                                                                                                  });
-                                                                                                },
+                                                                                              ),
+                                                                                              const SizedBox(
+                                                                                                height: 4,
                                                                                               ),
                                                                                               Text(
-                                                                                                '${e.quantity}',
-                                                                                              ),
-                                                                                              IconButton(
-                                                                                                icon: const Icon(
-                                                                                                  Icons.add,
-                                                                                                  color: Colors.brown,
+                                                                                                e.isFree ==
+                                                                                                    true
+                                                                                                    ? "Free (Max: ${e
+                                                                                                    .maxQuantity})"
+                                                                                                    : "₹ ${e.price
+                                                                                                    ?.toStringAsFixed(2) ??
+                                                                                                    '0.00'} (Max: ${e
+                                                                                                    .maxQuantity})",
+                                                                                                style: TextStyle(
+                                                                                                  color: Colors.grey
+                                                                                                      .shade600,
                                                                                                 ),
-                                                                                                onPressed: e.quantity == 0
-                                                                                                    ? () {
-                                                                                                  setState(() {
-                                                                                                    e.quantity = 1;
-                                                                                                    e.isSelected = true;
-                                                                                                  });
-
-                                                                                                }
-                                                                                                    : null, // disable if already 1
-                                                                                              )
-
-
+                                                                                              ),
                                                                                             ],
                                                                                           ),
-                                                                                        ],
-                                                                                      ),
+                                                                                        ),
+                                                                                        Row(
+                                                                                          children: [
+                                                                                            IconButton(
+                                                                                              icon: Icon(
+                                                                                                Icons.remove,
+                                                                                                color: isAddonRemoveDisabled(
+                                                                                                  p.id.toString(),
+                                                                                                  e.id.toString(),
+                                                                                                  int.parse(e.quantity.toString()),
+                                                                                                )
+                                                                                                    ? Colors.grey
+                                                                                                    : Colors.black,
+                                                                                              ),
+                                                                                              onPressed: isAddonRemoveDisabled(
+                                                                                                p.id.toString(),
+                                                                                                e.id.toString(),
+                                                                                                int.parse(e.quantity.toString())
+                                                                                              )
+                                                                                                  ? null
+                                                                                                  : () {
+                                                                                                setState(() {
+                                                                                                  e.quantity = (e.quantity) - 1;
+                                                                                                  if (e.quantity == 0) {
+                                                                                                    e.isSelected = false;
+                                                                                                  }
+                                                                                                });
+                                                                                              },
+                                                                                            ),
+                                                                                            Text(
+                                                                                              '${e.quantity}',
+                                                                                            ),
+                                                                                            IconButton(
+                                                                                              icon: const Icon(
+                                                                                                Icons.add,
+                                                                                                color: Colors.brown,
+                                                                                              ),
+                                                                                              onPressed: e.quantity == 0
+                                                                                                  ? () {
+                                                                                                setState(() {
+                                                                                                  e.quantity = 1;
+                                                                                                  e.isSelected = true;
+                                                                                                });
+
+                                                                                              }
+                                                                                                  : null, // disable if already 1
+                                                                                            )
+
+
+                                                                                          ],
+                                                                                        ),
+                                                                                      ],
                                                                                     ),
+                                                                                  ),
+                                                                                );
+                                                                              },
+                                                                            ).toList(),
+                                                                          ),
+                                                                          SizedBox(
+                                                                            height: 20,
+                                                                          ),
+                                                                          Row(
+                                                                            mainAxisAlignment: MainAxisAlignment.end,
+                                                                            children: [
+                                                                              ElevatedButton(
+                                                                                onPressed: () {
+                                                                                  setState(
+                                                                                        () {
+                                                                                      if (counter >
+                                                                                          1 ||
+                                                                                          counter ==
+                                                                                              1) {
+                                                                                        counter--;
+                                                                                      }
+                                                                                    },
+                                                                                  );
+                                                                                  Navigator.of(
+                                                                                    context,
+                                                                                  ).pop();
+                                                                                },
+                                                                                style: ElevatedButton.styleFrom(
+                                                                                  backgroundColor: greyColor.shade400,
+                                                                                  minimumSize: Size(
+                                                                                    80,
+                                                                                    40,
+                                                                                  ),
+                                                                                  padding: EdgeInsets.all(
+                                                                                    20,
+                                                                                  ),
+                                                                                  shape: RoundedRectangleBorder(
+                                                                                    borderRadius: BorderRadius.circular(
+                                                                                      10,
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                                child: Text(
+                                                                                  'Cancel',
+                                                                                  style: MyTextStyle.f14(
+                                                                                    blackColor,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                              SizedBox(
+                                                                                width: 8,
+                                                                              ),
+                                                                              ElevatedButton(
+                                                                                onPressed: () {
+                                                                                  final currentQtyInCart = getCurrentQuantity(
+                                                                                    p.id.toString(),
+                                                                                  );
+                                                                                  bool canAdd;
+
+                                                                                  if (p.isStock ==
+                                                                                      true) {
+                                                                                    if ((widget.isEditingOrder ==
+                                                                                        true &&
+                                                                                        widget.existingOrder?.data
+                                                                                            ?.orderStatus ==
+                                                                                            "COMPLETED") ||
+                                                                                        (widget.isEditingOrder ==
+                                                                                            true &&
+                                                                                            widget.existingOrder?.data
+                                                                                                ?.orderStatus ==
+                                                                                                "WAITLIST")) {
+                                                                                      final paidQty =
+                                                                                          widget.existingOrder?.data?.items
+                                                                                              ?.firstWhereOrNull(
+                                                                                                (item,) =>
+                                                                                            item.product?.id ==
+                                                                                                p.id,
+                                                                                          )
+                                                                                              ?.quantity ??
+                                                                                              0;
+                                                                                      canAdd =
+                                                                                          currentQtyInCart <
+                                                                                              ((p.availableQuantity ??
+                                                                                                  0) +
+                                                                                                  paidQty);
+                                                                                    } else {
+                                                                                      canAdd =
+                                                                                          currentQtyInCart <
+                                                                                              (p.availableQuantity ??
+                                                                                                  0);
+                                                                                    }
+                                                                                  } else {
+                                                                                    canAdd = true;
+                                                                                  }
+
+                                                                                  if (!canAdd) {
+                                                                                    showToast(
+                                                                                      "Cannot add more items. Stock limit reached.",
+                                                                                      context,
+                                                                                      color: false,
+                                                                                    );
+                                                                                    return;
+                                                                                  }
+
+                                                                                  setState(
+                                                                                        () {
+                                                                                      isSplitPayment = false;
+                                                                                      if (widget.isEditingOrder !=
+                                                                                          true) {
+                                                                                        selectedOrderType = OrderType.line;
+                                                                                      }
+                                                                                      final index = billingItems.indexWhere(
+                                                                                            (item) => item['_id'] == p.id,
+                                                                                      );
+
+                                                                                      final selectedAddons = p.addons!
+                                                                                          .where((addon) => addon.quantity > 0)
+                                                                                          .map((addon) => {
+                                                                                        "_id": addon.id,
+                                                                                        "price": addon.price,
+                                                                                        "quantity": addon.quantity,
+                                                                                        "name": addon.name,
+                                                                                        "isAvailable": addon.isAvailable,
+                                                                                        "maxQuantity": addon.maxQuantity,
+                                                                                        "isFree": addon.isFree,
+                                                                                      })
+                                                                                          .toList();
+
+                                                                                      if (index != -1) {
+                                                                                        billingItems[index]['selectedAddons'] = selectedAddons;
+                                                                                      } else {
+                                                                                        billingItems.add({
+                                                                                          "_id": p.id,
+                                                                                          "basePrice": p.basePrice,
+                                                                                          "image": p.image,
+                                                                                          "qty": 0,
+                                                                                          "name": p.name,
+                                                                                          "availableQuantity": p.availableQuantity,
+                                                                                          "selectedAddons": selectedAddons,
+                                                                                        });
+                                                                                      }
+
+                                                                                          debugPrint("billingAddbills:${List.from(
+                                                                                            billingItems,
+                                                                                          )}");
+                                                                                      context
+                                                                                          .read<
+                                                                                          FoodCategoryBloc
+                                                                                      >()
+                                                                                          .add(
+                                                                                        AddToBilling(
+                                                                                          List.from(
+                                                                                            billingItems,
+                                                                                          ),
+                                                                                          isDiscountApplied,
+                                                                                          selectedOrderType,
+                                                                                        ),
+                                                                                      );
+                                                                                      debugPrint("billingItem in addons:${List.from(
+                                                                                        billingItems,
+                                                                                      )}");
+
+                                                                                      Navigator.of(
+                                                                                        context,
+                                                                                      ).pop();
+                                                                                    },
                                                                                   );
                                                                                 },
-                                                                              ).toList(),
-                                                                            ),
-                                                                            SizedBox(
-                                                                              height: 20,
-                                                                            ),
-                                                                            Row(
-                                                                              mainAxisAlignment: MainAxisAlignment.end,
-                                                                              children: [
-                                                                                ElevatedButton(
-                                                                                  onPressed: () {
-                                                                                    setState(
-                                                                                          () {
-                                                                                        if (counter >
-                                                                                            1 ||
-                                                                                            counter ==
-                                                                                                1) {
-                                                                                          counter--;
-                                                                                        }
-                                                                                      },
-                                                                                    );
-                                                                                    Navigator.of(
-                                                                                      context,
-                                                                                    ).pop();
-                                                                                  },
-                                                                                  style: ElevatedButton.styleFrom(
-                                                                                    backgroundColor: greyColor.shade400,
-                                                                                    minimumSize: Size(
-                                                                                      80,
-                                                                                      40,
-                                                                                    ),
-                                                                                    padding: EdgeInsets.all(
-                                                                                      20,
-                                                                                    ),
-                                                                                    shape: RoundedRectangleBorder(
-                                                                                      borderRadius: BorderRadius.circular(
-                                                                                        10,
-                                                                                      ),
-                                                                                    ),
+                                                                                style: ElevatedButton.styleFrom(
+                                                                                  backgroundColor: appPrimaryColor,
+                                                                                  minimumSize: Size(
+                                                                                    80,
+                                                                                    40,
                                                                                   ),
-                                                                                  child: Text(
-                                                                                    'Cancel',
-                                                                                    style: MyTextStyle.f14(
-                                                                                      blackColor,
+                                                                                  padding: EdgeInsets.all(
+                                                                                    20,
+                                                                                  ),
+                                                                                  shape: RoundedRectangleBorder(
+                                                                                    borderRadius: BorderRadius.circular(
+                                                                                      10,
                                                                                     ),
                                                                                   ),
                                                                                 ),
-                                                                                SizedBox(
-                                                                                  width: 8,
-                                                                                ),
-                                                                                ElevatedButton(
-                                                                                  onPressed: () {
-                                                                                    final currentQtyInCart = getCurrentQuantity(
-                                                                                      p.id.toString(),
-                                                                                    );
-                                                                                    bool canAdd;
-
-                                                                                    if (p.isStock ==
-                                                                                        true) {
-                                                                                      if ((widget.isEditingOrder ==
-                                                                                          true &&
-                                                                                          widget.existingOrder?.data
-                                                                                              ?.orderStatus ==
-                                                                                              "COMPLETED") ||
-                                                                                          (widget.isEditingOrder ==
-                                                                                              true &&
-                                                                                              widget.existingOrder?.data
-                                                                                                  ?.orderStatus ==
-                                                                                                  "WAITLIST")) {
-                                                                                        final paidQty =
-                                                                                            widget.existingOrder?.data?.items
-                                                                                                ?.firstWhereOrNull(
-                                                                                                  (item,) =>
-                                                                                              item.product?.id ==
-                                                                                                  p.id,
-                                                                                            )
-                                                                                                ?.quantity ??
-                                                                                                0;
-                                                                                        canAdd =
-                                                                                            currentQtyInCart <
-                                                                                                ((p.availableQuantity ??
-                                                                                                    0) +
-                                                                                                    paidQty);
-                                                                                      } else {
-                                                                                        canAdd =
-                                                                                            currentQtyInCart <
-                                                                                                (p.availableQuantity ??
-                                                                                                    0);
-                                                                                      }
-                                                                                    } else {
-                                                                                      canAdd = true;
-                                                                                    }
-
-                                                                                    if (!canAdd) {
-                                                                                      showToast(
-                                                                                        "Cannot add more items. Stock limit reached.",
-                                                                                        context,
-                                                                                        color: false,
-                                                                                      );
-                                                                                      return;
-                                                                                    }
-
-                                                                                    setState(
-                                                                                          () {
-                                                                                        isSplitPayment = false;
-                                                                                        if (widget.isEditingOrder !=
-                                                                                            true) {
-                                                                                          selectedOrderType = OrderType.line;
-                                                                                        }
-                                                                                        final index = billingItems.indexWhere(
-                                                                                              (item) => item['_id'] == p.id,
-                                                                                        );
-
-                                                                                        final selectedAddons = p.addons!
-                                                                                            .where((addon) => addon.quantity > 0)
-                                                                                            .map((addon) => {
-                                                                                          "_id": addon.id,
-                                                                                          "price": addon.price,
-                                                                                          "quantity": addon.quantity,
-                                                                                          "name": addon.name,
-                                                                                          "isAvailable": addon.isAvailable,
-                                                                                          "maxQuantity": addon.maxQuantity,
-                                                                                          "isFree": addon.isFree,
-                                                                                        })
-                                                                                            .toList();
-
-                                                                                        if (index != -1) {
-                                                                                          billingItems[index]['selectedAddons'] = selectedAddons;
-                                                                                        } else {
-                                                                                          billingItems.add({
-                                                                                            "_id": p.id,
-                                                                                            "basePrice": p.basePrice,
-                                                                                            "image": p.image,
-                                                                                            "qty": 0,
-                                                                                            "name": p.name,
-                                                                                            "availableQuantity": p.availableQuantity,
-                                                                                            "selectedAddons": selectedAddons,
-                                                                                          });
-                                                                                        }
-
-                                                                                            debugPrint("billingAddbills:${List.from(
-                                                                                              billingItems,
-                                                                                            )}");
-                                                                                        context
-                                                                                            .read<
-                                                                                            FoodCategoryBloc
-                                                                                        >()
-                                                                                            .add(
-                                                                                          AddToBilling(
-                                                                                            List.from(
-                                                                                              billingItems,
-                                                                                            ),
-                                                                                            isDiscountApplied,
-                                                                                            selectedOrderType,
-                                                                                          ),
-                                                                                        );
-                                                                                        debugPrint("billingItem in addons:${List.from(
-                                                                                          billingItems,
-                                                                                        )}");
-
-                                                                                        Navigator.of(
-                                                                                          context,
-                                                                                        ).pop();
-                                                                                      },
-                                                                                    );
-                                                                                  },
-                                                                                  style: ElevatedButton.styleFrom(
-                                                                                    backgroundColor: appPrimaryColor,
-                                                                                    minimumSize: Size(
-                                                                                      80,
-                                                                                      40,
-                                                                                    ),
-                                                                                    padding: EdgeInsets.all(
-                                                                                      20,
-                                                                                    ),
-                                                                                    shape: RoundedRectangleBorder(
-                                                                                      borderRadius: BorderRadius.circular(
-                                                                                        10,
-                                                                                      ),
-                                                                                    ),
-                                                                                  ),
-                                                                                  child: Text(
-                                                                                    'Add to Bill',
-                                                                                    style: MyTextStyle.f14(
-                                                                                      whiteColor,
-                                                                                    ),
+                                                                                child: Text(
+                                                                                  'Add to Bill',
+                                                                                  style: MyTextStyle.f14(
+                                                                                    whiteColor,
                                                                                   ),
                                                                                 ),
-                                                                              ],
-                                                                            ),
-                                                                          ],
-                                                                        ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
                                                                       ),
                                                                     ),
-                                                                  );
-                                                                },
-                                                              ),
+                                                                  ),
+                                                                );
+                                                              },
                                                             ),
-                                                          );
-                                                        },
-                                                      );
-                                                    },
-                                                    style: ElevatedButton.styleFrom(
-                                                    backgroundColor: const Color(0xFFF5F6F8), // light grey background
-                                                    foregroundColor: appPrimaryColor, // brown text
-                                                      shape: RoundedRectangleBorder(
-                                                        borderRadius: BorderRadius.circular(20),
-                                                      ),
-                                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                                      minimumSize: const Size(0, 0),
-                                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                                      elevation: 0,
-                                                    ),
-                                                    child: const Text(
-                                                    "Choose Add-ons",
-                                                    style: TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                    ),
-                                                    ),
-                                                    ),
-
-                                                    ],
                                                           ),
-                                                          // ),
-                                                        ),
-                                                      ),
+                                                        );
+                                                      },
                                                     );
                                                   },
-                                                ),
-                                        ),
-                                      ],
-                                    ),
+                                                  style: ElevatedButton.styleFrom(
+                                                  backgroundColor: const Color(0xFFF5F6F8), // light grey background
+                                                  foregroundColor: appPrimaryColor, // brown text
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(20),
+                                                    ),
+                                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                                    minimumSize: const Size(0, 0),
+                                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                                    elevation: 0,
+                                                  ),
+                                                  child: const Text(
+                                                  "Choose Add-ons",
+                                                  style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w500,
+                                                  ),
+                                                  ),
+                                                  ),
+
+                                                  ],
+                                                        ),
+                                                        // ),
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                          ),
+                                    ],
                                   ),
                                 ),
 
@@ -5205,11 +5157,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                               url,
                                                               error,
                                                             ) {
-                                                              return const Icon(
-                                                                Icons.error,
-                                                                size: 30,
-                                                                color:
-                                                                    appHomeTextColor,
+                                                              return Image.asset(
+                                                                Images.all,
+                                                                width: 25,
+                                                                height: 25,
+                                                                fit: BoxFit.cover,
                                                               );
                                                             },
                                                         progressIndicatorBuilder:
@@ -7885,7 +7837,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
               child: Container(
                 margin: const EdgeInsets.symmetric(
                   horizontal: 10,
-                  vertical: 15,
+                  vertical: 5,
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 5),
                 child: Column(
@@ -7921,2632 +7873,2596 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                           )
                               : Container(
                             margin: const EdgeInsets.only(top: 10),
-                            child: SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: SizedBox(
-                                          width: size.width * 0.6,
-                                          child: TextField(
-                                            controller: searchController,
-                                            decoration: InputDecoration(
-                                              hintText: 'Search product',
-                                              prefixIcon: Icon(
-                                                Icons.search,
-                                              ),
-                                              contentPadding:
-                                              EdgeInsets.symmetric(
-                                                horizontal: 12,
-                                              ),
-                                              border: OutlineInputBorder(
-                                                borderRadius:
-                                                BorderRadius.circular(
-                                                  30,
-                                                ),
-                                              ),
-                                              enabledBorder:
-                                              OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: appGreyColor,
-                                                  width: 1.5,
-                                                ),
-                                                borderRadius:
-                                                BorderRadius.circular(
-                                                  30,
-                                                ),
-                                              ),
-                                              focusedBorder:
-                                              OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color:
-                                                  appPrimaryColor,
-                                                  width: 1.5,
-                                                ),
-                                                borderRadius:
-                                                BorderRadius.circular(
-                                                  30,
-                                                ),
+                            child: Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: SizedBox(
+                                        width: size.width * 0.6,
+                                        child: TextField(
+                                          controller: searchController,
+                                          decoration: InputDecoration(
+                                            hintText: 'Search product',
+                                            prefixIcon: Icon(
+                                              Icons.search,
+                                            ),
+                                            contentPadding:
+                                            EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                            ),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                              BorderRadius.circular(
+                                                30,
                                               ),
                                             ),
-                                            onChanged: (value) {
-                                              searchController
-                                                ..text = (value)
-                                                ..selection =
-                                                TextSelection.collapsed(
-                                                  offset:
-                                                  searchController
-                                                      .text
-                                                      .length,
-                                                );
-                                              setState(() {
-                                                _loadInitialProducts();
-                                              });
-                                            },
-                                          ),
-                                        ),
-                                      ),
-                                      horizontalSpace(width: 10),
-                                      Expanded(
-                                        child: SizedBox(
-                                          width: size.width * 0.5,
-                                          child: TextField(
-                                            controller:
-                                            searchCodeController,
-                                            decoration: InputDecoration(
-                                              hintText: 'Search code',
-                                              prefixIcon: Icon(
-                                                Icons.search,
+                                            enabledBorder:
+                                            OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: appGreyColor,
+                                                width: 1.5,
                                               ),
-                                              contentPadding:
-                                              EdgeInsets.symmetric(
-                                                horizontal: 12,
-                                              ),
-                                              border: OutlineInputBorder(
-                                                borderRadius:
-                                                BorderRadius.circular(
-                                                  30,
-                                                ),
-                                              ),
-                                              enabledBorder:
-                                              OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: appGreyColor,
-                                                  width: 1.5,
-                                                ),
-                                                borderRadius:
-                                                BorderRadius.circular(
-                                                  30,
-                                                ),
-                                              ),
-                                              focusedBorder:
-                                              OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color:
-                                                  appPrimaryColor,
-                                                  width: 1.5,
-                                                ),
-                                                borderRadius:
-                                                BorderRadius.circular(
-                                                  30,
-                                                ),
+                                              borderRadius:
+                                              BorderRadius.circular(
+                                                30,
                                               ),
                                             ),
-                                            onChanged: (value) {
-                                              searchCodeController
-                                                ..text = (value)
-                                                ..selection =
-                                                TextSelection.collapsed(
-                                                  offset:
-                                                  searchCodeController
-                                                      .text
-                                                      .length,
-                                                );
-                                              setState(() {
-                                                _loadInitialProducts();
-                                              });
-                                            },
+                                            focusedBorder:
+                                            OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color:
+                                                appPrimaryColor,
+                                                width: 1.5,
+                                              ),
+                                              borderRadius:
+                                              BorderRadius.circular(
+                                                30,
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  verticalSpace(
-                                    height: 2,
-                                  ),
-
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "Choose Category",
-                                        style: MyTextStyle.f18(
-                                          blackColor,
-                                          weight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      IconButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            searchController.clear();
-                                            searchCodeController.clear();
-                                          });
-                                          _loadInitialProducts();
-                                        },
-                                        icon: const Icon(Icons.refresh),
-                                      ),
-                                    ],
-                                  ),
-                                  verticalSpace(
-                                    height: 2,
-                                  ),
-
-                                  /// Category - list
-                                  displayedCategories.isEmpty
-                                      ? Container()
-                                      : SizedBox(
-                                    height: size.height * 0.14,
-                                    width: size.width * 1.38,
-                                    child: ListView.separated(
-                                      scrollDirection:
-                                      Axis.horizontal,
-                                      itemCount: displayedCategories
-                                          .length,
-                                      separatorBuilder: (_, _) =>
-                                          SizedBox(width: 12),
-                                      itemBuilder: (context, index) {
-                                        final category =
-                                        displayedCategories[index];
-                                        final isSelected =
-                                            category.name ==
-                                                selectedCategory;
-                                        return CategoryCard(
-                                          label: category.name!,
-                                          imagePath:
-                                          category.image ?? "",
-                                          isSelected: isSelected,
-                                          onTap: () {
+                                          onChanged: (value) {
+                                            searchController
+                                              ..text = (value)
+                                              ..selection =
+                                              TextSelection.collapsed(
+                                                offset:
+                                                searchController
+                                                    .text
+                                                    .length,
+                                              );
                                             setState(() {
-                                              selectedCategory =
-                                              category.name!;
-                                              selectedCatId =
-                                                  category.id;
-                                              if (selectedCategory ==
-                                                  'All') {
-                                                _loadInitialProducts();
-                                              } else {
-                                                _loadInitialProducts();
-                                              }
+                                              _loadInitialProducts();
                                             });
                                           },
-                                        );
-                                      },
+                                        ),
+                                      ),
                                     ),
-                                  ),
-
-                                  /// Product - list
-                                  SizedBox(
-                                    height: size.height * 0.45,
-                                    width: size.width * 1.8,
-                                    child:
-                                    allProducts.isEmpty
-                                        ? Container()
-                                        : GridView.builder(
-                                      controller: _scrollController,
-                                      padding: EdgeInsets.only(
-                                        top: 10,
-                                      ),
-                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount:
-                                        MediaQuery.of(
-                                          context,
-                                        ).size.width >
-                                            650 && MediaQuery.of(
-                                          context,
-                                        ).size.width <
-                                            760
-                                            ? 3
-                                            : MediaQuery.of(context)
-                                            .size
-                                            .width >=
-                                            760 && MediaQuery.of(context)
-                                            .size
-                                            .width <
-                                            800
-                                            ? 4
-                                            : 5,
-                                        crossAxisSpacing: 8,
-                                        mainAxisSpacing: 8,
-                                        childAspectRatio:
-                                        MediaQuery.of(
-                                          context,
-                                        ).size.width >
-                                            650 && MediaQuery.of(
-                                          context,
-                                        ).size.width <
-                                            700
-                                            ? 0.78
-                                            : MediaQuery.of(
-                                          context,
-                                        ).size.width >=
-                                            700 && MediaQuery.of(
-                                          context,
-                                        ).size.width <
-                                            740
-                                            ? 0.8
-                                            : MediaQuery.of(
-                                          context,
-                                        ).size.width >=
-                                            740 && MediaQuery.of(
-                                          context,
-                                        ).size.width <
-                                            760
-                                            ? 0.9
-                                            : MediaQuery.of(
-                                          context,
-                                        ).size.width >=
-                                            760 && MediaQuery.of(context)
-                                            .size
-                                            .width <
-                                            800 ?0.65:0.5,
-                                      ),
-                                      itemCount:
-                                      allProducts.length + (hasMoreData ? 1 : 0),
-                                      itemBuilder: (_, index) {
-                                        if (index == allProducts.length) {
-                                          return buildLoadingIndicator();
-                                        }
-                                        int getCurrentQuantity(
-                                            String productId,
-                                            ) {
-                                          return billingItems
-                                              .firstWhere(
-                                                (item) =>
-                                            item['_id'] ==
-                                                productId,
-                                            orElse: () =>
-                                            {},
-                                          )['qty'] ??
-                                              0;
-                                        }
-
-                                        debugPrint(
-                                          "sizeWidth:${MediaQuery.of(context).size.width}",
-                                        );
-                                        debugPrint(
-                                          "sizeHeight:${MediaQuery.of(context).size.height}",
-                                        );
-                                        TextEditingController
-                                        getQuantityController(
-                                            String productId,
-                                            ) {
-                                          if (!quantityControllers
-                                              .containsKey(
-                                            productId,
-                                          )) {
-                                            final currentQty =
-                                            getCurrentQuantity(
-                                              productId,
-                                            );
-                                            quantityControllers[productId] =
-                                                TextEditingController(
-                                                  text: currentQty
-                                                      .toString(),
-                                                );
-                                          }
-                                          return quantityControllers[productId]!;
-                                        }
-
-                                        void updateControllerText(
-                                            String productId,
-                                            int quantity,
-                                            ) {
-                                          if (quantityControllers
-                                              .containsKey(
-                                            productId,
-                                          )) {
-                                            quantityControllers[productId]!
-                                                .text = quantity
-                                                .toString();
-                                          }
-                                        }
-
-                                        final p =
-                                        allProducts[index];
-                                        int currentQuantity =
-                                        getCurrentQuantity(
-                                          p.id.toString(),
-                                        );
-                                        TextEditingController
-                                        currentController =
-                                        getQuantityController(
-                                          p.id.toString(),
-                                        );
-                                        return InkWell(
-                                          onTap: () {
+                                    horizontalSpace(width: 10),
+                                    Expanded(
+                                      child: SizedBox(
+                                        width: size.width * 0.5,
+                                        child: TextField(
+                                          controller:
+                                          searchCodeController,
+                                          decoration: InputDecoration(
+                                            hintText: 'Search code',
+                                            prefixIcon: Icon(
+                                              Icons.search,
+                                            ),
+                                            contentPadding:
+                                            EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                            ),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                              BorderRadius.circular(
+                                                30,
+                                              ),
+                                            ),
+                                            enabledBorder:
+                                            OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: appGreyColor,
+                                                width: 1.5,
+                                              ),
+                                              borderRadius:
+                                              BorderRadius.circular(
+                                                30,
+                                              ),
+                                            ),
+                                            focusedBorder:
+                                            OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color:
+                                                appPrimaryColor,
+                                                width: 1.5,
+                                              ),
+                                              borderRadius:
+                                              BorderRadius.circular(
+                                                30,
+                                              ),
+                                            ),
+                                          ),
+                                          onChanged: (value) {
+                                            searchCodeController
+                                              ..text = (value)
+                                              ..selection =
+                                              TextSelection.collapsed(
+                                                offset:
+                                                searchCodeController
+                                                    .text
+                                                    .length,
+                                              );
                                             setState(() {
-                                              currentQuantity = 1;
-                                              if (p
-                                                  .addons!
-                                                  .isNotEmpty) {
-                                                productExists = isProductInCart(p.id.toString());
-                                                if(productExists == true) {
-                                                  final currentQtyInCart = getCurrentQuantity(p.id.toString());
-                                                  bool canAdd;
+                                              _loadInitialProducts();
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                verticalSpace(
+                                  height: 2,
+                                ),
 
-                                                  if (p.isStock == true) {
-                                                    if ((widget.isEditingOrder == true &&
-                                                        widget.existingOrder?.data?.orderStatus == "COMPLETED") ||
-                                                        (widget.isEditingOrder == true &&
-                                                            widget.existingOrder?.data?.orderStatus == "WAITLIST")) {
-                                                      final paidQty = widget.existingOrder?.data?.items
-                                                          ?.firstWhereOrNull((item) => item.product?.id == p.id)
-                                                          ?.quantity ?? 0;
-                                                      canAdd = currentQtyInCart < ((p.availableQuantity ?? 0) + paidQty);
-                                                    } else {
-                                                      canAdd = currentQtyInCart < (p.availableQuantity ?? 0);
-                                                    }
-                                                  } else {
-                                                    canAdd = true;
-                                                  }
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Choose Category",
+                                      style: MyTextStyle.f18(
+                                        blackColor,
+                                        weight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          searchController.clear();
+                                          searchCodeController.clear();
+                                        });
+                                        _loadInitialProducts();
+                                      },
+                                      icon: const Icon(Icons.refresh),
+                                    ),
+                                  ],
+                                ),
+                                verticalSpace(
+                                  height: 2,
+                                ),
 
-                                                  if (!canAdd) {
-                                                    showToast(
-                                                      "Cannot add more items. Stock limit reached.",
-                                                      context,
-                                                      color: false,
-                                                    );
-                                                    return;
-                                                  }
+                                /// Category - list
+                                displayedCategories.isEmpty
+                                    ? Container()
+                                    : SizedBox(
+                                  height: size.height * 0.14,
+                                  width: size.width * 1.38,
+                                  child: ListView.separated(
+                                    scrollDirection:
+                                    Axis.horizontal,
+                                    itemCount: displayedCategories
+                                        .length,
+                                    separatorBuilder: (_, _) =>
+                                        SizedBox(width: 12),
+                                    itemBuilder: (context, index) {
+                                      final category =
+                                      displayedCategories[index];
+                                      final isSelected =
+                                          category.name ==
+                                              selectedCategory;
+                                      return CategoryCard(
+                                        label: category.name!,
+                                        imagePath:
+                                        category.image ?? "",
+                                        isSelected: isSelected,
+                                        onTap: () {
+                                          setState(() {
+                                            selectedCategory =
+                                            category.name!;
+                                            selectedCatId =
+                                                category.id;
+                                            if (selectedCategory ==
+                                                'All') {
+                                              _loadInitialProducts();
+                                            } else {
+                                              _loadInitialProducts();
+                                            }
+                                          });
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
 
-                                                  setState(() {
-                                                    isSplitPayment = false;
-                                                    if (widget.isEditingOrder != true) {
-                                                      selectedOrderType = OrderType.line;
-                                                    }
-
-                                                    final index = billingItems.indexWhere((item) => item['_id'] == p.id);
-                                                    if (index != -1) {
-                                                      billingItems[index]['qty'] = billingItems[index]['qty'] + 1;
-                                                      updateControllerText(
-                                                        p.id.toString(),
-                                                        billingItems[index]['qty'],
-                                                      );
-                                                    }
-
-                                                    context.read<FoodCategoryBloc>().add(
-                                                      AddToBilling(
-                                                        List.from(billingItems),
-                                                        isDiscountApplied,
-                                                        selectedOrderType,
-                                                      ),
-                                                    );
-                                                  });
-                                                } else {
-                                                  final index = billingItems.indexWhere((item) => item['_id'] == p.id);
-
-                                                  if (index == -1) {
-                                                    for (var addon in p.addons!) {
-                                                      addon.isSelected = false;
-                                                      addon.quantity = 0;
-                                                    }
-                                                  }
-                                                  else {
-                                                    final existingAddons = billingItems[index]['selectedAddons'] as List<dynamic>? ?? [];
-                                                    for (var addon in p.addons!) {
-                                                      final found = existingAddons.firstWhereOrNull(
-                                                            (a) => a['_id'] == addon.id,
-                                                      );
-                                                      if (found != null) {
-                                                        addon.quantity = 1;
-                                                        addon.isSelected = true;
-                                                      } else {
-                                                        addon.quantity = 0;
-                                                        addon.isSelected = false;
-                                                      }
-                                                    }
-                                                  }
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (context2) {
-                                                      return BlocProvider(
-                                                        create:
-                                                            (context,) =>
-                                                            FoodCategoryBloc(),
-                                                        child: BlocProvider.value(
-                                                          value:
-                                                          BlocProvider.of<
-                                                              FoodCategoryBloc
-                                                          >(
-                                                            context,
-                                                            listen:
-                                                            false,
-                                                          ),
-                                                          child: StatefulBuilder(
-                                                            builder:
-                                                                (context,
-                                                                setState,) {
-                                                              return Dialog(
-                                                                insetPadding: EdgeInsets.symmetric(
-                                                                  horizontal: 40,
-                                                                  vertical: 24,
-                                                                ),
-                                                                shape: RoundedRectangleBorder(
-                                                                  borderRadius: BorderRadius.circular(
-                                                                    8,
-                                                                  ),
-                                                                ),
-                                                                child: Container(
-                                                                  constraints: BoxConstraints(
-                                                                    maxWidth:
-                                                                    size.width *
-                                                                        0.4,
-                                                                    maxHeight:
-                                                                    size.height *
-                                                                        0.6,
-                                                                  ),
-                                                                  padding: EdgeInsets.all(
-                                                                    16,
-                                                                  ),
-                                                                  child: SingleChildScrollView(
-                                                                    child: Column(
-                                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                                      mainAxisSize: MainAxisSize.min,
-                                                                      children: [
-                                                                        ClipRRect(
-                                                                          borderRadius: BorderRadius.circular(
-                                                                            15.0,
+                                /// Product - list
+                                  allProducts.isEmpty
+                                      ? Container()
+                                      : Expanded(
+                                    child: GridView.builder(
+                                      controller: _scrollController,
+                                      shrinkWrap: true,
+                                      padding: EdgeInsets.only(
+                                    top: 10,
                                                                           ),
-                                                                          child: CachedNetworkImage(
-                                                                            imageUrl: p.image ??
-                                                                                "",
-                                                                            width:
-                                                                            size.width *
-                                                                                0.9,
-                                                                            height:
-                                                                            size.height *
-                                                                                0.2,
+                                                                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount:
+                                    MediaQuery.of(
+                                      context,
+                                    ).size.width >
+                                        650 && MediaQuery.of(
+                                      context,
+                                    ).size.width <
+                                        760
+                                        ? 3
+                                        : MediaQuery.of(context)
+                                        .size
+                                        .width >=
+                                        760 && MediaQuery.of(context)
+                                        .size
+                                        .width <
+                                        800
+                                        ? 4
+                                        : 5,
+                                    crossAxisSpacing: 8,
+                                    mainAxisSpacing: 8,
+                                    childAspectRatio: 0.7),
+                                      itemCount: allProducts.length + (hasMoreData ? 1 : 0),
+                                      itemBuilder: (_, index) {
+                                    if (index == allProducts.length) {
+                                      return buildLoadingIndicator();
+                                    }
+                                    int getCurrentQuantity(
+                                        String productId,
+                                        ) {
+                                      return billingItems
+                                          .firstWhere(
+                                            (item) =>
+                                        item['_id'] ==
+                                            productId,
+                                        orElse: () =>
+                                        {},
+                                      )['qty'] ??
+                                          0;
+                                    }
+
+                                    debugPrint(
+                                      "sizeWidth:${MediaQuery.of(context).size.width}",
+                                    );
+                                    debugPrint(
+                                      "sizeHeight:${MediaQuery.of(context).size.height}",
+                                    );
+                                    TextEditingController
+                                    getQuantityController(
+                                        String productId,
+                                        ) {
+                                      if (!quantityControllers
+                                          .containsKey(
+                                        productId,
+                                      )) {
+                                        final currentQty =
+                                        getCurrentQuantity(
+                                          productId,
+                                        );
+                                        quantityControllers[productId] =
+                                            TextEditingController(
+                                              text: currentQty
+                                                  .toString(),
+                                            );
+                                      }
+                                      return quantityControllers[productId]!;
+                                    }
+
+                                    void updateControllerText(
+                                        String productId,
+                                        int quantity,
+                                        ) {
+                                      if (quantityControllers
+                                          .containsKey(
+                                        productId,
+                                      )) {
+                                        quantityControllers[productId]!
+                                            .text = quantity
+                                            .toString();
+                                      }
+                                    }
+
+                                    final p =
+                                    allProducts[index];
+                                    int currentQuantity =
+                                    getCurrentQuantity(
+                                      p.id.toString(),
+                                    );
+                                    TextEditingController
+                                    currentController =
+                                    getQuantityController(
+                                      p.id.toString(),
+                                    );
+                                    return InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          currentQuantity = 1;
+                                          if (p
+                                              .addons!
+                                              .isNotEmpty) {
+                                            productExists = isProductInCart(p.id.toString());
+                                            if(productExists == true) {
+                                              final currentQtyInCart = getCurrentQuantity(p.id.toString());
+                                              bool canAdd;
+
+                                              if (p.isStock == true) {
+                                                if ((widget.isEditingOrder == true &&
+                                                    widget.existingOrder?.data?.orderStatus == "COMPLETED") ||
+                                                    (widget.isEditingOrder == true &&
+                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST")) {
+                                                  final paidQty = widget.existingOrder?.data?.items
+                                                      ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                      ?.quantity ?? 0;
+                                                  canAdd = currentQtyInCart < ((p.availableQuantity ?? 0) + paidQty);
+                                                } else {
+                                                  canAdd = currentQtyInCart < (p.availableQuantity ?? 0);
+                                                }
+                                              } else {
+                                                canAdd = true;
+                                              }
+
+                                              if (!canAdd) {
+                                                showToast(
+                                                  "Cannot add more items. Stock limit reached.",
+                                                  context,
+                                                  color: false,
+                                                );
+                                                return;
+                                              }
+
+                                              setState(() {
+                                                isSplitPayment = false;
+                                                if (widget.isEditingOrder != true) {
+                                                  selectedOrderType = OrderType.line;
+                                                }
+
+                                                final index = billingItems.indexWhere((item) => item['_id'] == p.id);
+                                                if (index != -1) {
+                                                  billingItems[index]['qty'] = billingItems[index]['qty'] + 1;
+                                                  updateControllerText(
+                                                    p.id.toString(),
+                                                    billingItems[index]['qty'],
+                                                  );
+                                                }
+
+                                                context.read<FoodCategoryBloc>().add(
+                                                  AddToBilling(
+                                                    List.from(billingItems),
+                                                    isDiscountApplied,
+                                                    selectedOrderType,
+                                                  ),
+                                                );
+                                              });
+                                            } else {
+                                              final index = billingItems.indexWhere((item) => item['_id'] == p.id);
+
+                                              if (index == -1) {
+                                                for (var addon in p.addons!) {
+                                                  addon.isSelected = false;
+                                                  addon.quantity = 0;
+                                                }
+                                              }
+                                              else {
+                                                final existingAddons = billingItems[index]['selectedAddons'] as List<dynamic>? ?? [];
+                                                for (var addon in p.addons!) {
+                                                  final found = existingAddons.firstWhereOrNull(
+                                                        (a) => a['_id'] == addon.id,
+                                                  );
+                                                  if (found != null) {
+                                                    addon.quantity = 1;
+                                                    addon.isSelected = true;
+                                                  } else {
+                                                    addon.quantity = 0;
+                                                    addon.isSelected = false;
+                                                  }
+                                                }
+                                              }
+                                              showDialog(
+                                                context: context,
+                                                builder: (context2) {
+                                                  return BlocProvider(
+                                                    create:
+                                                        (context,) =>
+                                                        FoodCategoryBloc(),
+                                                    child: BlocProvider.value(
+                                                      value:
+                                                      BlocProvider.of<
+                                                          FoodCategoryBloc
+                                                      >(
+                                                        context,
+                                                        listen:
+                                                        false,
+                                                      ),
+                                                      child: StatefulBuilder(
+                                                        builder:
+                                                            (context,
+                                                            setState,) {
+                                                          return Dialog(
+                                                            insetPadding: EdgeInsets.symmetric(
+                                                              horizontal: 40,
+                                                              vertical: 24,
+                                                            ),
+                                                            shape: RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius.circular(
+                                                                8,
+                                                              ),
+                                                            ),
+                                                            child: Container(
+                                                              constraints: BoxConstraints(
+                                                                maxWidth:
+                                                                size.width *
+                                                                    0.4,
+                                                                maxHeight:
+                                                                size.height *
+                                                                    0.6,
+                                                              ),
+                                                              padding: EdgeInsets.all(
+                                                                16,
+                                                              ),
+                                                              child: SingleChildScrollView(
+                                                                child: Column(
+                                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                                  mainAxisSize: MainAxisSize.min,
+                                                                  children: [
+                                                                    ClipRRect(
+                                                                      borderRadius: BorderRadius.circular(
+                                                                        15.0,
+                                                                      ),
+                                                                      child: CachedNetworkImage(
+                                                                        imageUrl: p.image ??
+                                                                            "",
+                                                                        width:
+                                                                        size.width *
+                                                                            0.9,
+                                                                        height:
+                                                                        size.height *
+                                                                            0.2,
+                                                                        fit: BoxFit.cover,
+                                                                        errorWidget:
+                                                                            (context,
+                                                                            url,
+                                                                            error,) {
+                                                                          return Image.asset(
+                                                                            Images.all,
+                                                                            width: 25,
+                                                                            height: 25,
                                                                             fit: BoxFit.cover,
-                                                                            errorWidget:
-                                                                                (context,
-                                                                                url,
-                                                                                error,) {
-                                                                              return const Icon(
-                                                                                Icons.error,
-                                                                                size: 30,
-                                                                                color: appHomeTextColor,
-                                                                              );
-                                                                            },
-                                                                            progressIndicatorBuilder:
-                                                                                (context,
-                                                                                url,
-                                                                                downloadProgress,) =>
-                                                                            const SpinKitCircle(
-                                                                              color: appPrimaryColor,
-                                                                              size: 30,
+                                                                          );
+                                                                        },
+                                                                        progressIndicatorBuilder:
+                                                                            (context,
+                                                                            url,
+                                                                            downloadProgress,) =>
+                                                                        const SpinKitCircle(
+                                                                          color: appPrimaryColor,
+                                                                          size: 30,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height: 16,
+                                                                    ),
+                                                                    Text(
+                                                                      'Choose Add‑Ons for ${p.name}',
+                                                                      style: MyTextStyle.f16(
+                                                                        weight: FontWeight.bold,
+                                                                        blackColor,
+                                                                      ),
+                                                                      textAlign: TextAlign.left,
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height: 12,
+                                                                    ),
+                                                                    Column(
+                                                                      children: p.addons!.map(
+                                                                            (e,) {
+                                                                          return Padding(
+                                                                            padding: const EdgeInsets.symmetric(
+                                                                              vertical: 4.0,
+                                                                            ),
+                                                                            child: Container(
+                                                                              padding: const EdgeInsets.all(
+                                                                                8,
+                                                                              ),
+                                                                              decoration: BoxDecoration(
+                                                                                border: Border.all(
+                                                                                  color: blackColor,
+                                                                                ),
+                                                                                borderRadius: BorderRadius.circular(
+                                                                                  8,
+                                                                                ),
+                                                                              ),
+                                                                              child: Row(
+                                                                                children: [
+                                                                                  Expanded(
+                                                                                    child: Column(
+                                                                                      crossAxisAlignment: CrossAxisAlignment
+                                                                                          .start,
+                                                                                      children: [
+                                                                                        Text(
+                                                                                          e.name ??
+                                                                                              '',
+                                                                                          style: const TextStyle(
+                                                                                            fontWeight: FontWeight
+                                                                                                .bold,
+                                                                                          ),
+                                                                                        ),
+                                                                                        const SizedBox(
+                                                                                          height: 4,
+                                                                                        ),
+                                                                                        Text(
+                                                                                          e.isFree ==
+                                                                                              true
+                                                                                              ? "Free (Max: ${e
+                                                                                              .maxQuantity})"
+                                                                                              : "₹ ${e.price
+                                                                                              ?.toStringAsFixed(2) ??
+                                                                                              '0.00'} (Max: ${e
+                                                                                              .maxQuantity})",
+                                                                                          style: TextStyle(
+                                                                                            color: Colors.grey
+                                                                                                .shade600,
+                                                                                          ),
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
+                                                                                  ),
+                                                                                  Row(
+                                                                                    children: [
+                                                                                      IconButton(
+                                                                                        icon: const Icon(
+                                                                                          Icons.remove,
+                                                                                        ),
+                                                                                        onPressed:
+                                                                                        (e.quantity) >
+                                                                                            0
+                                                                                            ? () {
+                                                                                          setState(
+                                                                                                () {
+                                                                                              e.quantity =
+                                                                                                  (e.quantity) -
+                                                                                                      1;
+                                                                                            },
+                                                                                          );
+                                                                                        }
+                                                                                            : null,
+                                                                                      ),
+                                                                                      Text(
+                                                                                        '${e.quantity}',
+                                                                                      ),
+                                                                                      IconButton(
+                                                                                        icon: const Icon(
+                                                                                          Icons.add,
+                                                                                          color: Colors.brown,
+                                                                                        ),
+                                                                                        onPressed:
+                                                                                        (e.quantity) <
+                                                                                            (e.maxQuantity ??
+                                                                                                1)
+                                                                                            ? () {
+                                                                                          setState(
+                                                                                                () {
+                                                                                              e.quantity =
+                                                                                                  (e.quantity) +
+                                                                                                      1;
+                                                                                            },
+                                                                                          );
+                                                                                        }
+                                                                                            : null,
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                            ),
+                                                                          );
+                                                                        },
+                                                                      ).toList(),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height: 20,
+                                                                    ),
+                                                                    Row(
+                                                                      mainAxisAlignment: MainAxisAlignment.end,
+                                                                      children: [
+                                                                        ElevatedButton(
+                                                                          onPressed: () {
+                                                                            setState(
+                                                                                  () {
+                                                                                if (counter >
+                                                                                    1 ||
+                                                                                    counter ==
+                                                                                        1) {
+                                                                                  counter--;
+                                                                                }
+                                                                              },
+                                                                            );
+                                                                            Navigator.of(
+                                                                              context,
+                                                                            ).pop();
+                                                                          },
+                                                                          style: ElevatedButton.styleFrom(
+                                                                            backgroundColor: greyColor.shade400,
+                                                                            minimumSize: Size(
+                                                                              80,
+                                                                              40,
+                                                                            ),
+                                                                            padding: EdgeInsets.all(
+                                                                              20,
+                                                                            ),
+                                                                            shape: RoundedRectangleBorder(
+                                                                              borderRadius: BorderRadius.circular(
+                                                                                10,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                          child: Text(
+                                                                            'Cancel',
+                                                                            style: MyTextStyle.f14(
+                                                                              blackColor,
                                                                             ),
                                                                           ),
                                                                         ),
                                                                         SizedBox(
-                                                                          height: 16,
+                                                                          width: 8,
                                                                         ),
-                                                                        Text(
-                                                                          'Choose Add‑Ons for ${p.name}',
-                                                                          style: MyTextStyle.f16(
-                                                                            weight: FontWeight.bold,
-                                                                            blackColor,
-                                                                          ),
-                                                                          textAlign: TextAlign.left,
-                                                                        ),
-                                                                        SizedBox(
-                                                                          height: 12,
-                                                                        ),
-                                                                        Column(
-                                                                          children: p.addons!.map(
-                                                                                (e,) {
-                                                                              return Padding(
-                                                                                padding: const EdgeInsets.symmetric(
-                                                                                  vertical: 4.0,
-                                                                                ),
-                                                                                child: Container(
-                                                                                  padding: const EdgeInsets.all(
-                                                                                    8,
-                                                                                  ),
-                                                                                  decoration: BoxDecoration(
-                                                                                    border: Border.all(
-                                                                                      color: blackColor,
-                                                                                    ),
-                                                                                    borderRadius: BorderRadius.circular(
-                                                                                      8,
-                                                                                    ),
-                                                                                  ),
-                                                                                  child: Row(
-                                                                                    children: [
-                                                                                      Expanded(
-                                                                                        child: Column(
-                                                                                          crossAxisAlignment: CrossAxisAlignment
-                                                                                              .start,
-                                                                                          children: [
-                                                                                            Text(
-                                                                                              e.name ??
-                                                                                                  '',
-                                                                                              style: const TextStyle(
-                                                                                                fontWeight: FontWeight
-                                                                                                    .bold,
-                                                                                              ),
-                                                                                            ),
-                                                                                            const SizedBox(
-                                                                                              height: 4,
-                                                                                            ),
-                                                                                            Text(
-                                                                                              e.isFree ==
-                                                                                                  true
-                                                                                                  ? "Free (Max: ${e
-                                                                                                  .maxQuantity})"
-                                                                                                  : "₹ ${e.price
-                                                                                                  ?.toStringAsFixed(2) ??
-                                                                                                  '0.00'} (Max: ${e
-                                                                                                  .maxQuantity})",
-                                                                                              style: TextStyle(
-                                                                                                color: Colors.grey
-                                                                                                    .shade600,
-                                                                                              ),
-                                                                                            ),
-                                                                                          ],
-                                                                                        ),
-                                                                                      ),
-                                                                                      Row(
-                                                                                        children: [
-                                                                                          IconButton(
-                                                                                            icon: const Icon(
-                                                                                              Icons.remove,
-                                                                                            ),
-                                                                                            onPressed:
-                                                                                            (e.quantity) >
-                                                                                                0
-                                                                                                ? () {
-                                                                                              setState(
-                                                                                                    () {
-                                                                                                  e.quantity =
-                                                                                                      (e.quantity) -
-                                                                                                          1;
-                                                                                                },
-                                                                                              );
-                                                                                            }
-                                                                                                : null,
-                                                                                          ),
-                                                                                          Text(
-                                                                                            '${e.quantity}',
-                                                                                          ),
-                                                                                          IconButton(
-                                                                                            icon: const Icon(
-                                                                                              Icons.add,
-                                                                                              color: Colors.brown,
-                                                                                            ),
-                                                                                            onPressed:
-                                                                                            (e.quantity) <
-                                                                                                (e.maxQuantity ??
-                                                                                                    1)
-                                                                                                ? () {
-                                                                                              setState(
-                                                                                                    () {
-                                                                                                  e.quantity =
-                                                                                                      (e.quantity) +
-                                                                                                          1;
-                                                                                                },
-                                                                                              );
-                                                                                            }
-                                                                                                : null,
-                                                                                          ),
-                                                                                        ],
-                                                                                      ),
-                                                                                    ],
-                                                                                  ),
-                                                                                ),
+                                                                        ElevatedButton(
+                                                                          onPressed: () {
+                                                                            final currentQtyInCart = getCurrentQuantity(
+                                                                              p.id.toString(),
+                                                                            );
+                                                                            bool canAdd;
+
+                                                                            if (p.isStock ==
+                                                                                true) {
+                                                                              if ((widget.isEditingOrder ==
+                                                                                  true &&
+                                                                                  widget.existingOrder?.data
+                                                                                      ?.orderStatus ==
+                                                                                      "COMPLETED") ||
+                                                                                  (widget.isEditingOrder ==
+                                                                                      true &&
+                                                                                      widget.existingOrder?.data
+                                                                                          ?.orderStatus ==
+                                                                                          "WAITLIST")) {
+                                                                                final paidQty =
+                                                                                    widget.existingOrder?.data?.items
+                                                                                        ?.firstWhereOrNull(
+                                                                                          (item,) =>
+                                                                                      item.product?.id ==
+                                                                                          p.id,
+                                                                                    )
+                                                                                        ?.quantity ??
+                                                                                        0;
+                                                                                canAdd =
+                                                                                    currentQtyInCart <
+                                                                                        ((p.availableQuantity ??
+                                                                                            0) +
+                                                                                            paidQty);
+                                                                              } else {
+                                                                                canAdd =
+                                                                                    currentQtyInCart <
+                                                                                        (p.availableQuantity ??
+                                                                                            0);
+                                                                              }
+                                                                            } else {
+                                                                              canAdd = true;
+                                                                            }
+
+                                                                            if (!canAdd) {
+                                                                              showToast(
+                                                                                "Cannot add more items. Stock limit reached.",
+                                                                                context,
+                                                                                color: false,
                                                                               );
-                                                                            },
-                                                                          ).toList(),
-                                                                        ),
-                                                                        SizedBox(
-                                                                          height: 20,
-                                                                        ),
-                                                                        Row(
-                                                                          mainAxisAlignment: MainAxisAlignment.end,
-                                                                          children: [
-                                                                            ElevatedButton(
-                                                                              onPressed: () {
-                                                                                setState(
-                                                                                      () {
-                                                                                    if (counter >
-                                                                                        1 ||
-                                                                                        counter ==
-                                                                                            1) {
-                                                                                      counter--;
-                                                                                    }
-                                                                                  },
+                                                                              return;
+                                                                            }
+
+                                                                            setState(
+                                                                                  () {
+                                                                                isSplitPayment = false;
+                                                                                if (widget.isEditingOrder !=
+                                                                                    true) {
+                                                                                  selectedOrderType = OrderType.line;
+                                                                                }
+                                                                                final index = billingItems.indexWhere(
+                                                                                      (item,) =>
+                                                                                  item['_id'] ==
+                                                                                      p.id,
                                                                                 );
+                                                                                if (index !=
+                                                                                    -1) {
+                                                                                  billingItems[index]['qty'] =
+                                                                                      billingItems[index]['qty'] +
+                                                                                          1;
+                                                                                  updateControllerText(
+                                                                                    p.id.toString(),
+                                                                                    billingItems[index]['qty'],
+                                                                                  );
+                                                                                } else {
+                                                                                  billingItems.add(
+                                                                                    {
+                                                                                      "_id": p.id,
+                                                                                      "basePrice": p.basePrice,
+                                                                                      "image": p.image,
+                                                                                      "qty": 1,
+                                                                                      "name": p.name,
+                                                                                      "availableQuantity": p
+                                                                                          .availableQuantity,
+                                                                                      "selectedAddons": p.addons!
+                                                                                          .where(
+                                                                                            (addon,) =>
+                                                                                        addon.quantity >
+                                                                                            0,
+                                                                                      )
+                                                                                          .map(
+                                                                                            (addon,) =>
+                                                                                        {
+                                                                                          "_id": addon.id,
+                                                                                          "price": addon.price,
+                                                                                          "quantity": addon.quantity,
+                                                                                          "name": addon.name,
+                                                                                          "isAvailable": addon
+                                                                                              .isAvailable,
+                                                                                          "maxQuantity": addon
+                                                                                              .maxQuantity,
+                                                                                          "isFree": addon.isFree,
+                                                                                        },
+                                                                                      )
+                                                                                          .toList(),
+                                                                                    },
+                                                                                  );
+                                                                                  updateControllerText(
+                                                                                    p.id.toString(),
+                                                                                    1,
+                                                                                  );
+                                                                                }
+                                                                                context
+                                                                                    .read<
+                                                                                    FoodCategoryBloc
+                                                                                >()
+                                                                                    .add(
+                                                                                  AddToBilling(
+                                                                                    List.from(
+                                                                                      billingItems,
+                                                                                    ),
+                                                                                    isDiscountApplied,
+                                                                                    selectedOrderType,
+                                                                                  ),
+                                                                                );
+
                                                                                 Navigator.of(
                                                                                   context,
                                                                                 ).pop();
                                                                               },
-                                                                              style: ElevatedButton.styleFrom(
-                                                                                backgroundColor: greyColor.shade400,
-                                                                                minimumSize: Size(
-                                                                                  80,
-                                                                                  40,
-                                                                                ),
-                                                                                padding: EdgeInsets.all(
-                                                                                  20,
-                                                                                ),
-                                                                                shape: RoundedRectangleBorder(
-                                                                                  borderRadius: BorderRadius.circular(
-                                                                                    10,
-                                                                                  ),
-                                                                                ),
-                                                                              ),
-                                                                              child: Text(
-                                                                                'Cancel',
-                                                                                style: MyTextStyle.f14(
-                                                                                  blackColor,
-                                                                                ),
+                                                                            );
+                                                                          },
+                                                                          style: ElevatedButton.styleFrom(
+                                                                            backgroundColor: appPrimaryColor,
+                                                                            minimumSize: Size(
+                                                                              80,
+                                                                              40,
+                                                                            ),
+                                                                            padding: EdgeInsets.all(
+                                                                              20,
+                                                                            ),
+                                                                            shape: RoundedRectangleBorder(
+                                                                              borderRadius: BorderRadius.circular(
+                                                                                10,
                                                                               ),
                                                                             ),
-                                                                            SizedBox(
-                                                                              width: 8,
+                                                                          ),
+                                                                          child: Text(
+                                                                            'Add to Bill',
+                                                                            style: MyTextStyle.f14(
+                                                                              whiteColor,
                                                                             ),
-                                                                            ElevatedButton(
-                                                                              onPressed: () {
-                                                                                final currentQtyInCart = getCurrentQuantity(
-                                                                                  p.id.toString(),
-                                                                                );
-                                                                                bool canAdd;
-
-                                                                                if (p.isStock ==
-                                                                                    true) {
-                                                                                  if ((widget.isEditingOrder ==
-                                                                                      true &&
-                                                                                      widget.existingOrder?.data
-                                                                                          ?.orderStatus ==
-                                                                                          "COMPLETED") ||
-                                                                                      (widget.isEditingOrder ==
-                                                                                          true &&
-                                                                                          widget.existingOrder?.data
-                                                                                              ?.orderStatus ==
-                                                                                              "WAITLIST")) {
-                                                                                    final paidQty =
-                                                                                        widget.existingOrder?.data?.items
-                                                                                            ?.firstWhereOrNull(
-                                                                                              (item,) =>
-                                                                                          item.product?.id ==
-                                                                                              p.id,
-                                                                                        )
-                                                                                            ?.quantity ??
-                                                                                            0;
-                                                                                    canAdd =
-                                                                                        currentQtyInCart <
-                                                                                            ((p.availableQuantity ??
-                                                                                                0) +
-                                                                                                paidQty);
-                                                                                  } else {
-                                                                                    canAdd =
-                                                                                        currentQtyInCart <
-                                                                                            (p.availableQuantity ??
-                                                                                                0);
-                                                                                  }
-                                                                                } else {
-                                                                                  canAdd = true;
-                                                                                }
-
-                                                                                if (!canAdd) {
-                                                                                  showToast(
-                                                                                    "Cannot add more items. Stock limit reached.",
-                                                                                    context,
-                                                                                    color: false,
-                                                                                  );
-                                                                                  return;
-                                                                                }
-
-                                                                                setState(
-                                                                                      () {
-                                                                                    isSplitPayment = false;
-                                                                                    if (widget.isEditingOrder !=
-                                                                                        true) {
-                                                                                      selectedOrderType = OrderType.line;
-                                                                                    }
-                                                                                    final index = billingItems.indexWhere(
-                                                                                          (item,) =>
-                                                                                      item['_id'] ==
-                                                                                          p.id,
-                                                                                    );
-                                                                                    if (index !=
-                                                                                        -1) {
-                                                                                      billingItems[index]['qty'] =
-                                                                                          billingItems[index]['qty'] +
-                                                                                              1;
-                                                                                      updateControllerText(
-                                                                                        p.id.toString(),
-                                                                                        billingItems[index]['qty'],
-                                                                                      );
-                                                                                    } else {
-                                                                                      billingItems.add(
-                                                                                        {
-                                                                                          "_id": p.id,
-                                                                                          "basePrice": p.basePrice,
-                                                                                          "image": p.image,
-                                                                                          "qty": 1,
-                                                                                          "name": p.name,
-                                                                                          "availableQuantity": p
-                                                                                              .availableQuantity,
-                                                                                          "selectedAddons": p.addons!
-                                                                                              .where(
-                                                                                                (addon,) =>
-                                                                                            addon.quantity >
-                                                                                                0,
-                                                                                          )
-                                                                                              .map(
-                                                                                                (addon,) =>
-                                                                                            {
-                                                                                              "_id": addon.id,
-                                                                                              "price": addon.price,
-                                                                                              "quantity": addon.quantity,
-                                                                                              "name": addon.name,
-                                                                                              "isAvailable": addon
-                                                                                                  .isAvailable,
-                                                                                              "maxQuantity": addon
-                                                                                                  .maxQuantity,
-                                                                                              "isFree": addon.isFree,
-                                                                                            },
-                                                                                          )
-                                                                                              .toList(),
-                                                                                        },
-                                                                                      );
-                                                                                      updateControllerText(
-                                                                                        p.id.toString(),
-                                                                                        1,
-                                                                                      );
-                                                                                    }
-                                                                                    context
-                                                                                        .read<
-                                                                                        FoodCategoryBloc
-                                                                                    >()
-                                                                                        .add(
-                                                                                      AddToBilling(
-                                                                                        List.from(
-                                                                                          billingItems,
-                                                                                        ),
-                                                                                        isDiscountApplied,
-                                                                                        selectedOrderType,
-                                                                                      ),
-                                                                                    );
-
-                                                                                    Navigator.of(
-                                                                                      context,
-                                                                                    ).pop();
-                                                                                  },
-                                                                                );
-                                                                              },
-                                                                              style: ElevatedButton.styleFrom(
-                                                                                backgroundColor: appPrimaryColor,
-                                                                                minimumSize: Size(
-                                                                                  80,
-                                                                                  40,
-                                                                                ),
-                                                                                padding: EdgeInsets.all(
-                                                                                  20,
-                                                                                ),
-                                                                                shape: RoundedRectangleBorder(
-                                                                                  borderRadius: BorderRadius.circular(
-                                                                                    10,
-                                                                                  ),
-                                                                                ),
-                                                                              ),
-                                                                              child: Text(
-                                                                                'Add to Bill',
-                                                                                style: MyTextStyle.f14(
-                                                                                  whiteColor,
-                                                                                ),
-                                                                              ),
-                                                                            ),
-                                                                          ],
+                                                                          ),
                                                                         ),
                                                                       ],
                                                                     ),
-                                                                  ),
+                                                                  ],
                                                                 ),
-                                                              );
-                                                            },
-                                                          ),
-                                                        ),
-                                                      );
-                                                    },
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                      ),
+                                                    ),
                                                   );
-                                                }
-                                              }
-                                              else {
-                                                final currentQtyInCart =
-                                                getCurrentQuantity(
-                                                  p.id.toString(),
-                                                );
-                                                bool canAdd;
+                                                },
+                                              );
+                                            }
+                                          }
+                                          else {
+                                            final currentQtyInCart =
+                                            getCurrentQuantity(
+                                              p.id.toString(),
+                                            );
+                                            bool canAdd;
 
-                                                if (p.isStock ==
-                                                    true) {
-                                                  if ((widget.isEditingOrder ==
+                                            if (p.isStock ==
+                                                true) {
+                                              if ((widget.isEditingOrder ==
+                                                  true &&
+                                                  widget
+                                                      .existingOrder
+                                                      ?.data
+                                                      ?.orderStatus ==
+                                                      "COMPLETED") ||
+                                                  (widget.isEditingOrder ==
                                                       true &&
                                                       widget
                                                           .existingOrder
                                                           ?.data
                                                           ?.orderStatus ==
-                                                          "COMPLETED") ||
-                                                      (widget.isEditingOrder ==
-                                                          true &&
-                                                          widget
-                                                              .existingOrder
-                                                              ?.data
-                                                              ?.orderStatus ==
-                                                              "WAITLIST")) {
-                                                    final paidQty =
-                                                        widget
-                                                            .existingOrder
-                                                            ?.data
-                                                            ?.items
-                                                            ?.firstWhereOrNull(
-                                                              (
-                                                              item,
-                                                              ) =>
-                                                          item.product?.id ==
-                                                              p.id,
-                                                        )
-                                                            ?.quantity ??
-                                                            0;
-                                                    canAdd =
-                                                        currentQtyInCart <
-                                                            ((p.availableQuantity ??
-                                                                0) +
-                                                                paidQty);
-                                                  } else {
-                                                    canAdd =
-                                                        currentQtyInCart <
-                                                            (p.availableQuantity ??
-                                                                0);
-                                                  }
-                                                } else {
-                                                  canAdd = true;
-                                                }
-
-                                                if (!canAdd) {
-                                                  showToast(
-                                                    "Cannot add more items. Stock limit reached.",
-                                                    context,
-                                                    color: false,
-                                                  );
-                                                  return;
-                                                }
-
-                                                setState(() {
-                                                  isSplitPayment =
-                                                  false;
-                                                  if (widget
-                                                      .isEditingOrder !=
-                                                      true) {
-                                                    selectedOrderType =
-                                                        OrderType
-                                                            .line;
-                                                  }
-                                                  final index =
-                                                  billingItems
-                                                      .indexWhere(
-                                                        (
-                                                        item,
-                                                        ) =>
-                                                    item['_id'] ==
-                                                        p.id,
-                                                  );
-                                                  if (index != -1) {
-                                                    billingItems[index]['qty'] =
-                                                        billingItems[index]['qty'] +
-                                                            1;
-                                                    updateControllerText(
-                                                      p.id.toString(),
-                                                      billingItems[index]['qty'],
-                                                    );
-                                                  } else {
-                                                    billingItems.add({
-                                                      "_id": p.id,
-                                                      "basePrice": p
-                                                          .basePrice,
-                                                      "image":
-                                                      p.image,
-                                                      "qty": 1,
-                                                      "name":
-                                                      p.name,
-                                                      "availableQuantity":
-                                                      p.availableQuantity,
-                                                      "selectedAddons": p
-                                                          .addons!
-                                                          .where(
-                                                            (
-                                                            addon,
-                                                            ) =>
-                                                        addon.quantity >
-                                                            0,
-                                                      )
-                                                          .map(
-                                                            (
-                                                            addon,
-                                                            ) => {
-                                                          "_id":
-                                                          addon.id,
-                                                          "price":
-                                                          addon.price,
-                                                          "quantity":
-                                                          addon.quantity,
-                                                          "name":
-                                                          addon.name,
-                                                          "isAvailable":
-                                                          addon.isAvailable,
-                                                          "maxQuantity":
-                                                          addon.maxQuantity,
-                                                          "isFree":
-                                                          addon.isFree,
-                                                        },
-                                                      )
-                                                          .toList(),
-                                                    });
-                                                    updateControllerText(
-                                                      p.id.toString(),
-                                                      1,
-                                                    );
-                                                  }
-                                                  context
-                                                      .read<
-                                                      FoodCategoryBloc
-                                                  >()
-                                                      .add(
-                                                    AddToBilling(
-                                                      List.from(
-                                                        billingItems,
-                                                      ),
-                                                      isDiscountApplied,
-                                                      selectedOrderType,
-                                                    ),
-                                                  );
-                                                });
+                                                          "WAITLIST")) {
+                                                final paidQty =
+                                                    widget
+                                                        .existingOrder
+                                                        ?.data
+                                                        ?.items
+                                                        ?.firstWhereOrNull(
+                                                          (
+                                                          item,
+                                                          ) =>
+                                                      item.product?.id ==
+                                                          p.id,
+                                                    )
+                                                        ?.quantity ??
+                                                        0;
+                                                canAdd =
+                                                    currentQtyInCart <
+                                                        ((p.availableQuantity ??
+                                                            0) +
+                                                            paidQty);
+                                              } else {
+                                                canAdd =
+                                                    currentQtyInCart <
+                                                        (p.availableQuantity ??
+                                                            0);
                                               }
+                                            } else {
+                                              canAdd = true;
+                                            }
+
+                                            if (!canAdd) {
+                                              showToast(
+                                                "Cannot add more items. Stock limit reached.",
+                                                context,
+                                                color: false,
+                                              );
+                                              return;
+                                            }
+
+                                            setState(() {
+                                              isSplitPayment =
+                                              false;
+                                              if (widget
+                                                  .isEditingOrder !=
+                                                  true) {
+                                                selectedOrderType =
+                                                    OrderType
+                                                        .line;
+                                              }
+                                              final index =
+                                              billingItems
+                                                  .indexWhere(
+                                                    (
+                                                    item,
+                                                    ) =>
+                                                item['_id'] ==
+                                                    p.id,
+                                              );
+                                              if (index != -1) {
+                                                billingItems[index]['qty'] =
+                                                    billingItems[index]['qty'] +
+                                                        1;
+                                                updateControllerText(
+                                                  p.id.toString(),
+                                                  billingItems[index]['qty'],
+                                                );
+                                              } else {
+                                                billingItems.add({
+                                                  "_id": p.id,
+                                                  "basePrice": p
+                                                      .basePrice,
+                                                  "image":
+                                                  p.image,
+                                                  "qty": 1,
+                                                  "name":
+                                                  p.name,
+                                                  "availableQuantity":
+                                                  p.availableQuantity,
+                                                  "selectedAddons": p
+                                                      .addons!
+                                                      .where(
+                                                        (
+                                                        addon,
+                                                        ) =>
+                                                    addon.quantity >
+                                                        0,
+                                                  )
+                                                      .map(
+                                                        (
+                                                        addon,
+                                                        ) => {
+                                                      "_id":
+                                                      addon.id,
+                                                      "price":
+                                                      addon.price,
+                                                      "quantity":
+                                                      addon.quantity,
+                                                      "name":
+                                                      addon.name,
+                                                      "isAvailable":
+                                                      addon.isAvailable,
+                                                      "maxQuantity":
+                                                      addon.maxQuantity,
+                                                      "isFree":
+                                                      addon.isFree,
+                                                    },
+                                                  )
+                                                      .toList(),
+                                                });
+                                                updateControllerText(
+                                                  p.id.toString(),
+                                                  1,
+                                                );
+                                              }
+                                              context
+                                                  .read<
+                                                  FoodCategoryBloc
+                                              >()
+                                                  .add(
+                                                AddToBilling(
+                                                  List.from(
+                                                    billingItems,
+                                                  ),
+                                                  isDiscountApplied,
+                                                  selectedOrderType,
+                                                ),
+                                              );
                                             });
-                                          },
-                                          child: Opacity(
-                                            opacity:
-                                            (p.availableQuantity ??
-                                                0) >
-                                                0 ||
-                                                p.isStock ==
-                                                    false
-                                                ? 1.0
-                                                : 0.5,
-                                            child: Card(
-                                              color: whiteColor,
-                                              elevation: 6,
-                                              shadowColor:
-                                              greyColor,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                BorderRadius.circular(
-                                                  12,
+                                          }
+                                        });
+                                      },
+                                      child: Opacity(
+                                        opacity:
+                                        (p.availableQuantity ??
+                                            0) >
+                                            0 ||
+                                            p.isStock ==
+                                                false
+                                            ? 1.0
+                                            : 0.5,
+                                        child: Card(
+                                          color: whiteColor,
+                                          elevation: 6,
+                                          shadowColor:
+                                          greyColor,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                            BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          child: Column(
+                                            mainAxisSize:
+                                            MainAxisSize
+                                                .min,
+                                            children: [
+                                          Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                                child: ClipOval(
+                                                  child: CachedNetworkImage(
+                                                    imageUrl:
+                                                    p.image ??
+                                                        "",
+                                                    width:
+                                                   55,
+                                                    height:
+                                                    55,
+                                                    fit: BoxFit
+                                                        .cover,
+                                                    errorWidget:
+                                                        (
+                                                        context,
+                                                        url,
+                                                        error,
+                                                        ) {
+                                                      return Image.asset(
+                                                        Images.all,
+                                                        width: 25,
+                                                        height: 25,
+                                                        fit: BoxFit.cover,
+                                                      );
+                                                    },
+                                                    progressIndicatorBuilder:
+                                                        (
+                                                        context,
+                                                        url,
+                                                        downloadProgress,
+                                                        ) => const SpinKitCircle(
+                                                      color:
+                                                      appPrimaryColor,
+                                                      size:
+                                                      30,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
-                                              child: Column(
-                                                mainAxisSize:
-                                                MainAxisSize
-                                                    .min,
-                                                children: [
-                                              Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                                    child: ClipOval(
-                                                      child: CachedNetworkImage(
-                                                        imageUrl:
-                                                        p.image ??
-                                                            "",
-                                                        width:
-                                                       55,
-                                                        height:
-                                                        55,
-                                                        fit: BoxFit
-                                                            .cover,
-                                                        errorWidget:
-                                                            (
-                                                            context,
-                                                            url,
-                                                            error,
-                                                            ) {
-                                                          return const Icon(
-                                                            Icons.error,
-                                                            size:
-                                                            30,
-                                                            color:
-                                                            appHomeTextColor,
-                                                          );
-                                                        },
-                                                        progressIndicatorBuilder:
-                                                            (
-                                                            context,
-                                                            url,
-                                                            downloadProgress,
-                                                            ) => const SpinKitCircle(
-                                                          color:
-                                                          appPrimaryColor,
-                                                          size:
-                                                          30,
-                                                        ),
-                                                      ),
-                                                    ),
+                                              SizedBox(
+                                                width:
+                                                size.width *
+                                                    0.35,
+                                                child: Text(
+                                                  p.name ?? '',
+                                                  style: MyTextStyle.f13(
+                                                    blackColor,
+                                                    weight:
+                                                    FontWeight
+                                                        .w500,
                                                   ),
-                                                  SizedBox(
-                                                    width:
-                                                    size.width *
-                                                        0.35,
-                                                    child: Text(
-                                                      p.name ?? '',
-                                                      style: MyTextStyle.f13(
-                                                        blackColor,
-                                                        weight:
-                                                        FontWeight
-                                                            .w500,
-                                                      ),
-                                                      maxLines: 3,
-                                                      overflow:
-                                                      TextOverflow
-                                                          .ellipsis,
-                                                      textAlign:
-                                                      TextAlign
-                                                          .center,
-                                                    ),
-                                                  ),
-                                                  if (p.isStock ==
-                                                      true)
-                                                    SizedBox(
-                                                      width:
-                                                      size.width *
-                                                          0.25,
-                                                      child: FittedBox(
-                                                        fit: BoxFit
-                                                            .scaleDown,
-                                                        child: Row(
-                                                          children: [
-                                                            Text(
-                                                              'Available: ',
-                                                              style: MyTextStyle.f12(
-                                                                greyColor,
-                                                                weight:
-                                                                FontWeight.w500,
-                                                              ),
-                                                              maxLines:
-                                                              1,
-                                                              overflow:
-                                                              TextOverflow.ellipsis,
-                                                            ),
-                                                            Text(
-                                                              '${p.availableQuantity ?? 0}',
-                                                              style: MyTextStyle.f12(
-                                                                (p.availableQuantity ??
-                                                                    0) >
-                                                                    0
-                                                                    ? greyColor
-                                                                    : redColor,
-                                                                weight:
-                                                                FontWeight.w500,
-                                                              ),
-                                                              maxLines:
-                                                              1,
-                                                              overflow:
-                                                              TextOverflow.ellipsis,
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  if ((p.availableQuantity ??
-                                                      0) <=
-                                                      0 &&
-                                                      p.isStock ==
-                                                          true) ...[
-                                                    verticalSpace(
-                                                      height: 5,
-                                                    ),
-                                                    Container(
-                                                      padding:
-                                                      EdgeInsets.symmetric(
-                                                        horizontal:
-                                                        8,
-                                                        vertical:
-                                                        4,
-                                                      ),
-                                                      decoration: BoxDecoration(
-                                                        color: redColor200,
-                                                        borderRadius:
-                                                        BorderRadius.circular(
-                                                          4,
-                                                        ),
-                                                      ),
-                                                      child: Text(
-                                                        'Out of Stock',
-                                                        style: MyTextStyle.f12(
-                                                          redColor,
-                                                          weight: FontWeight
-                                                              .bold,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                  if((currentQuantity ==
-                                                      0 &&
-                                                      p.isStock ==
-                                                          false) ||(currentQuantity ==
-                                                      0 &&
-                                                      p.isStock ==
-                                                          true) ||
-                                                      (currentQuantity !=
-                                                          0 &&
-                                                          p.isStock ==
-                                                              false) || (currentQuantity !=
-                                                      0 &&
-                                                      p.isStock ==
-                                                          true))
-                                                    verticalSpace(
-                                                      height: 5,
-                                                    ),
-                                                  if((currentQuantity ==
-                                                      0 &&
-                                                      p.isStock ==
-                                                          false) ||(currentQuantity ==
-                                                      0 &&
-                                                      p.isStock ==
-                                                          true) ||
-                                                      (currentQuantity !=
-                                                          0 &&
-                                                          p.isStock ==
-                                                              false) || (currentQuantity !=
-                                                      0 &&
-                                                      p.isStock ==
-                                                          true))
-                                                    SizedBox(
-                                                      width:
-                                                      size.width *
-                                                          0.25,
-                                                      child: FittedBox(
-                                                        fit: BoxFit
-                                                            .scaleDown,
-                                                        child: Text(
-                                                          '₹ ${p.basePrice}',
-                                                          style: MyTextStyle.f14(
-                                                            blackColor,
+                                                  maxLines: 3,
+                                                  overflow:
+                                                  TextOverflow
+                                                      .ellipsis,
+                                                  textAlign:
+                                                  TextAlign
+                                                      .center,
+                                                ),
+                                              ),
+                                              if (p.isStock ==
+                                                  true)
+                                                SizedBox(
+                                                  width:
+                                                  size.width *
+                                                      0.25,
+                                                  child: FittedBox(
+                                                    fit: BoxFit
+                                                        .scaleDown,
+                                                    child: Row(
+                                                      children: [
+                                                        Text(
+                                                          'Available: ',
+                                                          style: MyTextStyle.f12(
+                                                            greyColor,
                                                             weight:
-                                                            FontWeight.w600,
+                                                            FontWeight.w500,
                                                           ),
                                                           maxLines:
                                                           1,
                                                           overflow:
-                                                          TextOverflow
-                                                              .ellipsis,
+                                                          TextOverflow.ellipsis,
+                                                        ),
+                                                        Text(
+                                                          '${p.availableQuantity ?? 0}',
+                                                          style: MyTextStyle.f12(
+                                                            (p.availableQuantity ??
+                                                                0) >
+                                                                0
+                                                                ? greyColor
+                                                                : redColor,
+                                                            weight:
+                                                            FontWeight.w500,
+                                                          ),
+                                                          maxLines:
+                                                          1,
+                                                          overflow:
+                                                          TextOverflow.ellipsis,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              if ((p.availableQuantity ??
+                                                  0) <=
+                                                  0 &&
+                                                  p.isStock ==
+                                                      true) ...[
+                                                verticalSpace(
+                                                  height: 5,
+                                                ),
+                                                Container(
+                                                  padding:
+                                                  EdgeInsets.symmetric(
+                                                    horizontal:
+                                                    8,
+                                                    vertical:
+                                                    4,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: redColor200,
+                                                    borderRadius:
+                                                    BorderRadius.circular(
+                                                      4,
+                                                    ),
+                                                  ),
+                                                  child: Text(
+                                                    'Out of Stock',
+                                                    style: MyTextStyle.f12(
+                                                      redColor,
+                                                      weight: FontWeight
+                                                          .bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                              if((currentQuantity ==
+                                                  0 &&
+                                                  p.isStock ==
+                                                      false) ||(currentQuantity ==
+                                                  0 &&
+                                                  p.isStock ==
+                                                      true) ||
+                                                  (currentQuantity !=
+                                                      0 &&
+                                                      p.isStock ==
+                                                          false) || (currentQuantity !=
+                                                  0 &&
+                                                  p.isStock ==
+                                                      true))
+                                                verticalSpace(
+                                                  height: 5,
+                                                ),
+                                              if((currentQuantity ==
+                                                  0 &&
+                                                  p.isStock ==
+                                                      false) ||(currentQuantity ==
+                                                  0 &&
+                                                  p.isStock ==
+                                                      true) ||
+                                                  (currentQuantity !=
+                                                      0 &&
+                                                      p.isStock ==
+                                                          false) || (currentQuantity !=
+                                                  0 &&
+                                                  p.isStock ==
+                                                      true))
+                                                SizedBox(
+                                                  width:
+                                                  size.width *
+                                                      0.25,
+                                                  child: FittedBox(
+                                                    fit: BoxFit
+                                                        .scaleDown,
+                                                    child: Text(
+                                                      '₹ ${p.basePrice}',
+                                                      style: MyTextStyle.f14(
+                                                        blackColor,
+                                                        weight:
+                                                        FontWeight.w600,
+                                                      ),
+                                                      maxLines:
+                                                      1,
+                                                      overflow:
+                                                      TextOverflow
+                                                          .ellipsis,
+                                                    ),
+                                                  ),
+                                                ),
+                                              if (currentQuantity !=
+                                                  0 &&
+                                                  (p.availableQuantity ??
+                                                      0) >
+                                                      0)
+                                                verticalSpace(
+                                                  height: 10,
+                                                ),
+                                              if (currentQuantity !=
+                                                  0 &&
+                                                  (p.availableQuantity ??
+                                                      0) >
+                                                      0)
+                                                Padding(
+                                                  padding:
+                                                  const EdgeInsets.only(
+                                                    left:
+                                                    5.0,
+                                                    right:
+                                                    5.0,
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .center,
+                                                    children: [
+
+                                                      CircleAvatar(
+                                                        radius: 15,
+                                                        backgroundColor: greyColor200,
+                                                        child: IconButton(
+                                                          icon: Icon(
+                                                            Icons.remove,
+                                                            size: 15,
+                                                            color: blackColor,
+                                                          ),
+                                                          onPressed: () {
+                                                            setState(() {
+                                                              isSplitPayment = false;
+                                                              if (widget.isEditingOrder != true) {
+                                                                selectedOrderType = OrderType.line;
+                                                              }
+
+                                                              final index = billingItems.indexWhere(
+                                                                    (item) => item['_id'] == p.id,
+                                                              );
+
+                                                              if (index != -1) {
+                                                                final currentQty = billingItems[index]['qty'];
+
+                                                                // 🔎 original quantity from existing order
+                                                                final originalQty = widget.existingOrder?.data?.items
+                                                                    ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                                    ?.quantity ??
+                                                                    0;
+
+                                                                if (isOriginalOrderItem(p.id.toString())) {
+                                                                  // ✅ original item: only allow decrease if above originalQty
+                                                                  if (currentQty > originalQty) {
+                                                                    billingItems[index]['qty'] = currentQty - 1;
+                                                                    updateControllerText(
+                                                                      p.id.toString(),
+                                                                      billingItems[index]['qty'],
+                                                                    );
+                                                                  } else {
+                                                                    // show feedback if user tries to go below
+                                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                                      SnackBar(
+                                                                        content: Text(
+                                                                          "Cannot reduce below original ordered qty ($originalQty)",
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                  }
+                                                                } else {
+                                                                  // ✅ new item: free to decrease/remove
+                                                                  if (currentQty > 1) {
+                                                                    billingItems[index]['qty'] = currentQty - 1;
+                                                                    updateControllerText(
+                                                                      p.id.toString(),
+                                                                      billingItems[index]['qty'],
+                                                                    );
+                                                                  } else {
+                                                                    billingItems.removeWhere((item) => item['_id'] == p.id);
+                                                                    quantityControllers.remove(p.id);
+                                                                    if (billingItems.isEmpty) {
+                                                                      isDiscountApplied = false;
+                                                                      widget.isEditingOrder = false;
+                                                                      tableId = null;
+                                                                      waiterId = null;
+                                                                      selectedValue = null;
+                                                                      selectedValueWaiter = null;
+                                                                    }
+                                                                  }
+                                                                }
+
+                                                                context.read<FoodCategoryBloc>().add(
+                                                                  AddToBilling(
+                                                                    List.from(billingItems),
+                                                                    isDiscountApplied,
+                                                                    selectedOrderType,
+                                                                  ),
+                                                                );
+                                                                if(billingItems.isEmpty || billingItems == []) {
+                                                                  for (var addon in p
+                                                                      .addons!) {
+                                                                    addon
+                                                                        .isSelected =
+                                                                    false;
+                                                                    addon
+                                                                        .quantity =
+                                                                    0;
+                                                                  }
+                                                                }
+                                                              }
+                                                            });
+                                                          },
                                                         ),
                                                       ),
-                                                    ),
-                                                  if (currentQuantity !=
-                                                      0 &&
-                                                      (p.availableQuantity ??
-                                                          0) >
-                                                          0)
-                                                    verticalSpace(
-                                                      height: 10,
-                                                    ),
-                                                  if (currentQuantity !=
-                                                      0 &&
-                                                      (p.availableQuantity ??
-                                                          0) >
-                                                          0)
-                                                    Padding(
-                                                      padding:
-                                                      const EdgeInsets.only(
-                                                        left:
-                                                        5.0,
-                                                        right:
-                                                        5.0,
-                                                      ),
-                                                      child: Row(
-                                                        mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                        children: [
+                                                      Container(
+                                                        width: 45,
+                                                        height: 32,
+                                                        margin: const EdgeInsets.symmetric(horizontal: 12),
+                                                        decoration: BoxDecoration(
+                                                          border: Border.all(
+                                                            color: (widget.isEditingOrder == true &&
+                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                isOriginalOrderItem(p.id.toString()))
+                                                                ? greyColor200!
+                                                                : greyColor,
+                                                          ),
+                                                          borderRadius: BorderRadius.circular(4),
+                                                          color: (widget.isEditingOrder == true &&
+                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                              isOriginalOrderItem(p.id.toString()))
+                                                              ? greyColor200
+                                                              : whiteColor,
+                                                        ),
+                                                        child: TextField(
+                                                          controller: currentController,
+                                                          textAlign: TextAlign.center,
+                                                          keyboardType: TextInputType.number,
+                                                          enabled: !(widget.isEditingOrder == true &&
+                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                              isOriginalOrderItem(p.id.toString())), // Disable for original items
+                                                          style: MyTextStyle.f16(
+                                                            (widget.isEditingOrder == true &&
+                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                isOriginalOrderItem(p.id.toString()))
+                                                                ? greyColor
+                                                                : blackColor,
+                                                          ),
+                                                          decoration: InputDecoration(
+                                                            border: InputBorder.none,
+                                                            isDense: true,
+                                                            contentPadding: EdgeInsets.all(8),
+                                                            hintText: (widget.isEditingOrder == true &&
+                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                isOriginalOrderItem(p.id.toString()))
+                                                                ? "Locked"
+                                                                : null,
+                                                            hintStyle: TextStyle(color: greyColor, fontSize: 12),
+                                                          ),
+                                                          onChanged: (value) {
+                                                            final newQty = int.tryParse(value);
 
-                                                          CircleAvatar(
-                                                            radius: 15,
-                                                            backgroundColor: greyColor200,
-                                                            child: IconButton(
-                                                              icon: Icon(
-                                                                Icons.remove,
-                                                                size: 15,
-                                                                color: blackColor,
-                                                              ),
-                                                              onPressed: () {
+                                                            // original order quantity (0 if not in existing order)
+                                                            final originalQty = widget.existingOrder?.data?.items
+                                                                ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                                ?.quantity ??
+                                                                0;
+
+                                                            if (newQty != null && newQty > 0) {
+                                                              bool canSetQuantity = true;
+
+                                                              if (p.isStock == true) {
+                                                                if ((widget.isEditingOrder == true &&
+                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST"))) {
+                                                                  // For editing order, allow up to available stock + originalQty
+                                                                  canSetQuantity = newQty <= ((p.availableQuantity ?? 0) + originalQty);
+                                                                } else {
+                                                                  canSetQuantity = newQty <= (p.availableQuantity ?? 0);
+                                                                }
+                                                              }
+
+                                                              // 👇 extra rule: don't allow decreasing below originalQty
+                                                              if (widget.isEditingOrder == true &&
+                                                                  isOriginalOrderItem(p.id.toString()) &&
+                                                                  newQty < originalQty) {
+                                                                canSetQuantity = false;
+                                                              }
+
+                                                              if (canSetQuantity) {
                                                                 setState(() {
                                                                   isSplitPayment = false;
                                                                   if (widget.isEditingOrder != true) {
                                                                     selectedOrderType = OrderType.line;
                                                                   }
 
-                                                                  final index = billingItems.indexWhere(
-                                                                        (item) => item['_id'] == p.id,
-                                                                  );
-
+                                                                  final index =
+                                                                  billingItems.indexWhere((item) => item['_id'] == p.id);
                                                                   if (index != -1) {
-                                                                    final currentQty = billingItems[index]['qty'];
-
-                                                                    // 🔎 original quantity from existing order
-                                                                    final originalQty = widget.existingOrder?.data?.items
-                                                                        ?.firstWhereOrNull((item) => item.product?.id == p.id)
-                                                                        ?.quantity ??
-                                                                        0;
-
-                                                                    if (isOriginalOrderItem(p.id.toString())) {
-                                                                      // ✅ original item: only allow decrease if above originalQty
-                                                                      if (currentQty > originalQty) {
-                                                                        billingItems[index]['qty'] = currentQty - 1;
-                                                                        updateControllerText(
-                                                                          p.id.toString(),
-                                                                          billingItems[index]['qty'],
-                                                                        );
-                                                                      } else {
-                                                                        // show feedback if user tries to go below
-                                                                        ScaffoldMessenger.of(context).showSnackBar(
-                                                                          SnackBar(
-                                                                            content: Text(
-                                                                              "Cannot reduce below original ordered qty ($originalQty)",
-                                                                            ),
-                                                                          ),
-                                                                        );
-                                                                      }
-                                                                    } else {
-                                                                      // ✅ new item: free to decrease/remove
-                                                                      if (currentQty > 1) {
-                                                                        billingItems[index]['qty'] = currentQty - 1;
-                                                                        updateControllerText(
-                                                                          p.id.toString(),
-                                                                          billingItems[index]['qty'],
-                                                                        );
-                                                                      } else {
-                                                                        billingItems.removeWhere((item) => item['_id'] == p.id);
-                                                                        quantityControllers.remove(p.id);
-                                                                        if (billingItems.isEmpty) {
-                                                                          isDiscountApplied = false;
-                                                                          widget.isEditingOrder = false;
-                                                                          tableId = null;
-                                                                          waiterId = null;
-                                                                          selectedValue = null;
-                                                                          selectedValueWaiter = null;
-                                                                        }
-                                                                      }
-                                                                    }
-
-                                                                    context.read<FoodCategoryBloc>().add(
-                                                                      AddToBilling(
-                                                                        List.from(billingItems),
-                                                                        isDiscountApplied,
-                                                                        selectedOrderType,
-                                                                      ),
-                                                                    );
-                                                                    if(billingItems.isEmpty || billingItems == []) {
-                                                                      for (var addon in p
-                                                                          .addons!) {
-                                                                        addon
-                                                                            .isSelected =
-                                                                        false;
-                                                                        addon
-                                                                            .quantity =
-                                                                        0;
-                                                                      }
-                                                                    }
-                                                                  }
-                                                                });
-                                                              },
-                                                            ),
-                                                          ),
-                                                          Container(
-                                                            width: 45,
-                                                            height: 32,
-                                                            margin: const EdgeInsets.symmetric(horizontal: 12),
-                                                            decoration: BoxDecoration(
-                                                              border: Border.all(
-                                                                color: (widget.isEditingOrder == true &&
-                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                    isOriginalOrderItem(p.id.toString()))
-                                                                    ? greyColor200!
-                                                                    : greyColor,
-                                                              ),
-                                                              borderRadius: BorderRadius.circular(4),
-                                                              color: (widget.isEditingOrder == true &&
-                                                                  (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                      widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                  isOriginalOrderItem(p.id.toString()))
-                                                                  ? greyColor200
-                                                                  : whiteColor,
-                                                            ),
-                                                            child: TextField(
-                                                              controller: currentController,
-                                                              textAlign: TextAlign.center,
-                                                              keyboardType: TextInputType.number,
-                                                              enabled: !(widget.isEditingOrder == true &&
-                                                                  (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                      widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                  isOriginalOrderItem(p.id.toString())), // Disable for original items
-                                                              style: MyTextStyle.f16(
-                                                                (widget.isEditingOrder == true &&
-                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                    isOriginalOrderItem(p.id.toString()))
-                                                                    ? greyColor
-                                                                    : blackColor,
-                                                              ),
-                                                              decoration: InputDecoration(
-                                                                border: InputBorder.none,
-                                                                isDense: true,
-                                                                contentPadding: EdgeInsets.all(8),
-                                                                hintText: (widget.isEditingOrder == true &&
-                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                    isOriginalOrderItem(p.id.toString()))
-                                                                    ? "Locked"
-                                                                    : null,
-                                                                hintStyle: TextStyle(color: greyColor, fontSize: 12),
-                                                              ),
-                                                              onChanged: (value) {
-                                                                final newQty = int.tryParse(value);
-
-                                                                // original order quantity (0 if not in existing order)
-                                                                final originalQty = widget.existingOrder?.data?.items
-                                                                    ?.firstWhereOrNull((item) => item.product?.id == p.id)
-                                                                    ?.quantity ??
-                                                                    0;
-
-                                                                if (newQty != null && newQty > 0) {
-                                                                  bool canSetQuantity = true;
-
-                                                                  if (p.isStock == true) {
-                                                                    if ((widget.isEditingOrder == true &&
-                                                                        (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                            widget.existingOrder?.data?.orderStatus == "WAITLIST"))) {
-                                                                      // For editing order, allow up to available stock + originalQty
-                                                                      canSetQuantity = newQty <= ((p.availableQuantity ?? 0) + originalQty);
-                                                                    } else {
-                                                                      canSetQuantity = newQty <= (p.availableQuantity ?? 0);
-                                                                    }
-                                                                  }
-
-                                                                  // 👇 extra rule: don't allow decreasing below originalQty
-                                                                  if (widget.isEditingOrder == true &&
-                                                                      isOriginalOrderItem(p.id.toString()) &&
-                                                                      newQty < originalQty) {
-                                                                    canSetQuantity = false;
-                                                                  }
-
-                                                                  if (canSetQuantity) {
-                                                                    setState(() {
-                                                                      isSplitPayment = false;
-                                                                      if (widget.isEditingOrder != true) {
-                                                                        selectedOrderType = OrderType.line;
-                                                                      }
-
-                                                                      final index =
-                                                                      billingItems.indexWhere((item) => item['_id'] == p.id);
-                                                                      if (index != -1) {
-                                                                        billingItems[index]['qty'] = newQty;
-                                                                      } else {
-                                                                        billingItems.add({
-                                                                          "_id": p.id,
-                                                                          "basePrice": p.basePrice,
-                                                                          "image": p.image,
-                                                                          "qty": newQty,
-                                                                          "name": p.name,
-                                                                          "availableQuantity": p.availableQuantity,
-                                                                          "selectedAddons": p.addons!
-                                                                              .where((addon) => addon.quantity > 0)
-                                                                              .map((addon) => {
-                                                                            "_id": addon.id,
-                                                                            "price": addon.price,
-                                                                            "quantity": addon.quantity,
-                                                                            "name": addon.name,
-                                                                            "isAvailable": addon.isAvailable,
-                                                                            "maxQuantity": addon.maxQuantity,
-                                                                            "isFree": addon.isFree,
-                                                                          })
-                                                                              .toList(),
-                                                                        });
-                                                                      }
-                                                                      context.read<FoodCategoryBloc>().add(
-                                                                        AddToBilling(
-                                                                          List.from(billingItems),
-                                                                          isDiscountApplied,
-                                                                          selectedOrderType,
-                                                                        ),
-                                                                      );
-                                                                    });
+                                                                    billingItems[index]['qty'] = newQty;
                                                                   } else {
-                                                                    // restore previous valid qty
-                                                                    currentController.text =
-                                                                        getCurrentQuantity(p.id.toString()).toString();
-                                                                    ScaffoldMessenger.of(context).showSnackBar(
-                                                                      SnackBar(
-                                                                        content: Text(
-                                                                          newQty < originalQty
-                                                                              ? "Cannot reduce below original ordered qty ($originalQty)"
-                                                                              : "Maximum available quantity is ${p.availableQuantity ?? 0}",
-                                                                        ),
-                                                                      ),
-                                                                    );
-                                                                  }
-                                                                } else if (newQty == 0 || value.isEmpty) {
-                                                                  // 👇 allow removal only if it's not an original order item
-                                                                  if (isOriginalOrderItem(p.id.toString())) {
-                                                                    currentController.text = originalQty.toString();
-                                                                    ScaffoldMessenger.of(context).showSnackBar(
-                                                                      SnackBar(
-                                                                        content: Text(
-                                                                          "This item cannot be removed. Minimum qty is $originalQty",
-                                                                        ),
-                                                                      ),
-                                                                    );
-                                                                  } else {
-                                                                    setState(() {
-                                                                      billingItems.removeWhere((item) => item['_id'] == p.id);
-                                                                      quantityControllers.remove(p.id);
-                                                                      if (billingItems.isEmpty) {
-                                                                        isDiscountApplied = false;
-                                                                        widget.isEditingOrder = false;
-                                                                        tableId = null;
-                                                                        waiterId = null;
-                                                                        selectedValue = null;
-                                                                        selectedValueWaiter = null;
-                                                                      }
-                                                                      context.read<FoodCategoryBloc>().add(
-                                                                        AddToBilling(
-                                                                          List.from(billingItems),
-                                                                          isDiscountApplied,
-                                                                          selectedOrderType,
-                                                                        ),
-                                                                      );
+                                                                    billingItems.add({
+                                                                      "_id": p.id,
+                                                                      "basePrice": p.basePrice,
+                                                                      "image": p.image,
+                                                                      "qty": newQty,
+                                                                      "name": p.name,
+                                                                      "availableQuantity": p.availableQuantity,
+                                                                      "selectedAddons": p.addons!
+                                                                          .where((addon) => addon.quantity > 0)
+                                                                          .map((addon) => {
+                                                                        "_id": addon.id,
+                                                                        "price": addon.price,
+                                                                        "quantity": addon.quantity,
+                                                                        "name": addon.name,
+                                                                        "isAvailable": addon.isAvailable,
+                                                                        "maxQuantity": addon.maxQuantity,
+                                                                        "isFree": addon.isFree,
+                                                                      })
+                                                                          .toList(),
                                                                     });
                                                                   }
-                                                                }
-                                                              },
-
-                                                              onTap: () {
-                                                                if (!(widget.isEditingOrder == true &&
-                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                    isOriginalOrderItem(p.id.toString()))) {
-                                                                  currentController.selection = TextSelection(
-                                                                    baseOffset: 0,
-                                                                    extentOffset: currentController.text.length,
+                                                                  context.read<FoodCategoryBloc>().add(
+                                                                    AddToBilling(
+                                                                      List.from(billingItems),
+                                                                      isDiscountApplied,
+                                                                      selectedOrderType,
+                                                                    ),
                                                                   );
-                                                                }
-                                                              },
-                                                            ),
-                                                          ),
-                                                          Builder(
-                                                            builder:
-                                                                (
-                                                                context,
-                                                                ) {
-                                                              final currentQtyInCart = getCurrentQuantity(
-                                                                p.id.toString(),
-                                                              );
-                                                              bool
-                                                              canAddMore;
-                                                              if (p.isStock ==
-                                                                  true) {
-                                                                if ((widget.isEditingOrder ==
-                                                                    true &&
-                                                                    widget.existingOrder?.data?.orderStatus ==
-                                                                        "COMPLETED") ||
-                                                                    (widget.isEditingOrder ==
-                                                                        true &&
-                                                                        widget.existingOrder?.data?.orderStatus ==
-                                                                            "WAITLIST")) {
-                                                                  final paidQty =
-                                                                      widget.existingOrder?.data?.items
-                                                                          ?.firstWhereOrNull(
-                                                                            (
-                                                                            item,
-                                                                            ) =>
-                                                                        item.product?.id ==
-                                                                            p.id,
-                                                                      )
-                                                                          ?.quantity ??
-                                                                          0;
-                                                                  canAddMore =
-                                                                      currentQtyInCart <
-                                                                          ((p.availableQuantity ??
-                                                                              0) +
-                                                                              paidQty);
-                                                                } else {
-                                                                  canAddMore =
-                                                                      (p.availableQuantity ??
-                                                                          0) >
-                                                                          0 &&
-                                                                          currentQtyInCart <
-                                                                              (p.availableQuantity ??
-                                                                                  0);
-                                                                }
+                                                                });
                                                               } else {
-                                                                canAddMore = true;
-                                                              }
-
-                                                              return CircleAvatar(
-                                                                radius: 15,
-                                                                backgroundColor: canAddMore
-                                                                    ? appPrimaryColor
-                                                                    : greyColor,
-                                                                child: IconButton(
-                                                                  icon: Icon(
-                                                                    Icons.add,
-                                                                    size: 16,
-                                                                    color: canAddMore
-                                                                        ? whiteColor
-                                                                        : blackColor,
+                                                                // restore previous valid qty
+                                                                currentController.text =
+                                                                    getCurrentQuantity(p.id.toString()).toString();
+                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                  SnackBar(
+                                                                    content: Text(
+                                                                      newQty < originalQty
+                                                                          ? "Cannot reduce below original ordered qty ($originalQty)"
+                                                                          : "Maximum available quantity is ${p.availableQuantity ?? 0}",
+                                                                    ),
                                                                   ),
-                                                                  onPressed: canAddMore
-                                                                      ? () {
-                                                                    setState(
-                                                                          () {
-                                                                        isSplitPayment = false;
-                                                                        if (widget.isEditingOrder !=
-                                                                            true) {
-                                                                          selectedOrderType = OrderType.line;
-                                                                        }
-                                                                        final index = billingItems.indexWhere(
-                                                                              (
-                                                                              item,
-                                                                              ) =>
-                                                                          item['_id'] ==
-                                                                              p.id,
-                                                                        );
-                                                                        if (index !=
-                                                                            -1) {
-                                                                          billingItems[index]['qty'] =
-                                                                              billingItems[index]['qty'] +
-                                                                                  1;
-                                                                          updateControllerText(
-                                                                            p.id.toString(),
-                                                                            billingItems[index]['qty'],
-                                                                          );
-                                                                        } else {
-                                                                          billingItems.add(
-                                                                            {
-                                                                              "_id": p.id,
-                                                                              "basePrice": p.basePrice,
-                                                                              "image": p.image,
-                                                                              "qty": 1,
-                                                                              "name": p.name,
-                                                                              "availableQuantity": p.availableQuantity,
-                                                                              "selectedAddons": p.addons!
-                                                                                  .where(
-                                                                                    (
-                                                                                    addon,
-                                                                                    ) =>
-                                                                                addon.quantity >
-                                                                                    0,
-                                                                              )
-                                                                                  .map(
-                                                                                    (
-                                                                                    addon,
-                                                                                    ) => {
-                                                                                  "_id": addon.id,
-                                                                                  "price": addon.price,
-                                                                                  "quantity": addon.quantity,
-                                                                                  "name": addon.name,
-                                                                                  "isAvailable": addon.isAvailable,
-                                                                                  "maxQuantity": addon.maxQuantity,
-                                                                                  "isFree": addon.isFree,
-                                                                                },
-                                                                              )
-                                                                                  .toList(),
-                                                                            },
-                                                                          );
-                                                                          updateControllerText(
-                                                                            p.id.toString(),
-                                                                            1,
-                                                                          );
-                                                                        }
-                                                                        context
-                                                                            .read<
-                                                                            FoodCategoryBloc
-                                                                        >()
-                                                                            .add(
-                                                                          AddToBilling(
-                                                                            List.from(
-                                                                              billingItems,
-                                                                            ),
-                                                                            isDiscountApplied,
-                                                                            selectedOrderType,
-                                                                          ),
-                                                                        );
-                                                                      },
-                                                                    );
-                                                                  }
-                                                                      : () {
-                                                                    if (p.isStock ==
-                                                                        true &&
-                                                                        (p.availableQuantity ??
-                                                                            0) ==
-                                                                            0) {
-                                                                      ScaffoldMessenger.of(
-                                                                        context,
-                                                                      ).showSnackBar(
-                                                                        const SnackBar(
-                                                                          content: Text(
-                                                                            "Out of stock",
-                                                                          ),
-                                                                        ),
-                                                                      );
-                                                                    }
-                                                                  },
-                                                                ),
-                                                              );
-                                                            },
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  if (currentQuantity !=
-                                                      0 &&
-                                                      p.isStock ==
-                                                          false)
-                                                    verticalSpace(
-                                                      height: 10,
-                                                    ),
-                                                  if (currentQuantity !=
-                                                      0 &&
-                                                      p.isStock ==
-                                                          false)
-                                                    Padding(
-                                                      padding:
-                                                      const EdgeInsets.only(
-                                                        left:
-                                                        5.0,
-                                                        right:
-                                                        5.0,
-                                                      ),
-                                                      child: Row(
-                                                        mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                        children: [
-                                                          CircleAvatar(
-                                                            radius: 15,
-                                                            backgroundColor: greyColor200,
-                                                            child: IconButton(
-                                                              icon: Icon(
-                                                                Icons.remove,
-                                                                size: 15,
-                                                                color: blackColor,
-                                                              ),
-                                                              onPressed: () {
+                                                                );
+                                                              }
+                                                            } else if (newQty == 0 || value.isEmpty) {
+                                                              // 👇 allow removal only if it's not an original order item
+                                                              if (isOriginalOrderItem(p.id.toString())) {
+                                                                currentController.text = originalQty.toString();
+                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                  SnackBar(
+                                                                    content: Text(
+                                                                      "This item cannot be removed. Minimum qty is $originalQty",
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              } else {
                                                                 setState(() {
-                                                                  isSplitPayment = false;
-                                                                  if (widget.isEditingOrder != true) {
-                                                                    selectedOrderType = OrderType.line;
+                                                                  billingItems.removeWhere((item) => item['_id'] == p.id);
+                                                                  quantityControllers.remove(p.id);
+                                                                  if (billingItems.isEmpty) {
+                                                                    isDiscountApplied = false;
+                                                                    widget.isEditingOrder = false;
+                                                                    tableId = null;
+                                                                    waiterId = null;
+                                                                    selectedValue = null;
+                                                                    selectedValueWaiter = null;
                                                                   }
-
-                                                                  final index = billingItems.indexWhere(
-                                                                        (item) => item['_id'] == p.id,
+                                                                  context.read<FoodCategoryBloc>().add(
+                                                                    AddToBilling(
+                                                                      List.from(billingItems),
+                                                                      isDiscountApplied,
+                                                                      selectedOrderType,
+                                                                    ),
                                                                   );
-
-                                                                  if (index != -1) {
-                                                                    final currentQty = billingItems[index]['qty'];
-
-                                                                    // 🔎 original quantity from existing order
-                                                                    final originalQty = widget.existingOrder?.data?.items
-                                                                        ?.firstWhereOrNull((item) => item.product?.id == p.id)
-                                                                        ?.quantity ??
-                                                                        0;
-
-                                                                    if (isOriginalOrderItem(p.id.toString())) {
-                                                                      // ✅ original item: only allow decrease if above originalQty
-                                                                      if (currentQty > originalQty) {
-                                                                        billingItems[index]['qty'] = currentQty - 1;
-                                                                        updateControllerText(
-                                                                          p.id.toString(),
-                                                                          billingItems[index]['qty'],
-                                                                        );
-                                                                      } else {
-                                                                        // show feedback if user tries to go below
-                                                                        ScaffoldMessenger.of(context).showSnackBar(
-                                                                          SnackBar(
-                                                                            content: Text(
-                                                                              "Cannot reduce below original ordered qty ($originalQty)",
-                                                                            ),
-                                                                          ),
-                                                                        );
-                                                                      }
-                                                                    } else {
-                                                                      // ✅ new item: free to decrease/remove
-                                                                      if (currentQty > 1) {
-                                                                        billingItems[index]['qty'] = currentQty - 1;
-                                                                        updateControllerText(
-                                                                          p.id.toString(),
-                                                                          billingItems[index]['qty'],
-                                                                        );
-                                                                      } else {
-                                                                        billingItems.removeWhere((item) => item['_id'] == p.id);
-                                                                        quantityControllers.remove(p.id);
-                                                                        if (billingItems.isEmpty) {
-                                                                          isDiscountApplied = false;
-                                                                          widget.isEditingOrder = false;
-                                                                          tableId = null;
-                                                                          waiterId = null;
-                                                                          selectedValue = null;
-                                                                          selectedValueWaiter = null;
-                                                                        }
-                                                                      }
-                                                                    }
-
-                                                                    context.read<FoodCategoryBloc>().add(
-                                                                      AddToBilling(
-                                                                        List.from(billingItems),
-                                                                        isDiscountApplied,
-                                                                        selectedOrderType,
-                                                                      ),
-                                                                    );
-                                                                    if(billingItems.isEmpty || billingItems == []) {
-                                                                      for (var addon in p
-                                                                          .addons!) {
-                                                                        addon
-                                                                            .isSelected =
-                                                                        false;
-                                                                        addon
-                                                                            .quantity =
-                                                                        0;
-                                                                      }
-                                                                    }
-                                                                  }
                                                                 });
-                                                              },
-                                                            ),
-                                                          ),
-
-                                                          Container(
-                                                            width: 45,
-                                                            height: 32,
-                                                            margin: const EdgeInsets.symmetric(horizontal: 12),
-                                                            decoration: BoxDecoration(
-                                                              border: Border.all(
-                                                                color: (widget.isEditingOrder == true &&
-                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                    isOriginalOrderItem(p.id.toString()))
-                                                                    ? greyColor200!
-                                                                    : greyColor,
-                                                              ),
-                                                              borderRadius: BorderRadius.circular(4),
-                                                              color: (widget.isEditingOrder == true &&
-                                                                  (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                      widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                  isOriginalOrderItem(p.id.toString()))
-                                                                  ? greyColor200
-                                                                  : whiteColor,
-                                                            ),
-                                                            child: TextField(
-                                                              controller: currentController,
-                                                              textAlign: TextAlign.center,
-                                                              keyboardType: TextInputType.number,
-                                                              enabled: !(widget.isEditingOrder == true &&
-                                                                  (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                      widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                  isOriginalOrderItem(p.id.toString())), // Disable for original items
-                                                              style: MyTextStyle.f16(
-                                                                (widget.isEditingOrder == true &&
-                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                    isOriginalOrderItem(p.id.toString()))
-                                                                    ? greyColor // Gray text for locked items
-                                                                    : blackColor,
-                                                              ),
-                                                              decoration: InputDecoration(
-                                                                border: InputBorder.none,
-                                                                isDense: true,
-                                                                contentPadding: EdgeInsets.all(8),
-                                                                hintText: (widget.isEditingOrder == true &&
-                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                    isOriginalOrderItem(p.id.toString()))
-                                                                    ? "Locked"
-                                                                    : null,
-                                                                hintStyle: TextStyle(color: greyColor, fontSize: 12),
-                                                              ),
-                                                              onChanged: (value) {
-                                                                final newQty = int.tryParse(value);
-
-                                                                // original order quantity (0 if not in existing order)
-                                                                final originalQty = widget.existingOrder?.data?.items
-                                                                    ?.firstWhereOrNull((item) => item.product?.id == p.id)
-                                                                    ?.quantity ??
-                                                                    0;
-
-                                                                if (newQty != null && newQty > 0) {
-                                                                  bool canSetQuantity = true;
-
-                                                                  if (p.isStock == true) {
-                                                                    if ((widget.isEditingOrder == true &&
-                                                                        (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                            widget.existingOrder?.data?.orderStatus == "WAITLIST"))) {
-                                                                      // For editing order, allow up to available stock + originalQty
-                                                                      canSetQuantity = newQty <= ((p.availableQuantity ?? 0) + originalQty);
-                                                                    } else {
-                                                                      canSetQuantity = newQty <= (p.availableQuantity ?? 0);
-                                                                    }
-                                                                  }
-
-                                                                  // 👇 extra rule: don't allow decreasing below originalQty
-                                                                  if (widget.isEditingOrder == true &&
-                                                                      isOriginalOrderItem(p.id.toString()) &&
-                                                                      newQty < originalQty) {
-                                                                    canSetQuantity = false;
-                                                                  }
-
-                                                                  if (canSetQuantity) {
-                                                                    setState(() {
-                                                                      isSplitPayment = false;
-                                                                      if (widget.isEditingOrder != true) {
-                                                                        selectedOrderType = OrderType.line;
-                                                                      }
-
-                                                                      final index =
-                                                                      billingItems.indexWhere((item) => item['_id'] == p.id);
-                                                                      if (index != -1) {
-                                                                        billingItems[index]['qty'] = newQty;
-                                                                      } else {
-                                                                        billingItems.add({
-                                                                          "_id": p.id,
-                                                                          "basePrice": p.basePrice,
-                                                                          "image": p.image,
-                                                                          "qty": newQty,
-                                                                          "name": p.name,
-                                                                          "availableQuantity": p.availableQuantity,
-                                                                          "selectedAddons": p.addons!
-                                                                              .where((addon) => addon.quantity > 0)
-                                                                              .map((addon) => {
-                                                                            "_id": addon.id,
-                                                                            "price": addon.price,
-                                                                            "quantity": addon.quantity,
-                                                                            "name": addon.name,
-                                                                            "isAvailable": addon.isAvailable,
-                                                                            "maxQuantity": addon.maxQuantity,
-                                                                            "isFree": addon.isFree,
-                                                                          })
-                                                                              .toList(),
-                                                                        });
-                                                                      }
-                                                                      context.read<FoodCategoryBloc>().add(
-                                                                        AddToBilling(
-                                                                          List.from(billingItems),
-                                                                          isDiscountApplied,
-                                                                          selectedOrderType,
-                                                                        ),
-                                                                      );
-                                                                    });
-                                                                  } else {
-                                                                    // restore previous valid qty
-                                                                    currentController.text =
-                                                                        getCurrentQuantity(p.id.toString()).toString();
-                                                                    ScaffoldMessenger.of(context).showSnackBar(
-                                                                      SnackBar(
-                                                                        content: Text(
-                                                                          newQty < originalQty
-                                                                              ? "Cannot reduce below original ordered qty ($originalQty)"
-                                                                              : "Maximum available quantity is ${p.availableQuantity ?? 0}",
-                                                                        ),
-                                                                      ),
-                                                                    );
-                                                                  }
-                                                                } else if (newQty == 0 || value.isEmpty) {
-                                                                  // 👇 allow removal only if it's not an original order item
-                                                                  if (isOriginalOrderItem(p.id.toString())) {
-                                                                    currentController.text = originalQty.toString();
-                                                                    ScaffoldMessenger.of(context).showSnackBar(
-                                                                      SnackBar(
-                                                                        content: Text(
-                                                                          "This item cannot be removed. Minimum qty is $originalQty",
-                                                                        ),
-                                                                      ),
-                                                                    );
-                                                                  } else {
-                                                                    setState(() {
-                                                                      billingItems.removeWhere((item) => item['_id'] == p.id);
-                                                                      quantityControllers.remove(p.id);
-                                                                      if (billingItems.isEmpty) {
-                                                                        isDiscountApplied = false;
-                                                                        widget.isEditingOrder = false;
-                                                                        tableId = null;
-                                                                        waiterId = null;
-                                                                        selectedValue = null;
-                                                                        selectedValueWaiter = null;
-                                                                      }
-                                                                      context.read<FoodCategoryBloc>().add(
-                                                                        AddToBilling(
-                                                                          List.from(billingItems),
-                                                                          isDiscountApplied,
-                                                                          selectedOrderType,
-                                                                        ),
-                                                                      );
-                                                                    });
-                                                                  }
-                                                                }
-                                                              },
-
-                                                              onTap: () {
-                                                                if (!(widget.isEditingOrder == true &&
-                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
-                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
-                                                                    isOriginalOrderItem(p.id.toString()))) {
-                                                                  currentController.selection = TextSelection(
-                                                                    baseOffset: 0,
-                                                                    extentOffset: currentController.text.length,
-                                                                  );
-                                                                }
-                                                              },
-                                                            ),
-                                                          ),
-                                                          Builder(
-                                                            builder:
-                                                                (
-                                                                context,
-                                                                ) {
-                                                              final currentQtyInCart = getCurrentQuantity(
-                                                                p.id.toString(),
-                                                              );
-                                                              bool
-                                                              canAddMore;
-                                                              if (p.isStock ==
-                                                                  true) {
-                                                                if ((widget.isEditingOrder ==
-                                                                    true &&
-                                                                    widget.existingOrder?.data?.orderStatus ==
-                                                                        "COMPLETED") ||
-                                                                    (widget.isEditingOrder ==
-                                                                        true &&
-                                                                        widget.existingOrder?.data?.orderStatus ==
-                                                                            "WAITLIST")) {
-                                                                  final paidQty =
-                                                                      widget.existingOrder?.data?.items
-                                                                          ?.firstWhereOrNull(
-                                                                            (
-                                                                            item,
-                                                                            ) =>
-                                                                        item.product?.id ==
-                                                                            p.id,
-                                                                      )
-                                                                          ?.quantity ??
-                                                                          0;
-                                                                  canAddMore =
-                                                                      currentQtyInCart <
-                                                                          ((p.availableQuantity ??
-                                                                              0) +
-                                                                              paidQty);
-                                                                } else {
-                                                                  canAddMore =
-                                                                      (p.availableQuantity ??
-                                                                          0) >
-                                                                          0 &&
-                                                                          currentQtyInCart <
-                                                                              (p.availableQuantity ??
-                                                                                  0);
-                                                                }
-                                                              } else {
-                                                                canAddMore = true;
                                                               }
-
-                                                              return CircleAvatar(
-                                                                radius: 15,
-                                                                backgroundColor: canAddMore
-                                                                    ? appPrimaryColor
-                                                                    : greyColor,
-                                                                child: IconButton(
-                                                                  icon: Icon(
-                                                                    Icons.add,
-                                                                    size: 15,
-                                                                    color: canAddMore
-                                                                        ? whiteColor
-                                                                        : blackColor,
-                                                                  ),
-                                                                  onPressed: canAddMore
-                                                                      ? () {
-                                                                    setState(
-                                                                          () {
-                                                                        isSplitPayment = false;
-                                                                        if (widget.isEditingOrder !=
-                                                                            true) {
-                                                                          selectedOrderType = OrderType.line;
-                                                                        }
-                                                                        final index = billingItems.indexWhere(
-                                                                              (
-                                                                              item,
-                                                                              ) =>
-                                                                          item['_id'] ==
-                                                                              p.id,
-                                                                        );
-                                                                        if (index !=
-                                                                            -1) {
-                                                                          billingItems[index]['qty'] =
-                                                                              billingItems[index]['qty'] +
-                                                                                  1;
-                                                                          updateControllerText(
-                                                                            p.id.toString(),
-                                                                            billingItems[index]['qty'],
-                                                                          );
-                                                                        } else {
-                                                                          billingItems.add(
-                                                                            {
-                                                                              "_id": p.id,
-                                                                              "basePrice": p.basePrice,
-                                                                              "image": p.image,
-                                                                              "qty": 1,
-                                                                              "name": p.name,
-                                                                              "availableQuantity": p.availableQuantity,
-                                                                              "selectedAddons": p.addons!
-                                                                                  .where(
-                                                                                    (
-                                                                                    addon,
-                                                                                    ) =>
-                                                                                addon.quantity >
-                                                                                    0,
-                                                                              )
-                                                                                  .map(
-                                                                                    (
-                                                                                    addon,
-                                                                                    ) => {
-                                                                                  "_id": addon.id,
-                                                                                  "price": addon.price,
-                                                                                  "quantity": addon.quantity,
-                                                                                  "name": addon.name,
-                                                                                  "isAvailable": addon.isAvailable,
-                                                                                  "maxQuantity": addon.maxQuantity,
-                                                                                  "isFree": addon.isFree,
-                                                                                },
-                                                                              )
-                                                                                  .toList(),
-                                                                            },
-                                                                          );
-                                                                          updateControllerText(
-                                                                            p.id.toString(),
-                                                                            1,
-                                                                          );
-                                                                        }
-                                                                        context
-                                                                            .read<
-                                                                            FoodCategoryBloc
-                                                                        >()
-                                                                            .add(
-                                                                          AddToBilling(
-                                                                            List.from(
-                                                                              billingItems,
-                                                                            ),
-                                                                            isDiscountApplied,
-                                                                            selectedOrderType,
-                                                                          ),
-                                                                        );
-                                                                      },
-                                                                    );
-                                                                  }
-                                                                      : () {
-                                                                    if (p.isStock ==
-                                                                        true &&
-                                                                        (p.availableQuantity ??
-                                                                            0) ==
-                                                                            0) {
-                                                                      ScaffoldMessenger.of(
-                                                                        context,
-                                                                      ).showSnackBar(
-                                                                        const SnackBar(
-                                                                          content: Text(
-                                                                            "Out of stock",
-                                                                          ),
-                                                                        ),
-                                                                      );
-                                                                    }
-                                                                  },
-                                                                ),
-                                                              );
-                                                            },
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  if (currentQuantity >
-                                                      0 && p
-                                                      .addons!
-                                                      .isNotEmpty)
-                                                    verticalSpace(
-                                                      height: 5,
-                                                    ),
-                                                  if ( currentQuantity >
-                                                      0 && p
-                                                      .addons!
-                                                      .isNotEmpty )
-                                                    ElevatedButton(
-                                                      onPressed: () {
-                                                        final index = billingItems.indexWhere((item) => item['_id'] == p.id);
-
-                                                        if (index == -1) {
-                                                          for (var addon in p.addons!) {
-                                                            addon.isSelected = false;
-                                                            addon.quantity = 0;
-                                                          }
-                                                        } else {
-                                                          final existingAddons = billingItems[index]['selectedAddons'] as List<dynamic>? ?? [];
-                                                          for (var addon in p.addons!) {
-                                                            final found = existingAddons.firstWhereOrNull(
-                                                                  (a) => a['_id'] == addon.id,
-                                                            );
-                                                            if (found != null) {
-                                                              // addon.quantity = 1;
-                                                              // addon.isSelected = true;
-                                                              addon.quantity = found['quantity'] as int? ?? addon.quantity;
-                                                              addon.isSelected = addon.quantity > 0;
-                                                            } else {
-                                                              addon.quantity = 0;
-                                                              addon.isSelected = false;
                                                             }
+                                                          },
+
+                                                          onTap: () {
+                                                            if (!(widget.isEditingOrder == true &&
+                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                isOriginalOrderItem(p.id.toString()))) {
+                                                              currentController.selection = TextSelection(
+                                                                baseOffset: 0,
+                                                                extentOffset: currentController.text.length,
+                                                              );
+                                                            }
+                                                          },
+                                                        ),
+                                                      ),
+                                                      Builder(
+                                                        builder:
+                                                            (
+                                                            context,
+                                                            ) {
+                                                          final currentQtyInCart = getCurrentQuantity(
+                                                            p.id.toString(),
+                                                          );
+                                                          bool
+                                                          canAddMore;
+                                                          if (p.isStock ==
+                                                              true) {
+                                                            if ((widget.isEditingOrder ==
+                                                                true &&
+                                                                widget.existingOrder?.data?.orderStatus ==
+                                                                    "COMPLETED") ||
+                                                                (widget.isEditingOrder ==
+                                                                    true &&
+                                                                    widget.existingOrder?.data?.orderStatus ==
+                                                                        "WAITLIST")) {
+                                                              final paidQty =
+                                                                  widget.existingOrder?.data?.items
+                                                                      ?.firstWhereOrNull(
+                                                                        (
+                                                                        item,
+                                                                        ) =>
+                                                                    item.product?.id ==
+                                                                        p.id,
+                                                                  )
+                                                                      ?.quantity ??
+                                                                      0;
+                                                              canAddMore =
+                                                                  currentQtyInCart <
+                                                                      ((p.availableQuantity ??
+                                                                          0) +
+                                                                          paidQty);
+                                                            } else {
+                                                              canAddMore =
+                                                                  (p.availableQuantity ??
+                                                                      0) >
+                                                                      0 &&
+                                                                      currentQtyInCart <
+                                                                          (p.availableQuantity ??
+                                                                              0);
+                                                            }
+                                                          } else {
+                                                            canAddMore = true;
                                                           }
+
+                                                          return CircleAvatar(
+                                                            radius: 15,
+                                                            backgroundColor: canAddMore
+                                                                ? appPrimaryColor
+                                                                : greyColor,
+                                                            child: IconButton(
+                                                              icon: Icon(
+                                                                Icons.add,
+                                                                size: 16,
+                                                                color: canAddMore
+                                                                    ? whiteColor
+                                                                    : blackColor,
+                                                              ),
+                                                              onPressed: canAddMore
+                                                                  ? () {
+                                                                setState(
+                                                                      () {
+                                                                    isSplitPayment = false;
+                                                                    if (widget.isEditingOrder !=
+                                                                        true) {
+                                                                      selectedOrderType = OrderType.line;
+                                                                    }
+                                                                    final index = billingItems.indexWhere(
+                                                                          (
+                                                                          item,
+                                                                          ) =>
+                                                                      item['_id'] ==
+                                                                          p.id,
+                                                                    );
+                                                                    if (index !=
+                                                                        -1) {
+                                                                      billingItems[index]['qty'] =
+                                                                          billingItems[index]['qty'] +
+                                                                              1;
+                                                                      updateControllerText(
+                                                                        p.id.toString(),
+                                                                        billingItems[index]['qty'],
+                                                                      );
+                                                                    } else {
+                                                                      billingItems.add(
+                                                                        {
+                                                                          "_id": p.id,
+                                                                          "basePrice": p.basePrice,
+                                                                          "image": p.image,
+                                                                          "qty": 1,
+                                                                          "name": p.name,
+                                                                          "availableQuantity": p.availableQuantity,
+                                                                          "selectedAddons": p.addons!
+                                                                              .where(
+                                                                                (
+                                                                                addon,
+                                                                                ) =>
+                                                                            addon.quantity >
+                                                                                0,
+                                                                          )
+                                                                              .map(
+                                                                                (
+                                                                                addon,
+                                                                                ) => {
+                                                                              "_id": addon.id,
+                                                                              "price": addon.price,
+                                                                              "quantity": addon.quantity,
+                                                                              "name": addon.name,
+                                                                              "isAvailable": addon.isAvailable,
+                                                                              "maxQuantity": addon.maxQuantity,
+                                                                              "isFree": addon.isFree,
+                                                                            },
+                                                                          )
+                                                                              .toList(),
+                                                                        },
+                                                                      );
+                                                                      updateControllerText(
+                                                                        p.id.toString(),
+                                                                        1,
+                                                                      );
+                                                                    }
+                                                                    context
+                                                                        .read<
+                                                                        FoodCategoryBloc
+                                                                    >()
+                                                                        .add(
+                                                                      AddToBilling(
+                                                                        List.from(
+                                                                          billingItems,
+                                                                        ),
+                                                                        isDiscountApplied,
+                                                                        selectedOrderType,
+                                                                      ),
+                                                                    );
+                                                                  },
+                                                                );
+                                                              }
+                                                                  : () {
+                                                                if (p.isStock ==
+                                                                    true &&
+                                                                    (p.availableQuantity ??
+                                                                        0) ==
+                                                                        0) {
+                                                                  ScaffoldMessenger.of(
+                                                                    context,
+                                                                  ).showSnackBar(
+                                                                    const SnackBar(
+                                                                      content: Text(
+                                                                        "Out of stock",
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                }
+                                                              },
+                                                            ),
+                                                          );
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              if (currentQuantity !=
+                                                  0 &&
+                                                  p.isStock ==
+                                                      false)
+                                                verticalSpace(
+                                                  height: 10,
+                                                ),
+                                              if (currentQuantity !=
+                                                  0 &&
+                                                  p.isStock ==
+                                                      false)
+                                                Padding(
+                                                  padding:
+                                                  const EdgeInsets.only(
+                                                    left:
+                                                    5.0,
+                                                    right:
+                                                    5.0,
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .center,
+                                                    children: [
+                                                      CircleAvatar(
+                                                        radius: 15,
+                                                        backgroundColor: greyColor200,
+                                                        child: IconButton(
+                                                          icon: Icon(
+                                                            Icons.remove,
+                                                            size: 15,
+                                                            color: blackColor,
+                                                          ),
+                                                          onPressed: () {
+                                                            setState(() {
+                                                              isSplitPayment = false;
+                                                              if (widget.isEditingOrder != true) {
+                                                                selectedOrderType = OrderType.line;
+                                                              }
+
+                                                              final index = billingItems.indexWhere(
+                                                                    (item) => item['_id'] == p.id,
+                                                              );
+
+                                                              if (index != -1) {
+                                                                final currentQty = billingItems[index]['qty'];
+
+                                                                // 🔎 original quantity from existing order
+                                                                final originalQty = widget.existingOrder?.data?.items
+                                                                    ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                                    ?.quantity ??
+                                                                    0;
+
+                                                                if (isOriginalOrderItem(p.id.toString())) {
+                                                                  // ✅ original item: only allow decrease if above originalQty
+                                                                  if (currentQty > originalQty) {
+                                                                    billingItems[index]['qty'] = currentQty - 1;
+                                                                    updateControllerText(
+                                                                      p.id.toString(),
+                                                                      billingItems[index]['qty'],
+                                                                    );
+                                                                  } else {
+                                                                    // show feedback if user tries to go below
+                                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                                      SnackBar(
+                                                                        content: Text(
+                                                                          "Cannot reduce below original ordered qty ($originalQty)",
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                  }
+                                                                } else {
+                                                                  // ✅ new item: free to decrease/remove
+                                                                  if (currentQty > 1) {
+                                                                    billingItems[index]['qty'] = currentQty - 1;
+                                                                    updateControllerText(
+                                                                      p.id.toString(),
+                                                                      billingItems[index]['qty'],
+                                                                    );
+                                                                  } else {
+                                                                    billingItems.removeWhere((item) => item['_id'] == p.id);
+                                                                    quantityControllers.remove(p.id);
+                                                                    if (billingItems.isEmpty) {
+                                                                      isDiscountApplied = false;
+                                                                      widget.isEditingOrder = false;
+                                                                      tableId = null;
+                                                                      waiterId = null;
+                                                                      selectedValue = null;
+                                                                      selectedValueWaiter = null;
+                                                                    }
+                                                                  }
+                                                                }
+
+                                                                context.read<FoodCategoryBloc>().add(
+                                                                  AddToBilling(
+                                                                    List.from(billingItems),
+                                                                    isDiscountApplied,
+                                                                    selectedOrderType,
+                                                                  ),
+                                                                );
+                                                                if(billingItems.isEmpty || billingItems == []) {
+                                                                  for (var addon in p
+                                                                      .addons!) {
+                                                                    addon
+                                                                        .isSelected =
+                                                                    false;
+                                                                    addon
+                                                                        .quantity =
+                                                                    0;
+                                                                  }
+                                                                }
+                                                              }
+                                                            });
+                                                          },
+                                                        ),
+                                                      ),
+
+                                                      Container(
+                                                        width: 45,
+                                                        height: 32,
+                                                        margin: const EdgeInsets.symmetric(horizontal: 12),
+                                                        decoration: BoxDecoration(
+                                                          border: Border.all(
+                                                            color: (widget.isEditingOrder == true &&
+                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                isOriginalOrderItem(p.id.toString()))
+                                                                ? greyColor200!
+                                                                : greyColor,
+                                                          ),
+                                                          borderRadius: BorderRadius.circular(4),
+                                                          color: (widget.isEditingOrder == true &&
+                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                              isOriginalOrderItem(p.id.toString()))
+                                                              ? greyColor200
+                                                              : whiteColor,
+                                                        ),
+                                                        child: TextField(
+                                                          controller: currentController,
+                                                          textAlign: TextAlign.center,
+                                                          keyboardType: TextInputType.number,
+                                                          enabled: !(widget.isEditingOrder == true &&
+                                                              (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                  widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                              isOriginalOrderItem(p.id.toString())), // Disable for original items
+                                                          style: MyTextStyle.f16(
+                                                            (widget.isEditingOrder == true &&
+                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                isOriginalOrderItem(p.id.toString()))
+                                                                ? greyColor // Gray text for locked items
+                                                                : blackColor,
+                                                          ),
+                                                          decoration: InputDecoration(
+                                                            border: InputBorder.none,
+                                                            isDense: true,
+                                                            contentPadding: EdgeInsets.all(8),
+                                                            hintText: (widget.isEditingOrder == true &&
+                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                isOriginalOrderItem(p.id.toString()))
+                                                                ? "Locked"
+                                                                : null,
+                                                            hintStyle: TextStyle(color: greyColor, fontSize: 12),
+                                                          ),
+                                                          onChanged: (value) {
+                                                            final newQty = int.tryParse(value);
+
+                                                            // original order quantity (0 if not in existing order)
+                                                            final originalQty = widget.existingOrder?.data?.items
+                                                                ?.firstWhereOrNull((item) => item.product?.id == p.id)
+                                                                ?.quantity ??
+                                                                0;
+
+                                                            if (newQty != null && newQty > 0) {
+                                                              bool canSetQuantity = true;
+
+                                                              if (p.isStock == true) {
+                                                                if ((widget.isEditingOrder == true &&
+                                                                    (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                        widget.existingOrder?.data?.orderStatus == "WAITLIST"))) {
+                                                                  // For editing order, allow up to available stock + originalQty
+                                                                  canSetQuantity = newQty <= ((p.availableQuantity ?? 0) + originalQty);
+                                                                } else {
+                                                                  canSetQuantity = newQty <= (p.availableQuantity ?? 0);
+                                                                }
+                                                              }
+
+                                                              // 👇 extra rule: don't allow decreasing below originalQty
+                                                              if (widget.isEditingOrder == true &&
+                                                                  isOriginalOrderItem(p.id.toString()) &&
+                                                                  newQty < originalQty) {
+                                                                canSetQuantity = false;
+                                                              }
+
+                                                              if (canSetQuantity) {
+                                                                setState(() {
+                                                                  isSplitPayment = false;
+                                                                  if (widget.isEditingOrder != true) {
+                                                                    selectedOrderType = OrderType.line;
+                                                                  }
+
+                                                                  final index =
+                                                                  billingItems.indexWhere((item) => item['_id'] == p.id);
+                                                                  if (index != -1) {
+                                                                    billingItems[index]['qty'] = newQty;
+                                                                  } else {
+                                                                    billingItems.add({
+                                                                      "_id": p.id,
+                                                                      "basePrice": p.basePrice,
+                                                                      "image": p.image,
+                                                                      "qty": newQty,
+                                                                      "name": p.name,
+                                                                      "availableQuantity": p.availableQuantity,
+                                                                      "selectedAddons": p.addons!
+                                                                          .where((addon) => addon.quantity > 0)
+                                                                          .map((addon) => {
+                                                                        "_id": addon.id,
+                                                                        "price": addon.price,
+                                                                        "quantity": addon.quantity,
+                                                                        "name": addon.name,
+                                                                        "isAvailable": addon.isAvailable,
+                                                                        "maxQuantity": addon.maxQuantity,
+                                                                        "isFree": addon.isFree,
+                                                                      })
+                                                                          .toList(),
+                                                                    });
+                                                                  }
+                                                                  context.read<FoodCategoryBloc>().add(
+                                                                    AddToBilling(
+                                                                      List.from(billingItems),
+                                                                      isDiscountApplied,
+                                                                      selectedOrderType,
+                                                                    ),
+                                                                  );
+                                                                });
+                                                              } else {
+                                                                // restore previous valid qty
+                                                                currentController.text =
+                                                                    getCurrentQuantity(p.id.toString()).toString();
+                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                  SnackBar(
+                                                                    content: Text(
+                                                                      newQty < originalQty
+                                                                          ? "Cannot reduce below original ordered qty ($originalQty)"
+                                                                          : "Maximum available quantity is ${p.availableQuantity ?? 0}",
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              }
+                                                            } else if (newQty == 0 || value.isEmpty) {
+                                                              // 👇 allow removal only if it's not an original order item
+                                                              if (isOriginalOrderItem(p.id.toString())) {
+                                                                currentController.text = originalQty.toString();
+                                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                                  SnackBar(
+                                                                    content: Text(
+                                                                      "This item cannot be removed. Minimum qty is $originalQty",
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              } else {
+                                                                setState(() {
+                                                                  billingItems.removeWhere((item) => item['_id'] == p.id);
+                                                                  quantityControllers.remove(p.id);
+                                                                  if (billingItems.isEmpty) {
+                                                                    isDiscountApplied = false;
+                                                                    widget.isEditingOrder = false;
+                                                                    tableId = null;
+                                                                    waiterId = null;
+                                                                    selectedValue = null;
+                                                                    selectedValueWaiter = null;
+                                                                  }
+                                                                  context.read<FoodCategoryBloc>().add(
+                                                                    AddToBilling(
+                                                                      List.from(billingItems),
+                                                                      isDiscountApplied,
+                                                                      selectedOrderType,
+                                                                    ),
+                                                                  );
+                                                                });
+                                                              }
+                                                            }
+                                                          },
+
+                                                          onTap: () {
+                                                            if (!(widget.isEditingOrder == true &&
+                                                                (widget.existingOrder?.data?.orderStatus == "COMPLETED" ||
+                                                                    widget.existingOrder?.data?.orderStatus == "WAITLIST") &&
+                                                                isOriginalOrderItem(p.id.toString()))) {
+                                                              currentController.selection = TextSelection(
+                                                                baseOffset: 0,
+                                                                extentOffset: currentController.text.length,
+                                                              );
+                                                            }
+                                                          },
+                                                        ),
+                                                      ),
+                                                      Builder(
+                                                        builder:
+                                                            (
+                                                            context,
+                                                            ) {
+                                                          final currentQtyInCart = getCurrentQuantity(
+                                                            p.id.toString(),
+                                                          );
+                                                          bool
+                                                          canAddMore;
+                                                          if (p.isStock ==
+                                                              true) {
+                                                            if ((widget.isEditingOrder ==
+                                                                true &&
+                                                                widget.existingOrder?.data?.orderStatus ==
+                                                                    "COMPLETED") ||
+                                                                (widget.isEditingOrder ==
+                                                                    true &&
+                                                                    widget.existingOrder?.data?.orderStatus ==
+                                                                        "WAITLIST")) {
+                                                              final paidQty =
+                                                                  widget.existingOrder?.data?.items
+                                                                      ?.firstWhereOrNull(
+                                                                        (
+                                                                        item,
+                                                                        ) =>
+                                                                    item.product?.id ==
+                                                                        p.id,
+                                                                  )
+                                                                      ?.quantity ??
+                                                                      0;
+                                                              canAddMore =
+                                                                  currentQtyInCart <
+                                                                      ((p.availableQuantity ??
+                                                                          0) +
+                                                                          paidQty);
+                                                            } else {
+                                                              canAddMore =
+                                                                  (p.availableQuantity ??
+                                                                      0) >
+                                                                      0 &&
+                                                                      currentQtyInCart <
+                                                                          (p.availableQuantity ??
+                                                                              0);
+                                                            }
+                                                          } else {
+                                                            canAddMore = true;
+                                                          }
+
+                                                          return CircleAvatar(
+                                                            radius: 15,
+                                                            backgroundColor: canAddMore
+                                                                ? appPrimaryColor
+                                                                : greyColor,
+                                                            child: IconButton(
+                                                              icon: Icon(
+                                                                Icons.add,
+                                                                size: 15,
+                                                                color: canAddMore
+                                                                    ? whiteColor
+                                                                    : blackColor,
+                                                              ),
+                                                              onPressed: canAddMore
+                                                                  ? () {
+                                                                setState(
+                                                                      () {
+                                                                    isSplitPayment = false;
+                                                                    if (widget.isEditingOrder !=
+                                                                        true) {
+                                                                      selectedOrderType = OrderType.line;
+                                                                    }
+                                                                    final index = billingItems.indexWhere(
+                                                                          (
+                                                                          item,
+                                                                          ) =>
+                                                                      item['_id'] ==
+                                                                          p.id,
+                                                                    );
+                                                                    if (index !=
+                                                                        -1) {
+                                                                      billingItems[index]['qty'] =
+                                                                          billingItems[index]['qty'] +
+                                                                              1;
+                                                                      updateControllerText(
+                                                                        p.id.toString(),
+                                                                        billingItems[index]['qty'],
+                                                                      );
+                                                                    } else {
+                                                                      billingItems.add(
+                                                                        {
+                                                                          "_id": p.id,
+                                                                          "basePrice": p.basePrice,
+                                                                          "image": p.image,
+                                                                          "qty": 1,
+                                                                          "name": p.name,
+                                                                          "availableQuantity": p.availableQuantity,
+                                                                          "selectedAddons": p.addons!
+                                                                              .where(
+                                                                                (
+                                                                                addon,
+                                                                                ) =>
+                                                                            addon.quantity >
+                                                                                0,
+                                                                          )
+                                                                              .map(
+                                                                                (
+                                                                                addon,
+                                                                                ) => {
+                                                                              "_id": addon.id,
+                                                                              "price": addon.price,
+                                                                              "quantity": addon.quantity,
+                                                                              "name": addon.name,
+                                                                              "isAvailable": addon.isAvailable,
+                                                                              "maxQuantity": addon.maxQuantity,
+                                                                              "isFree": addon.isFree,
+                                                                            },
+                                                                          )
+                                                                              .toList(),
+                                                                        },
+                                                                      );
+                                                                      updateControllerText(
+                                                                        p.id.toString(),
+                                                                        1,
+                                                                      );
+                                                                    }
+                                                                    context
+                                                                        .read<
+                                                                        FoodCategoryBloc
+                                                                    >()
+                                                                        .add(
+                                                                      AddToBilling(
+                                                                        List.from(
+                                                                          billingItems,
+                                                                        ),
+                                                                        isDiscountApplied,
+                                                                        selectedOrderType,
+                                                                      ),
+                                                                    );
+                                                                  },
+                                                                );
+                                                              }
+                                                                  : () {
+                                                                if (p.isStock ==
+                                                                    true &&
+                                                                    (p.availableQuantity ??
+                                                                        0) ==
+                                                                        0) {
+                                                                  ScaffoldMessenger.of(
+                                                                    context,
+                                                                  ).showSnackBar(
+                                                                    const SnackBar(
+                                                                      content: Text(
+                                                                        "Out of stock",
+                                                                      ),
+                                                                    ),
+                                                                  );
+                                                                }
+                                                              },
+                                                            ),
+                                                          );
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              if (currentQuantity >
+                                                  0 && p
+                                                  .addons!
+                                                  .isNotEmpty)
+                                                verticalSpace(
+                                                  height: 5,
+                                                ),
+                                              if ( currentQuantity >
+                                                  0 && p
+                                                  .addons!
+                                                  .isNotEmpty )
+                                                ElevatedButton(
+                                                  onPressed: () {
+                                                    final index = billingItems.indexWhere((item) => item['_id'] == p.id);
+
+                                                    if (index == -1) {
+                                                      for (var addon in p.addons!) {
+                                                        addon.isSelected = false;
+                                                        addon.quantity = 0;
+                                                      }
+                                                    } else {
+                                                      final existingAddons = billingItems[index]['selectedAddons'] as List<dynamic>? ?? [];
+                                                      for (var addon in p.addons!) {
+                                                        final found = existingAddons.firstWhereOrNull(
+                                                              (a) => a['_id'] == addon.id,
+                                                        );
+                                                        if (found != null) {
+                                                          // addon.quantity = 1;
+                                                          // addon.isSelected = true;
+                                                          addon.quantity = found['quantity'] as int? ?? addon.quantity;
+                                                          addon.isSelected = addon.quantity > 0;
+                                                        } else {
+                                                          addon.quantity = 0;
+                                                          addon.isSelected = false;
                                                         }
-                                                        showDialog(
-                                                          context: context,
-                                                          builder: (context2) {
-                                                            return BlocProvider(
-                                                              create:
-                                                                  (context,) =>
-                                                                  FoodCategoryBloc(),
-                                                              child: BlocProvider.value(
-                                                                value:
-                                                                BlocProvider.of<
-                                                                    FoodCategoryBloc
-                                                                >(
-                                                                  context,
-                                                                  listen:
-                                                                  false,
-                                                                ),
-                                                                child: StatefulBuilder(
-                                                                  builder:
-                                                                      (context,
-                                                                      setState,) {
-                                                                    return Dialog(
-                                                                      insetPadding: EdgeInsets.symmetric(
-                                                                        horizontal: 40,
-                                                                        vertical: 24,
-                                                                      ),
-                                                                      shape: RoundedRectangleBorder(
-                                                                        borderRadius: BorderRadius.circular(
-                                                                          8,
-                                                                        ),
-                                                                      ),
-                                                                      child: Container(
-                                                                        constraints: BoxConstraints(
-                                                                          maxWidth:
-                                                                          size.width *
-                                                                              0.4,
-                                                                          maxHeight:
-                                                                          size.height *
-                                                                              0.6,
-                                                                        ),
-                                                                        padding: EdgeInsets.all(
-                                                                          16,
-                                                                        ),
-                                                                        child: SingleChildScrollView(
-                                                                          child: Column(
-                                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                                            mainAxisSize: MainAxisSize.min,
-                                                                            children: [
-                                                                              ClipRRect(
-                                                                                borderRadius: BorderRadius.circular(
-                                                                                  15.0,
-                                                                                ),
-                                                                                child: CachedNetworkImage(
-                                                                                  imageUrl: p.image ??
-                                                                                      "",
-                                                                                  width:
-                                                                                  size.width *
-                                                                                      0.9,
-                                                                                  height:
-                                                                                  size.height *
-                                                                                      0.2,
+                                                      }
+                                                    }
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (context2) {
+                                                        return BlocProvider(
+                                                          create:
+                                                              (context,) =>
+                                                              FoodCategoryBloc(),
+                                                          child: BlocProvider.value(
+                                                            value:
+                                                            BlocProvider.of<
+                                                                FoodCategoryBloc
+                                                            >(
+                                                              context,
+                                                              listen:
+                                                              false,
+                                                            ),
+                                                            child: StatefulBuilder(
+                                                              builder:
+                                                                  (context,
+                                                                  setState,) {
+                                                                return Dialog(
+                                                                  insetPadding: EdgeInsets.symmetric(
+                                                                    horizontal: 40,
+                                                                    vertical: 24,
+                                                                  ),
+                                                                  shape: RoundedRectangleBorder(
+                                                                    borderRadius: BorderRadius.circular(
+                                                                      8,
+                                                                    ),
+                                                                  ),
+                                                                  child: Container(
+                                                                    constraints: BoxConstraints(
+                                                                      maxWidth:
+                                                                      size.width *
+                                                                          0.4,
+                                                                      maxHeight:
+                                                                      size.height *
+                                                                          0.6,
+                                                                    ),
+                                                                    padding: EdgeInsets.all(
+                                                                      16,
+                                                                    ),
+                                                                    child: SingleChildScrollView(
+                                                                      child: Column(
+                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                        mainAxisSize: MainAxisSize.min,
+                                                                        children: [
+                                                                          ClipRRect(
+                                                                            borderRadius: BorderRadius.circular(
+                                                                              15.0,
+                                                                            ),
+                                                                            child: CachedNetworkImage(
+                                                                              imageUrl: p.image ??
+                                                                                  "",
+                                                                              width:
+                                                                              size.width *
+                                                                                  0.9,
+                                                                              height:
+                                                                              size.height *
+                                                                                  0.2,
+                                                                              fit: BoxFit.cover,
+                                                                              errorWidget:
+                                                                                  (context,
+                                                                                  url,
+                                                                                  error,) {
+                                                                                return Image.asset(
+                                                                                  Images.all,
+                                                                                  width: 25,
+                                                                                  height: 25,
                                                                                   fit: BoxFit.cover,
-                                                                                  errorWidget:
-                                                                                      (context,
-                                                                                      url,
-                                                                                      error,) {
-                                                                                    return const Icon(
-                                                                                      Icons.error,
-                                                                                      size: 30,
-                                                                                      color: appHomeTextColor,
-                                                                                    );
-                                                                                  },
-                                                                                  progressIndicatorBuilder:
-                                                                                      (context,
-                                                                                      url,
-                                                                                      downloadProgress,) =>
-                                                                                  const SpinKitCircle(
-                                                                                    color: appPrimaryColor,
-                                                                                    size: 30,
+                                                                                );
+                                                                              },
+                                                                              progressIndicatorBuilder:
+                                                                                  (context,
+                                                                                  url,
+                                                                                  downloadProgress,) =>
+                                                                              const SpinKitCircle(
+                                                                                color: appPrimaryColor,
+                                                                                size: 30,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                          SizedBox(
+                                                                            height: 16,
+                                                                          ),
+                                                                          Text(
+                                                                            'Choose Add‑Ons for ${p.name}',
+                                                                            style: MyTextStyle.f16(
+                                                                              weight: FontWeight.bold,
+                                                                              blackColor,
+                                                                            ),
+                                                                            textAlign: TextAlign.left,
+                                                                          ),
+                                                                          SizedBox(
+                                                                            height: 12,
+                                                                          ),
+                                                                          Column(
+                                                                            children: p.addons!.map(
+                                                                                  (e,) {
+                                                                                return Padding(
+                                                                                  padding: const EdgeInsets.symmetric(
+                                                                                    vertical: 4.0,
+                                                                                  ),
+                                                                                  child: Container(
+                                                                                    padding: const EdgeInsets.all(
+                                                                                      8,
+                                                                                    ),
+                                                                                    decoration: BoxDecoration(
+                                                                                      border: Border.all(
+                                                                                        color: blackColor,
+                                                                                      ),
+                                                                                      borderRadius: BorderRadius.circular(
+                                                                                        8,
+                                                                                      ),
+                                                                                    ),
+                                                                                    child: Row(
+                                                                                      children: [
+                                                                                        Expanded(
+                                                                                          child: Column(
+                                                                                            crossAxisAlignment: CrossAxisAlignment
+                                                                                                .start,
+                                                                                            children: [
+                                                                                              Text(
+                                                                                                e.name ??
+                                                                                                    '',
+                                                                                                style: const TextStyle(
+                                                                                                  fontWeight: FontWeight
+                                                                                                      .bold,
+                                                                                                ),
+                                                                                              ),
+                                                                                              const SizedBox(
+                                                                                                height: 4,
+                                                                                              ),
+                                                                                              Text(
+                                                                                                e.isFree ==
+                                                                                                    true
+                                                                                                    ? "Free (Max: ${e
+                                                                                                    .maxQuantity})"
+                                                                                                    : "₹ ${e.price
+                                                                                                    ?.toStringAsFixed(2) ??
+                                                                                                    '0.00'} (Max: ${e
+                                                                                                    .maxQuantity})",
+                                                                                                style: TextStyle(
+                                                                                                  color: Colors.grey
+                                                                                                      .shade600,
+                                                                                                ),
+                                                                                              ),
+                                                                                            ],
+                                                                                          ),
+                                                                                        ),
+                                                                                        Row(
+                                                                                          children: [
+                                                                                            IconButton(
+                                                                                              icon: Icon(
+                                                                                                Icons.remove,
+                                                                                                color: isAddonRemoveDisabled(
+                                                                                                  p.id.toString(),
+                                                                                                  e.id.toString(),
+                                                                                                  int.parse(e.quantity.toString()),
+                                                                                                )
+                                                                                                    ? Colors.grey
+                                                                                                    : Colors.black,
+                                                                                              ),
+                                                                                              onPressed: isAddonRemoveDisabled(
+                                                                                                p.id.toString(),
+                                                                                                e.id.toString(),
+                                                                                                int.parse(e.quantity.toString()),
+                                                                                              )
+                                                                                                  ? null
+                                                                                                  : () {
+                                                                                                setState(() {
+                                                                                                  e.quantity = (e.quantity) - 1;
+                                                                                                  if (e.quantity == 0) {
+                                                                                                    e.isSelected = false;
+                                                                                                  }
+                                                                                                });
+                                                                                              },
+                                                                                            ),
+                                                                                            Text(
+                                                                                              '${e.quantity}',
+                                                                                            ),
+                                                                                            IconButton(
+                                                                                              icon: const Icon(
+                                                                                                Icons.add,
+                                                                                                color: Colors.brown,
+                                                                                              ),
+                                                                                              onPressed: e.quantity == 0
+                                                                                                  ? () {
+                                                                                                setState(() {
+                                                                                                  e.quantity = 1;
+                                                                                                  e.isSelected = true;
+                                                                                                });
+                                                                                              }
+                                                                                                  : null, // disable if already 1
+                                                                                            )
+
+
+                                                                                          ],
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
+                                                                                  ),
+                                                                                );
+                                                                              },
+                                                                            ).toList(),
+                                                                          ),
+                                                                          SizedBox(
+                                                                            height: 20,
+                                                                          ),
+                                                                          Row(
+                                                                            mainAxisAlignment: MainAxisAlignment.end,
+                                                                            children: [
+                                                                              ElevatedButton(
+                                                                                onPressed: () {
+                                                                                  setState(
+                                                                                        () {
+                                                                                      if (counter >
+                                                                                          1 ||
+                                                                                          counter ==
+                                                                                              1) {
+                                                                                        counter--;
+                                                                                      }
+                                                                                    },
+                                                                                  );
+                                                                                  Navigator.of(
+                                                                                    context,
+                                                                                  ).pop();
+                                                                                },
+                                                                                style: ElevatedButton.styleFrom(
+                                                                                  backgroundColor: greyColor.shade400,
+                                                                                  minimumSize: Size(
+                                                                                    80,
+                                                                                    40,
+                                                                                  ),
+                                                                                  padding: EdgeInsets.all(
+                                                                                    20,
+                                                                                  ),
+                                                                                  shape: RoundedRectangleBorder(
+                                                                                    borderRadius: BorderRadius.circular(
+                                                                                      10,
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                                child: Text(
+                                                                                  'Cancel',
+                                                                                  style: MyTextStyle.f14(
+                                                                                    blackColor,
                                                                                   ),
                                                                                 ),
                                                                               ),
                                                                               SizedBox(
-                                                                                height: 16,
+                                                                                width: 8,
                                                                               ),
-                                                                              Text(
-                                                                                'Choose Add‑Ons for ${p.name}',
-                                                                                style: MyTextStyle.f16(
-                                                                                  weight: FontWeight.bold,
-                                                                                  blackColor,
-                                                                                ),
-                                                                                textAlign: TextAlign.left,
-                                                                              ),
-                                                                              SizedBox(
-                                                                                height: 12,
-                                                                              ),
-                                                                              Column(
-                                                                                children: p.addons!.map(
-                                                                                      (e,) {
-                                                                                    return Padding(
-                                                                                      padding: const EdgeInsets.symmetric(
-                                                                                        vertical: 4.0,
-                                                                                      ),
-                                                                                      child: Container(
-                                                                                        padding: const EdgeInsets.all(
-                                                                                          8,
-                                                                                        ),
-                                                                                        decoration: BoxDecoration(
-                                                                                          border: Border.all(
-                                                                                            color: blackColor,
-                                                                                          ),
-                                                                                          borderRadius: BorderRadius.circular(
-                                                                                            8,
-                                                                                          ),
-                                                                                        ),
-                                                                                        child: Row(
-                                                                                          children: [
-                                                                                            Expanded(
-                                                                                              child: Column(
-                                                                                                crossAxisAlignment: CrossAxisAlignment
-                                                                                                    .start,
-                                                                                                children: [
-                                                                                                  Text(
-                                                                                                    e.name ??
-                                                                                                        '',
-                                                                                                    style: const TextStyle(
-                                                                                                      fontWeight: FontWeight
-                                                                                                          .bold,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                  const SizedBox(
-                                                                                                    height: 4,
-                                                                                                  ),
-                                                                                                  Text(
-                                                                                                    e.isFree ==
-                                                                                                        true
-                                                                                                        ? "Free (Max: ${e
-                                                                                                        .maxQuantity})"
-                                                                                                        : "₹ ${e.price
-                                                                                                        ?.toStringAsFixed(2) ??
-                                                                                                        '0.00'} (Max: ${e
-                                                                                                        .maxQuantity})",
-                                                                                                    style: TextStyle(
-                                                                                                      color: Colors.grey
-                                                                                                          .shade600,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                ],
-                                                                                              ),
-                                                                                            ),
-                                                                                            Row(
-                                                                                              children: [
-                                                                                                IconButton(
-                                                                                                  icon: Icon(
-                                                                                                    Icons.remove,
-                                                                                                    color: isAddonRemoveDisabled(
-                                                                                                      p.id.toString(),
-                                                                                                      e.id.toString(),
-                                                                                                      int.parse(e.quantity.toString()),
-                                                                                                    )
-                                                                                                        ? Colors.grey
-                                                                                                        : Colors.black,
-                                                                                                  ),
-                                                                                                  onPressed: isAddonRemoveDisabled(
-                                                                                                    p.id.toString(),
-                                                                                                    e.id.toString(),
-                                                                                                    int.parse(e.quantity.toString()),
-                                                                                                  )
-                                                                                                      ? null
-                                                                                                      : () {
-                                                                                                    setState(() {
-                                                                                                      e.quantity = (e.quantity) - 1;
-                                                                                                      if (e.quantity == 0) {
-                                                                                                        e.isSelected = false;
-                                                                                                      }
-                                                                                                    });
-                                                                                                  },
-                                                                                                ),
-                                                                                                Text(
-                                                                                                  '${e.quantity}',
-                                                                                                ),
-                                                                                                IconButton(
-                                                                                                  icon: const Icon(
-                                                                                                    Icons.add,
-                                                                                                    color: Colors.brown,
-                                                                                                  ),
-                                                                                                  onPressed: e.quantity == 0
-                                                                                                      ? () {
-                                                                                                    setState(() {
-                                                                                                      e.quantity = 1;
-                                                                                                      e.isSelected = true;
-                                                                                                    });
-                                                                                                  }
-                                                                                                      : null, // disable if already 1
-                                                                                                )
+                                                                              ElevatedButton(
+                                                                                onPressed: () {
+                                                                                  final currentQtyInCart = getCurrentQuantity(
+                                                                                    p.id.toString(),
+                                                                                  );
+                                                                                  bool canAdd;
 
+                                                                                  if (p.isStock ==
+                                                                                      true) {
+                                                                                    if ((widget.isEditingOrder ==
+                                                                                        true &&
+                                                                                        widget.existingOrder?.data
+                                                                                            ?.orderStatus ==
+                                                                                            "COMPLETED") ||
+                                                                                        (widget.isEditingOrder ==
+                                                                                            true &&
+                                                                                            widget.existingOrder?.data
+                                                                                                ?.orderStatus ==
+                                                                                                "WAITLIST")) {
+                                                                                      final paidQty =
+                                                                                          widget.existingOrder?.data?.items
+                                                                                              ?.firstWhereOrNull(
+                                                                                                (item,) =>
+                                                                                            item.product?.id ==
+                                                                                                p.id,
+                                                                                          )
+                                                                                              ?.quantity ??
+                                                                                              0;
+                                                                                      canAdd =
+                                                                                          currentQtyInCart <
+                                                                                              ((p.availableQuantity ??
+                                                                                                  0) +
+                                                                                                  paidQty);
+                                                                                    } else {
+                                                                                      canAdd =
+                                                                                          currentQtyInCart <
+                                                                                              (p.availableQuantity ??
+                                                                                                  0);
+                                                                                    }
+                                                                                  } else {
+                                                                                    canAdd = true;
+                                                                                  }
 
-                                                                                              ],
-                                                                                            ),
-                                                                                          ],
-                                                                                        ),
-                                                                                      ),
+                                                                                  if (!canAdd) {
+                                                                                    showToast(
+                                                                                      "Cannot add more items. Stock limit reached.",
+                                                                                      context,
+                                                                                      color: false,
                                                                                     );
-                                                                                  },
-                                                                                ).toList(),
-                                                                              ),
-                                                                              SizedBox(
-                                                                                height: 20,
-                                                                              ),
-                                                                              Row(
-                                                                                mainAxisAlignment: MainAxisAlignment.end,
-                                                                                children: [
-                                                                                  ElevatedButton(
-                                                                                    onPressed: () {
-                                                                                      setState(
-                                                                                            () {
-                                                                                          if (counter >
-                                                                                              1 ||
-                                                                                              counter ==
-                                                                                                  1) {
-                                                                                            counter--;
-                                                                                          }
-                                                                                        },
+                                                                                    return;
+                                                                                  }
+
+                                                                                  setState(
+                                                                                        () {
+                                                                                      isSplitPayment = false;
+                                                                                      if (widget.isEditingOrder !=
+                                                                                          true) {
+                                                                                        selectedOrderType = OrderType.line;
+                                                                                      }
+                                                                                      final index = billingItems.indexWhere(
+                                                                                            (item) => item['_id'] == p.id,
                                                                                       );
+
+                                                                                      final selectedAddons = p.addons!
+                                                                                          .where((addon) => addon.quantity > 0)
+                                                                                          .map((addon) => {
+                                                                                        "_id": addon.id,
+                                                                                        "price": addon.price,
+                                                                                        "quantity": addon.quantity,
+                                                                                        "name": addon.name,
+                                                                                        "isAvailable": addon.isAvailable,
+                                                                                        "maxQuantity": addon.maxQuantity,
+                                                                                        "isFree": addon.isFree,
+                                                                                      })
+                                                                                          .toList();
+
+                                                                                      if (index != -1) {
+                                                                                        billingItems[index]['selectedAddons'] = selectedAddons;
+                                                                                      } else {
+                                                                                        billingItems.add({
+                                                                                          "_id": p.id,
+                                                                                          "basePrice": p.basePrice,
+                                                                                          "image": p.image,
+                                                                                          "qty": 0,
+                                                                                          "name": p.name,
+                                                                                          "availableQuantity": p.availableQuantity,
+                                                                                          "selectedAddons": selectedAddons,
+                                                                                        });
+                                                                                      }
+
+                                                                                      debugPrint("billingAddbills:${List.from(
+                                                                                        billingItems,
+                                                                                      )}");
+                                                                                      context
+                                                                                          .read<
+                                                                                          FoodCategoryBloc
+                                                                                      >()
+                                                                                          .add(
+                                                                                        AddToBilling(
+                                                                                          List.from(
+                                                                                            billingItems,
+                                                                                          ),
+                                                                                          isDiscountApplied,
+                                                                                          selectedOrderType,
+                                                                                        ),
+                                                                                      );
+                                                                                      debugPrint("billingItem in addons:${List.from(
+                                                                                        billingItems,
+                                                                                      )}");
+                                                                                      if(billingItems.isEmpty || billingItems == []) {
+                                                                                        for (var addon in p
+                                                                                            .addons!) {
+                                                                                          addon
+                                                                                              .isSelected =
+                                                                                          false;
+                                                                                          addon
+                                                                                              .quantity =
+                                                                                          0;
+                                                                                        }
+                                                                                      }
                                                                                       Navigator.of(
                                                                                         context,
                                                                                       ).pop();
                                                                                     },
-                                                                                    style: ElevatedButton.styleFrom(
-                                                                                      backgroundColor: greyColor.shade400,
-                                                                                      minimumSize: Size(
-                                                                                        80,
-                                                                                        40,
-                                                                                      ),
-                                                                                      padding: EdgeInsets.all(
-                                                                                        20,
-                                                                                      ),
-                                                                                      shape: RoundedRectangleBorder(
-                                                                                        borderRadius: BorderRadius.circular(
-                                                                                          10,
-                                                                                        ),
-                                                                                      ),
-                                                                                    ),
-                                                                                    child: Text(
-                                                                                      'Cancel',
-                                                                                      style: MyTextStyle.f14(
-                                                                                        blackColor,
-                                                                                      ),
+                                                                                  );
+                                                                                },
+                                                                                style: ElevatedButton.styleFrom(
+                                                                                  backgroundColor: appPrimaryColor,
+                                                                                  minimumSize: Size(
+                                                                                    80,
+                                                                                    40,
+                                                                                  ),
+                                                                                  padding: EdgeInsets.all(
+                                                                                    20,
+                                                                                  ),
+                                                                                  shape: RoundedRectangleBorder(
+                                                                                    borderRadius: BorderRadius.circular(
+                                                                                      10,
                                                                                     ),
                                                                                   ),
-                                                                                  SizedBox(
-                                                                                    width: 8,
+                                                                                ),
+                                                                                child: Text(
+                                                                                  'Add to Bill',
+                                                                                  style: MyTextStyle.f14(
+                                                                                    whiteColor,
                                                                                   ),
-                                                                                  ElevatedButton(
-                                                                                    onPressed: () {
-                                                                                      final currentQtyInCart = getCurrentQuantity(
-                                                                                        p.id.toString(),
-                                                                                      );
-                                                                                      bool canAdd;
-
-                                                                                      if (p.isStock ==
-                                                                                          true) {
-                                                                                        if ((widget.isEditingOrder ==
-                                                                                            true &&
-                                                                                            widget.existingOrder?.data
-                                                                                                ?.orderStatus ==
-                                                                                                "COMPLETED") ||
-                                                                                            (widget.isEditingOrder ==
-                                                                                                true &&
-                                                                                                widget.existingOrder?.data
-                                                                                                    ?.orderStatus ==
-                                                                                                    "WAITLIST")) {
-                                                                                          final paidQty =
-                                                                                              widget.existingOrder?.data?.items
-                                                                                                  ?.firstWhereOrNull(
-                                                                                                    (item,) =>
-                                                                                                item.product?.id ==
-                                                                                                    p.id,
-                                                                                              )
-                                                                                                  ?.quantity ??
-                                                                                                  0;
-                                                                                          canAdd =
-                                                                                              currentQtyInCart <
-                                                                                                  ((p.availableQuantity ??
-                                                                                                      0) +
-                                                                                                      paidQty);
-                                                                                        } else {
-                                                                                          canAdd =
-                                                                                              currentQtyInCart <
-                                                                                                  (p.availableQuantity ??
-                                                                                                      0);
-                                                                                        }
-                                                                                      } else {
-                                                                                        canAdd = true;
-                                                                                      }
-
-                                                                                      if (!canAdd) {
-                                                                                        showToast(
-                                                                                          "Cannot add more items. Stock limit reached.",
-                                                                                          context,
-                                                                                          color: false,
-                                                                                        );
-                                                                                        return;
-                                                                                      }
-
-                                                                                      setState(
-                                                                                            () {
-                                                                                          isSplitPayment = false;
-                                                                                          if (widget.isEditingOrder !=
-                                                                                              true) {
-                                                                                            selectedOrderType = OrderType.line;
-                                                                                          }
-                                                                                          final index = billingItems.indexWhere(
-                                                                                                (item) => item['_id'] == p.id,
-                                                                                          );
-
-                                                                                          final selectedAddons = p.addons!
-                                                                                              .where((addon) => addon.quantity > 0)
-                                                                                              .map((addon) => {
-                                                                                            "_id": addon.id,
-                                                                                            "price": addon.price,
-                                                                                            "quantity": addon.quantity,
-                                                                                            "name": addon.name,
-                                                                                            "isAvailable": addon.isAvailable,
-                                                                                            "maxQuantity": addon.maxQuantity,
-                                                                                            "isFree": addon.isFree,
-                                                                                          })
-                                                                                              .toList();
-
-                                                                                          if (index != -1) {
-                                                                                            billingItems[index]['selectedAddons'] = selectedAddons;
-                                                                                          } else {
-                                                                                            billingItems.add({
-                                                                                              "_id": p.id,
-                                                                                              "basePrice": p.basePrice,
-                                                                                              "image": p.image,
-                                                                                              "qty": 0,
-                                                                                              "name": p.name,
-                                                                                              "availableQuantity": p.availableQuantity,
-                                                                                              "selectedAddons": selectedAddons,
-                                                                                            });
-                                                                                          }
-
-                                                                                          debugPrint("billingAddbills:${List.from(
-                                                                                            billingItems,
-                                                                                          )}");
-                                                                                          context
-                                                                                              .read<
-                                                                                              FoodCategoryBloc
-                                                                                          >()
-                                                                                              .add(
-                                                                                            AddToBilling(
-                                                                                              List.from(
-                                                                                                billingItems,
-                                                                                              ),
-                                                                                              isDiscountApplied,
-                                                                                              selectedOrderType,
-                                                                                            ),
-                                                                                          );
-                                                                                          debugPrint("billingItem in addons:${List.from(
-                                                                                            billingItems,
-                                                                                          )}");
-                                                                                          if(billingItems.isEmpty || billingItems == []) {
-                                                                                            for (var addon in p
-                                                                                                .addons!) {
-                                                                                              addon
-                                                                                                  .isSelected =
-                                                                                              false;
-                                                                                              addon
-                                                                                                  .quantity =
-                                                                                              0;
-                                                                                            }
-                                                                                          }
-                                                                                          Navigator.of(
-                                                                                            context,
-                                                                                          ).pop();
-                                                                                        },
-                                                                                      );
-                                                                                    },
-                                                                                    style: ElevatedButton.styleFrom(
-                                                                                      backgroundColor: appPrimaryColor,
-                                                                                      minimumSize: Size(
-                                                                                        80,
-                                                                                        40,
-                                                                                      ),
-                                                                                      padding: EdgeInsets.all(
-                                                                                        20,
-                                                                                      ),
-                                                                                      shape: RoundedRectangleBorder(
-                                                                                        borderRadius: BorderRadius.circular(
-                                                                                          10,
-                                                                                        ),
-                                                                                      ),
-                                                                                    ),
-                                                                                    child: Text(
-                                                                                      'Add to Bill',
-                                                                                      style: MyTextStyle.f14(
-                                                                                        whiteColor,
-                                                                                      ),
-                                                                                    ),
-                                                                                  ),
-                                                                                ],
+                                                                                ),
                                                                               ),
                                                                             ],
                                                                           ),
-                                                                        ),
+                                                                        ],
                                                                       ),
-                                                                    );
-                                                                  },
-                                                                ),
-                                                              ),
-                                                            );
-                                                          },
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              },
+                                                            ),
+                                                          ),
                                                         );
                                                       },
-                                                      style: ElevatedButton.styleFrom(
-                                                        backgroundColor: const Color(0xFFF5F6F8), // light grey background
-                                                        foregroundColor: appPrimaryColor, // brown text
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius: BorderRadius.circular(20),
-                                                        ),
-                                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                                        minimumSize: const Size(0, 0),
-                                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                                        elevation: 0, // flat look (no shadow)
-                                                      ),
-                                                      child: const Text(
-                                                        "Choose Add-ons",
-                                                        style: TextStyle(
-                                                          fontSize: 14,
-                                                          fontWeight: FontWeight.w500,
-                                                        ),
-                                                      ),
+                                                    );
+                                                  },
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: const Color(0xFFF5F6F8), // light grey background
+                                                    foregroundColor: appPrimaryColor, // brown text
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(20),
                                                     ),
-                                                ],
-                                              ),
-                                              // ),
-                                            ),
+                                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                                    minimumSize: const Size(0, 0),
+                                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                                    elevation: 0, // flat look (no shadow)
+                                                  ),
+                                                  child: const Text(
+                                                    "Choose Add-ons",
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
                                           ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                          // ),
+                                        ),
+                                      ),
+                                    );
+                                                                          },
+                                                                        ),
+                                      ),
+                              ],
                             ),
                           ),
 
@@ -11745,11 +11661,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                       url,
                                                       error,
                                                       ) {
-                                                    return const Icon(
-                                                      Icons.error,
-                                                      size: 30,
-                                                      color:
-                                                      appHomeTextColor,
+                                                    return Image.asset(
+                                                      Images.all,
+                                                      width: 25,
+                                                      height: 25,
+                                                      fit: BoxFit.cover,
                                                     );
                                                   },
                                                   progressIndicatorBuilder:
@@ -14495,7 +14411,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
       backgroundColor: whiteColor,
       appBar: PreferredSize(
         preferredSize: size.width < 650
-            ? const Size.fromHeight(60)
+            ? const Size.fromHeight(40)
             : const Size.fromHeight(70),
         child: AppBar(
           backgroundColor: whiteColor,
@@ -14503,7 +14419,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
           flexibleSpace: Container(
             width: double.infinity,
             color: whiteColor,
-            padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+            padding: const EdgeInsets.only(top: 28, left: 20, right: 20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -14512,11 +14428,11 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                         child: Text(
                           getStockMaintanencesModel.data!.name.toString(),
                           style: size.width < 650
-                              ? MyTextStyle.f20(
+                              ? MyTextStyle.f18(
                                   appPrimaryColor,
                                   weight: FontWeight.bold,
                                 )
-                              : MyTextStyle.f30(
+                              : MyTextStyle.f28(
                                   appPrimaryColor,
                                   weight: FontWeight.bold,
                                 ),

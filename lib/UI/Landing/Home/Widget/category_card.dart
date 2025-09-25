@@ -138,38 +138,70 @@ class CategoryCard extends StatelessWidget {
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.orange.shade50, // background circle
+                color: Colors.transparent, // background circle
               ),
-              child: ClipOval(
-                child: (imagePath.isEmpty)
-                    ? Image.asset(
-                        fallbackAsset,
-                        width: 30,
-                        height: 30,
-                        fit: BoxFit.cover,
-                      )
-                    : _isNetworkImage(imagePath)
-                    ? CachedNetworkImage(
-                        imageUrl: imagePath,
-                        width: 30,
-                        height: 30,
-                        fit: BoxFit.cover,
-                        errorWidget: (context, url, error) => Image.asset(
+              child: CircleAvatar(
+                radius: 18,
+                backgroundColor: Colors.transparent,
+                child: ClipOval(
+                  child: (imagePath.isEmpty)
+                      ? Image.asset(
                           fallbackAsset,
-                          width: 30,
-                          height: 30,
+                          width: 25,
+                          height: 25,
+                          fit: BoxFit.cover,
+                        )
+                      : _isNetworkImage(imagePath)
+                      ? CachedNetworkImage(
+                          imageUrl: imagePath,
+                          width: 25,
+                          height: 25,
+                          fit: BoxFit.cover,
+                          errorWidget: (context, url, error) => Image.asset(
+                            fallbackAsset,
+                            width: 25,
+                            height: 25,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Image.asset(
+                          imagePath,
+                          width: 25,
+                          height: 25,
                           fit: BoxFit.cover,
                         ),
-                      )
-                    : Image.asset(
-                        imagePath,
-                        width: 30,
-                        height: 30,
-                        fit: BoxFit.cover,
-                      ),
+                ), // optional
               ),
+              // ClipOval(
+              //   child: (imagePath.isEmpty)
+              //       ? Image.asset(
+              //           fallbackAsset,
+              //           width: 35,
+              //           height: 35,
+              //           fit: BoxFit.cover,
+              //         )
+              //       : _isNetworkImage(imagePath)
+              //       ? CachedNetworkImage(
+              //           imageUrl: imagePath,
+              //           width: 30,
+              //           height: 35,
+              //           fit: BoxFit.cover,
+              //           errorWidget: (context, url, error) => Image.asset(
+              //             fallbackAsset,
+              //             width: 30,
+              //             height: 30,
+              //             fit: BoxFit.cover,
+              //           ),
+              //         )
+              //       : Image.asset(
+              //           imagePath,
+              //           width: 30,
+              //           height: 30,
+              //           fit: BoxFit.cover,
+              //         ),
+              // ),
             ),
-            const SizedBox(width: 8),
+            // const SizedBox(width: 8),
             // Label text
             Text(
               label,

@@ -378,7 +378,7 @@ class OrderPageViewState extends State<OrderPageView>
                   Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
-                      vertical: 8,
+                      vertical: 5,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1085,7 +1085,7 @@ class OrderPageViewState extends State<OrderPageView>
       backgroundColor: whiteColor,
       appBar: PreferredSize(
         preferredSize: size.width < 650
-            ? const Size.fromHeight(60)
+            ? const Size.fromHeight(40)
             : const Size.fromHeight(70),
         child: AppBar(
           backgroundColor: whiteColor,
@@ -1093,7 +1093,7 @@ class OrderPageViewState extends State<OrderPageView>
           flexibleSpace: Container(
             width: double.infinity,
             color: whiteColor,
-            padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+            padding: const EdgeInsets.only(top: 28, left: 20, right: 20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
