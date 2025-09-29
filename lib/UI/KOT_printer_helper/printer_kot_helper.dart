@@ -80,18 +80,18 @@ Widget getThermalReceiptKOTWidget({
                   "Item",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: 20,
                     color: blackColor,
                   ),
                 ),
               ),
               const Expanded(
-                flex: 1,
+                flex: 2,
                 child: Text(
                   "Qty",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: 20,
                     color: blackColor,
                   ),
                   textAlign: TextAlign.center,
@@ -136,7 +136,7 @@ Widget _buildKOTInfoRow(String label, String value) {
           child: Text(
             label,
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 20,
               color: blackColor,
               fontWeight: FontWeight.bold,
             ),
@@ -146,7 +146,7 @@ Widget _buildKOTInfoRow(String label, String value) {
           child: Text(
             value,
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 20,
               color: blackColor,
               fontWeight: FontWeight.bold,
             ),
@@ -167,18 +167,18 @@ Widget _buildKOTItemRow(String name, int qty) {
           child: Text(
             name,
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 20,
               color: blackColor,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
         Expanded(
-          flex: 1,
+          flex: 2,
           child: Text(
             '$qty',
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 20,
               color: blackColor,
               fontWeight: FontWeight.bold,
             ),

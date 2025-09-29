@@ -34,6 +34,7 @@ import 'package:ramanas_waiter/UI/Landing/Home/Helper/order_helper.dart';
 import 'package:ramanas_waiter/UI/Landing/Home/Widget/category_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image/image.dart' as img;
+import 'package:ramanas_waiter/UI/IminHelper/printer_helper.dart';
 
 class HomePage extends StatelessWidget {
   final from;
@@ -71,10 +72,10 @@ extension OrderTypeX on OrderType {
     switch (this) {
       case OrderType.line:
         return "LINE";
-      case OrderType.ac:
-        return "AC";
       case OrderType.parcel:
         return "PARCEL";
+      case OrderType.ac:
+        return "AC";
       case OrderType.hd:
         return "HD";
       case OrderType.swiggy:
@@ -85,10 +86,10 @@ extension OrderTypeX on OrderType {
     switch (value) {
       case "LINE":
         return OrderType.line;
-      case "AC":
-        return OrderType.ac;
       case "PARCEL":
         return OrderType.parcel;
+      case "AC":
+        return OrderType.ac;
       case "HD":
         return OrderType.hd;
       case "SWIGGY":
@@ -118,6 +119,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
   final int limit = 10;
 
   final TextEditingController ipController = TextEditingController();
+  final TextEditingController ipLanController = TextEditingController();
   TextEditingController searchController = TextEditingController();
   TextEditingController searchCodeController = TextEditingController();
   Map<String, TextEditingController> quantityControllers = {};
@@ -488,7 +490,90 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
       );
     }
   }
+  Future<void> _startNormalPrintingThermalOnly(BuildContext context, String printerIp) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(color: appPrimaryColor),
+              SizedBox(height: 16),
+              Text("Preparing KOT for thermal printer...",
+                  style: TextStyle(color: whiteColor)),
+            ],
+          ),
+        ),
+      );
 
+      await Future.delayed(const Duration(milliseconds: 300));
+      await WidgetsBinding.instance.endOfFrame;
+
+      Uint8List? imageBytes = await captureMonochromeReceipt(normalReceiptKey);
+
+      if (imageBytes != null) {
+        final printer = PrinterNetworkManager(printerIp);
+        final result = await printer.connect();
+
+        if (result == PosPrintResult.success) {
+          final profile = await CapabilityProfile.load();
+          final generator = Generator(PaperSize.mm58, profile);
+
+          final decodedImage = img.decodeImage(imageBytes);
+          if (decodedImage != null) {
+            final resizedImage = img.copyResize(
+              decodedImage,
+              width: 384, // 58mm = ~384 dots at 203 DPI
+              maintainAspect: true,
+            );
+            List<int> bytes = [];
+            bytes += generator.reset();
+            bytes += generator.imageRaster(
+              resizedImage,
+              align: PosAlign.center,
+              highDensityHorizontal: true, // Better quality
+              highDensityVertical: true,
+            );
+            bytes += generator.feed(2);
+            bytes += generator.cut();
+            await printer.printTicket(bytes);
+          }
+
+          await printer.disconnect();
+
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("KOT printed to thermal printer only!"),
+              backgroundColor: greenColor,
+            ),
+          );
+        } else {
+          // ❌ Failed to connect
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Failed to connect to printer ($result)"),
+              backgroundColor: redColor,
+            ),
+          );
+        }
+      } else {
+        Navigator.of(context).pop();
+        throw Exception("Failed to capture KOT receipt image");
+      }
+    } catch (e) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("KOT Print failed: $e"),
+          backgroundColor: redColor,
+        ),
+      );
+    }
+  }
 /// generate and update order print
   Future<void> printGenerateOrderReceipt() async {
     try {
@@ -512,7 +597,13 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
         'qty': e.quantity,
       })
           .toList();
-
+      List<Map<String, dynamic>> finalTax =
+      postGenerateOrderModel.order!.finalTaxes!
+          .map((e) => {
+        'name': e.name,
+        'amt': e.amount,
+      })
+          .toList();
       String businessName = postGenerateOrderModel.invoice!.businessName ?? '';
       String address = postGenerateOrderModel.invoice!.address ?? '';
       String gst = postGenerateOrderModel.invoice!.gstNumber ?? '';
@@ -532,9 +623,10 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
           ? postGenerateOrderModel.invoice!.waiterName.toString()
           : 'N/A';
       String date = formatInvoiceDate(postGenerateOrderModel.invoice?.date);
-      ipController.text =
-          postGenerateOrderModel.invoice!.thermalIp.toString() ?? "";
+      ipController.text = postGenerateOrderModel.invoice!.thermalIp.toString() ?? "";
+      ipLanController.text = postGenerateOrderModel.invoice!.ipAddress.toString() ?? "";
       debugPrint("ip:${ipController.text}");
+      debugPrint("ipLan:${ipLanController.text}");
       Navigator.of(context).pop();
 
       await showDialog(
@@ -557,15 +649,40 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                     ),
                     child: Column(
                       children: [
+                        // Normal Bill Receipt
+                        // RepaintBoundary(
+                        //   key: normalReceiptKey,
+                        //   child: getThermalReceiptWidget(
+                        //     businessName: businessName,
+                        //     address: address,
+                        //     gst: gst,
+                        //     items: items,
+                        //     finalTax: finalTax,
+                        //     tax: taxPercent,
+                        //     paidBy: paymentMethod,
+                        //     tamilTagline: '',
+                        //     phone: phone,
+                        //     subtotal: subTotal,
+                        //     total: total,
+                        //     orderNumber: orderNumber,
+                        //     tableName: tableName,
+                        //     waiterName: waiterName,
+                        //     orderType: orderType,
+                        //     date: date,
+                        //     status: orderStatus,
+                        //   ),
+                        // ),
+
+                        //const SizedBox(height: 20),
                         // KOT Receipt (for kitchen)
-                        if (postGenerateOrderModel.invoice!.kot!.isNotEmpty)
+                       // if (postGenerateOrderModel.invoice!.kot!.isNotEmpty)
                           RepaintBoundary(
                             key: kotReceiptKey,
                             child: getThermalReceiptKOTWidget(
                               businessName: businessName,
                               address: address,
                               gst: gst,
-                              items: kotItems,
+                              items: items,
                               paidBy: paymentMethod,
                               tamilTagline: '',
                               phone: phone,
@@ -598,35 +715,34 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (postGenerateOrderModel.invoice!.kot!.isNotEmpty)
+                  //if (postGenerateOrderModel.invoice!.kot!.isNotEmpty)
                     ElevatedButton.icon(
                       onPressed: () {
                         _startKOTPrintingThermalOnly(
                           context,
-                          ipController.text.trim(),
+                          ipLanController.text.trim(),
                         );
                       },
                       icon: const Icon(Icons.print),
-                      label: const Text("KOT(LAN)"),
+                      label: const Text("Print(LAN)"),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: greenColor,
                         foregroundColor: whiteColor,
                       ),
                     ),
-                  horizontalSpace(width: 10),
-                  if (postGenerateOrderModel.invoice!.kot!.isNotEmpty)
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        _selectBluetoothPrinter(context);
-                      },
-                      icon: const Icon(Icons.bluetooth),
-                      label: const Text("KOT(BT)"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: greenColor,
-                        foregroundColor: whiteColor,
-                      ),
-                    ),
-                  horizontalSpace(width: 10),
+                  // horizontalSpace(width: 10),
+                  //   ElevatedButton.icon(
+                  //     onPressed: () {
+                  //       _startNormalPrintingThermalOnly(context,ipLanController.text.trim());
+                  //     },
+                  //     icon: const Icon(Icons.print),
+                  //     label: const Text("Print(LAN)"),
+                  //     style: ElevatedButton.styleFrom(
+                  //       backgroundColor: greenColor,
+                  //       foregroundColor: whiteColor,
+                  //     ),
+                  //   ),
+                  // horizontalSpace(width: 10),
 
                 ],
               ),
@@ -665,11 +781,26 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
           child: CircularProgressIndicator(),
         ),
       );
+      List<Map<String, dynamic>> items = updateGenerateOrderModel.order!.items!
+          .map((e) => {
+        'name': e.name,
+        'qty': e.quantity,
+        'price': (e.unitPrice ?? 0).toDouble(),
+        'total': ((e.quantity ?? 0) * (e.unitPrice ?? 0)).toDouble(),
+      })
+          .toList();
       List<Map<String, dynamic>> kotItems =
       updateGenerateOrderModel.invoice!.kot!
           .map((e) => {
         'name': e.name,
         'qty': e.quantity,
+      })
+          .toList();
+      List<Map<String, dynamic>> finalTax =
+      updateGenerateOrderModel.invoice!.finalTaxes!
+          .map((e) => {
+        'name': e.name,
+        'amt': double.parse(e.amount.toString()),
       })
           .toList();
       String businessName =
@@ -694,9 +825,10 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
           ? updateGenerateOrderModel.invoice!.waiterName.toString()
           : 'N/A';
       String date = formatInvoiceDate(updateGenerateOrderModel.invoice?.date);
-      ipController.text =
-          updateGenerateOrderModel.invoice!.thermalIp.toString() ?? "";
+      ipController.text = updateGenerateOrderModel.invoice!.thermalIp.toString() ?? "";
+      ipLanController.text = updateGenerateOrderModel.invoice!.ipAddress.toString() ?? "";
       debugPrint("ip:${ipController.text}");
+      debugPrint("ipLan:${ipLanController.text}");
       Navigator.of(context).pop();
       await showDialog(
         context: context,
@@ -718,14 +850,36 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                     ),
                     child: Column(
                       children: [
-                        if (updateGenerateOrderModel.invoice!.kot!.isNotEmpty)
+                        // RepaintBoundary(
+                        //   key: normalReceiptKey,
+                        //   child: getThermalReceiptWidget(
+                        //       businessName: businessName,
+                        //       address: address,
+                        //       gst: gst,
+                        //       items: items,
+                        //       finalTax: finalTax,
+                        //       tax: taxPercent,
+                        //       paidBy: paymentMethod,
+                        //       tamilTagline: '',
+                        //       phone: phone,
+                        //       subtotal: subTotal,
+                        //       total: total,
+                        //       orderNumber: orderNumber,
+                        //       tableName: tableName,
+                        //       waiterName: waiterName,
+                        //       orderType: orderType,
+                        //       date: date,
+                        //       status: orderStatus),
+                        // ),
+                        // const SizedBox(height: 20),
+                      //  if (updateGenerateOrderModel.invoice!.kot!.isNotEmpty)
                           RepaintBoundary(
                             key: kotReceiptKey,
                             child: getThermalReceiptKOTWidget(
                               businessName: businessName,
                               address: address,
                               gst: gst,
-                              items: kotItems,
+                              items: items,
                               paidBy: paymentMethod,
                               tamilTagline: '',
                               phone: phone,
@@ -756,35 +910,34 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (updateGenerateOrderModel.invoice!.kot!.isNotEmpty)
+                  // if (updateGenerateOrderModel.invoice!.kot!.isNotEmpty)
                     ElevatedButton.icon(
                       onPressed: () {
                         _startKOTPrintingThermalOnly(
                           context,
-                          ipController.text.trim(),
+                          ipLanController.text.trim(),
                         );
                       },
                       icon: const Icon(Icons.print),
-                      label: const Text("KOT(LAN)"),
+                      label: const Text("Print(LAN)"),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: greenColor,
                         foregroundColor: whiteColor,
                       ),
                     ),
-                  horizontalSpace(width: 10),
-                  if (updateGenerateOrderModel.invoice!.kot!.isNotEmpty)
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        _selectBluetoothPrinter(context);
-                      },
-                      icon: const Icon(Icons.bluetooth),
-                      label: const Text("KOT(BT)"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: greenColor,
-                        foregroundColor: whiteColor,
-                      ),
-                    ),
-                  horizontalSpace(width: 10),
+                  // horizontalSpace(width: 10),
+                  // ElevatedButton.icon(
+                  //   onPressed: () {
+                  //     _startNormalPrintingThermalOnly(context,ipLanController.text.trim());
+                  //   },
+                  //   icon: const Icon(Icons.print),
+                  //   label: const Text("Print(LAN)"),
+                  //   style: ElevatedButton.styleFrom(
+                  //     backgroundColor: greenColor,
+                  //     foregroundColor: whiteColor,
+                  //   ),
+                  // ),
+                  // horizontalSpace(width: 10),
 
                 ],
               ),
@@ -3974,38 +4127,38 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                   ),
                                                 ),
                                                 const SizedBox(width: 8),
-                                                // Expanded(
-                                                //   child: InkWell(
-                                                //     onTap: () {},
-                                                //     child: Container(
-                                                //       padding:
-                                                //           const EdgeInsets.symmetric(
-                                                //             vertical: 8,
-                                                //           ),
-                                                //       constraints:
-                                                //           const BoxConstraints(
-                                                //             minWidth: 70,
-                                                //           ),
-                                                //       decoration: BoxDecoration(
-                                                //         color: whiteColor,
-                                                //         borderRadius:
-                                                //             BorderRadius.circular(
-                                                //               30,
-                                                //             ),
-                                                //       ),
-                                                //       child: Center(
-                                                //         child: Text(
-                                                //           "Parcel",
-                                                //           style:
-                                                //               MyTextStyle.f12(
-                                                //                 blackColor,
-                                                //               ),
-                                                //         ),
-                                                //       ),
-                                                //     ),
-                                                //   ),
-                                                // ),
-                                                //const SizedBox(width: 2),
+                                                Expanded(
+                                                  child: InkWell(
+                                                    onTap: () {},
+                                                    child: Container(
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            vertical: 8,
+                                                          ),
+                                                      constraints:
+                                                          const BoxConstraints(
+                                                            minWidth: 70,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        color: whiteColor,
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              30,
+                                                            ),
+                                                      ),
+                                                      child: Center(
+                                                        child: Text(
+                                                          "Parcel",
+                                                          style:
+                                                              MyTextStyle.f12(
+                                                                blackColor,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 2),
                                                 Expanded(
                                                   child: InkWell(
                                                     onTap: () {},
@@ -4427,7 +4580,8 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                       ),
                                     )
                                   : Container(
-                                      margin: EdgeInsets.only(top: 35),
+                                      margin: EdgeInsets.only(top: 5),
+                                padding: EdgeInsets.only(top: 10),
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -4500,74 +4654,74 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                                 ),
                                               ),
                                               const SizedBox(width: 8),
-                                              // Expanded(
-                                              //   child: InkWell(
-                                              //     onTap: () {
-                                              //       setState(() {
-                                              //         selectedOrderType =
-                                              //             OrderType.parcel;
-                                              //         if (widget
-                                              //                 .isEditingOrder !=
-                                              //             true) {
-                                              //           selectedValue = null;
-                                              //           selectedValueWaiter =
-                                              //               null;
-                                              //           tableId = null;
-                                              //           waiterId = null;
-                                              //         }
-                                              //         isSplitPayment = false;
-                                              //         context
-                                              //             .read<
-                                              //               FoodCategoryBloc
-                                              //             >()
-                                              //             .add(
-                                              //               AddToBilling(
-                                              //                 List.from(
-                                              //                   billingItems,
-                                              //                 ),
-                                              //                 isDiscountApplied,
-                                              //                 selectedOrderType,
-                                              //               ),
-                                              //             );
-                                              //       });
-                                              //     },
-                                              //     child: Container(
-                                              //       alignment: Alignment.center,
-                                              //       padding:
-                                              //           const EdgeInsets.symmetric(
-                                              //             vertical: 8,
-                                              //           ),
-                                              //       constraints:
-                                              //           const BoxConstraints(
-                                              //             minWidth: 70,
-                                              //           ),
-                                              //       decoration: BoxDecoration(
-                                              //         color:
-                                              //             selectedOrderType ==
-                                              //                 OrderType.parcel
-                                              //             ? appPrimaryColor
-                                              //             : whiteColor,
-                                              //         borderRadius:
-                                              //             BorderRadius.circular(
-                                              //               30,
-                                              //             ),
-                                              //       ),
-                                              //       child: Center(
-                                              //         child: Text(
-                                              //           "Parcel",
-                                              //           style: MyTextStyle.f12(
-                                              //             selectedOrderType ==
-                                              //                     OrderType
-                                              //                         .parcel
-                                              //                 ? whiteColor
-                                              //                 : blackColor,
-                                              //           ),
-                                              //         ),
-                                              //       ),
-                                              //     ),
-                                              //   ),
-                                              // ),
-                                              // const SizedBox(width: 8),
+                                              Expanded(
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    setState(() {
+                                                      selectedOrderType =
+                                                          OrderType.parcel;
+                                                      if (widget
+                                                              .isEditingOrder !=
+                                                          true) {
+                                                        selectedValue = null;
+                                                        selectedValueWaiter =
+                                                            null;
+                                                        tableId = null;
+                                                        waiterId = null;
+                                                      }
+                                                      isSplitPayment = false;
+                                                      context
+                                                          .read<
+                                                            FoodCategoryBloc
+                                                          >()
+                                                          .add(
+                                                            AddToBilling(
+                                                              List.from(
+                                                                billingItems,
+                                                              ),
+                                                              isDiscountApplied,
+                                                              selectedOrderType,
+                                                            ),
+                                                          );
+                                                    });
+                                                  },
+                                                  child: Container(
+                                                    alignment: Alignment.center,
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          vertical: 8,
+                                                        ),
+                                                    constraints:
+                                                        const BoxConstraints(
+                                                          minWidth: 70,
+                                                        ),
+                                                    decoration: BoxDecoration(
+                                                      color:
+                                                          selectedOrderType ==
+                                                              OrderType.parcel
+                                                          ? appPrimaryColor
+                                                          : whiteColor,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            30,
+                                                          ),
+                                                    ),
+                                                    child: Center(
+                                                      child: Text(
+                                                        "Parcel",
+                                                        style: MyTextStyle.f12(
+                                                          selectedOrderType ==
+                                                                  OrderType
+                                                                      .parcel
+                                                              ? whiteColor
+                                                              : blackColor,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
                                               Expanded(
                                                 child: InkWell(
                                                   onTap: () {
@@ -8089,8 +8243,8 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                       shrinkWrap: true,
                                       padding: EdgeInsets.only(
                                     top: 10,
-                                                                          ),
-                                                                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                      ),
+                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount:
                                     MediaQuery.of(
                                       context,
@@ -10524,38 +10678,38 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                             ),
                                           ),
                                           const SizedBox(width: 8),
-                                          // Expanded(
-                                          //   child: InkWell(
-                                          //     onTap: () {},
-                                          //     child: Container(
-                                          //       padding:
-                                          //       const EdgeInsets.symmetric(
-                                          //         vertical: 8,
-                                          //       ),
-                                          //       constraints:
-                                          //       const BoxConstraints(
-                                          //         minWidth: 70,
-                                          //       ),
-                                          //       decoration: BoxDecoration(
-                                          //         color: whiteColor,
-                                          //         borderRadius:
-                                          //         BorderRadius.circular(
-                                          //           30,
-                                          //         ),
-                                          //       ),
-                                          //       child: Center(
-                                          //         child: Text(
-                                          //           "Parcel",
-                                          //           style:
-                                          //           MyTextStyle.f12(
-                                          //             blackColor,
-                                          //           ),
-                                          //         ),
-                                          //       ),
-                                          //     ),
-                                          //   ),
-                                          // ),
-                                          // const SizedBox(width: 2),
+                                          Expanded(
+                                            child: InkWell(
+                                              onTap: () {},
+                                              child: Container(
+                                                padding:
+                                                const EdgeInsets.symmetric(
+                                                  vertical: 8,
+                                                ),
+                                                constraints:
+                                                const BoxConstraints(
+                                                  minWidth: 70,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: whiteColor,
+                                                  borderRadius:
+                                                  BorderRadius.circular(
+                                                    30,
+                                                  ),
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    "Parcel",
+                                                    style:
+                                                    MyTextStyle.f12(
+                                                      blackColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 2),
                                           Expanded(
                                             child: InkWell(
                                               onTap: () {},
@@ -10977,7 +11131,8 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                 ),
                               )
                                   : Container(
-                                margin: EdgeInsets.only(top: 35),
+                                margin: EdgeInsets.only(top: 5),
+                                padding: EdgeInsets.only(top: 10),
                                 child: Column(
                                   crossAxisAlignment:
                                   CrossAxisAlignment.start,
@@ -11050,74 +11205,74 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
                                           ),
                                         ),
                                         const SizedBox(width: 8),
-                                        // Expanded(
-                                        //   child: InkWell(
-                                        //     onTap: () {
-                                        //       setState(() {
-                                        //         selectedOrderType =
-                                        //             OrderType.parcel;
-                                        //         if (widget
-                                        //             .isEditingOrder !=
-                                        //             true) {
-                                        //           selectedValue = null;
-                                        //           selectedValueWaiter =
-                                        //           null;
-                                        //           tableId = null;
-                                        //           waiterId = null;
-                                        //         }
-                                        //         isSplitPayment = false;
-                                        //         context
-                                        //             .read<
-                                        //             FoodCategoryBloc
-                                        //         >()
-                                        //             .add(
-                                        //           AddToBilling(
-                                        //             List.from(
-                                        //               billingItems,
-                                        //             ),
-                                        //             isDiscountApplied,
-                                        //             selectedOrderType,
-                                        //           ),
-                                        //         );
-                                        //       });
-                                        //     },
-                                        //     child: Container(
-                                        //       alignment: Alignment.center,
-                                        //       padding:
-                                        //       const EdgeInsets.symmetric(
-                                        //         vertical: 8,
-                                        //       ),
-                                        //       constraints:
-                                        //       const BoxConstraints(
-                                        //         minWidth: 70,
-                                        //       ),
-                                        //       decoration: BoxDecoration(
-                                        //         color:
-                                        //         selectedOrderType ==
-                                        //             OrderType.parcel
-                                        //             ? appPrimaryColor
-                                        //             : whiteColor,
-                                        //         borderRadius:
-                                        //         BorderRadius.circular(
-                                        //           30,
-                                        //         ),
-                                        //       ),
-                                        //       child: Center(
-                                        //         child: Text(
-                                        //           "Parcel",
-                                        //           style: MyTextStyle.f12(
-                                        //             selectedOrderType ==
-                                        //                 OrderType
-                                        //                     .parcel
-                                        //                 ? whiteColor
-                                        //                 : blackColor,
-                                        //           ),
-                                        //         ),
-                                        //       ),
-                                        //     ),
-                                        //   ),
-                                        // ),
-                                        // const SizedBox(width: 8),
+                                        Expanded(
+                                          child: InkWell(
+                                            onTap: () {
+                                              setState(() {
+                                                selectedOrderType =
+                                                    OrderType.parcel;
+                                                if (widget
+                                                    .isEditingOrder !=
+                                                    true) {
+                                                  selectedValue = null;
+                                                  selectedValueWaiter =
+                                                  null;
+                                                  tableId = null;
+                                                  waiterId = null;
+                                                }
+                                                isSplitPayment = false;
+                                                context
+                                                    .read<
+                                                    FoodCategoryBloc
+                                                >()
+                                                    .add(
+                                                  AddToBilling(
+                                                    List.from(
+                                                      billingItems,
+                                                    ),
+                                                    isDiscountApplied,
+                                                    selectedOrderType,
+                                                  ),
+                                                );
+                                              });
+                                            },
+                                            child: Container(
+                                              alignment: Alignment.center,
+                                              padding:
+                                              const EdgeInsets.symmetric(
+                                                vertical: 8,
+                                              ),
+                                              constraints:
+                                              const BoxConstraints(
+                                                minWidth: 70,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color:
+                                                selectedOrderType ==
+                                                    OrderType.parcel
+                                                    ? appPrimaryColor
+                                                    : whiteColor,
+                                                borderRadius:
+                                                BorderRadius.circular(
+                                                  30,
+                                                ),
+                                              ),
+                                              child: Center(
+                                                child: Text(
+                                                  "Parcel",
+                                                  style: MyTextStyle.f12(
+                                                    selectedOrderType ==
+                                                        OrderType
+                                                            .parcel
+                                                        ? whiteColor
+                                                        : blackColor,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
                                         Expanded(
                                           child: InkWell(
                                             onTap: () {
@@ -14623,7 +14778,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
             //     searchController.text,
             //     searchCodeController.text));
             _loadInitialProducts();
-            if (postGenerateOrderModel.message != null && postGenerateOrderModel.invoice!.kot!.isNotEmpty) {
+            if (postGenerateOrderModel.message != null) {
               printGenerateOrderReceipt();
             } else {
               debugPrint("Receipt not printed - shouldPrintReceipt is false");
@@ -14687,7 +14842,7 @@ class HomePageViewState extends State<HomePageView>  with TickerProviderStateMix
             //     searchController.text,
             //     searchCodeController.text));
             _loadInitialProducts();
-            if (updateGenerateOrderModel.message != null && updateGenerateOrderModel.invoice!.kot!.isNotEmpty) {
+            if (updateGenerateOrderModel.message != null) {
               printUpdateOrderReceipt();
               // if (shouldPrintReceipt == true &&
               //     updateGenerateOrderModel.message != null) {

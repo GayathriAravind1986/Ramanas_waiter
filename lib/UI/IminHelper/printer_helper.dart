@@ -24,7 +24,7 @@ Widget getThermalReceiptWidget({
   required String status,
 }) {
   return Container(
-    width: 450, // Standard thermal printer width
+    width: 384, // Standard thermal printer width
     color: whiteColor, // Ensure white background
     child: Padding(
       padding: const EdgeInsets.all(8.0),

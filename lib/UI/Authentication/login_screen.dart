@@ -80,7 +80,7 @@ class LoginScreenViewState extends State<LoginScreenView> {
                       children: [
                         // Title
                         Text(
-                          'Roja Restaurant',
+                          'Login',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -223,7 +223,7 @@ class LoginScreenViewState extends State<LoginScreenView> {
                       children: [
                         // Title
                         Text(
-                          'Roja Restaurant',
+                          'Login',
                           style: TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.bold,

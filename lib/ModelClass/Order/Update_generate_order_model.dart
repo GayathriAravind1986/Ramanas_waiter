@@ -102,6 +102,7 @@ class Invoice {
     String? currencySymbol,
     String? printType,
     String? thermalIp,
+    String? ipAddress,
     String? orderStatus,
     List<InvoiceItems>? invoiceItems,
     num? subtotal,
@@ -127,6 +128,7 @@ class Invoice {
     _currencySymbol = currencySymbol;
     _printType = printType;
     _thermalIp = thermalIp;
+    _ipAddress = ipAddress;
     _orderStatus = orderStatus;
     _invoiceItems = invoiceItems;
     _subtotal = subtotal;
@@ -154,6 +156,7 @@ class Invoice {
     _currencySymbol = json['currencySymbol'];
     _printType = json['printType'];
     _thermalIp = json['thermalIp'];
+    _ipAddress = json['ipAddress'];
     _orderStatus = json['orderStatus'];
     if (json['invoice_items'] != null) {
       _invoiceItems = [];
@@ -194,6 +197,7 @@ class Invoice {
   String? _currencySymbol;
   String? _printType;
   String? _thermalIp;
+  String? _ipAddress;
   String? _orderStatus;
   List<InvoiceItems>? _invoiceItems;
   num? _subtotal;
@@ -219,6 +223,7 @@ class Invoice {
     String? currencySymbol,
     String? printType,
     String? thermalIp,
+    String? ipAddress,
     String? orderStatus,
     List<InvoiceItems>? invoiceItems,
     num? subtotal,
@@ -244,6 +249,7 @@ class Invoice {
     currencySymbol: currencySymbol ?? _currencySymbol,
     printType: printType ?? _printType,
     thermalIp: thermalIp ?? _thermalIp,
+    ipAddress: ipAddress ?? _ipAddress,
     orderStatus: orderStatus ?? _orderStatus,
     invoiceItems: invoiceItems ?? _invoiceItems,
     subtotal: subtotal ?? _subtotal,
@@ -269,6 +275,7 @@ class Invoice {
   String? get currencySymbol => _currencySymbol;
   String? get printType => _printType;
   String? get thermalIp => _thermalIp;
+  String? get ipAddress => _ipAddress;
   String? get orderStatus => _orderStatus;
   List<InvoiceItems>? get invoiceItems => _invoiceItems;
   num? get subtotal => _subtotal;
@@ -296,6 +303,7 @@ class Invoice {
     map['currencySymbol'] = _currencySymbol;
     map['printType'] = _printType;
     map['thermalIp'] = _thermalIp;
+    map['ipAddress'] = _ipAddress;
     map['orderStatus'] = _orderStatus;
     if (_invoiceItems != null) {
       map['invoice_items'] = _invoiceItems?.map((v) => v.toJson()).toList();

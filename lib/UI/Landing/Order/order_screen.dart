@@ -79,15 +79,15 @@ class OrderPageViewState extends State<OrderPageView>
   final List<String> _tabNames = [
     "All",
     "Line",
-    "AC",
     "Parcel",
+    "AC",
     "HD",
     "SWIGGY",
   ];
 
   @override
   void initState() {
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
         setState(() {
@@ -371,7 +371,7 @@ class OrderPageViewState extends State<OrderPageView>
         child: ResponsiveBuilder(
           mobileBuilder: (context, constraints) {
             return DefaultTabController(
-              length: 3,
+              length: 4,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -679,14 +679,14 @@ class OrderPageViewState extends State<OrderPageView>
                   TabBar(
                     controller: _tabController,
                     //isScrollable: true,
-                    //tabAlignment: TabAlignment.center,
+                    //  tabAlignment: TabAlignment.center,
                     labelColor: appPrimaryColor,
                     unselectedLabelColor: greyColor,
                     indicatorColor: appPrimaryColor,
                     tabs: const [
                       Tab(text: "All"),
                       Tab(text: "Line"),
-                      // Tab(text: "Parcel"),
+                      Tab(text: "Parcel"),
                       Tab(text: "AC"),
                       // Tab(text: "HD"),
                       // Tab(text: "SWIGGY"),
@@ -696,7 +696,7 @@ class OrderPageViewState extends State<OrderPageView>
                   Expanded(
                     child: TabBarView(
                       controller: _tabController,
-                      children: List.generate(3, (index) {
+                      children: List.generate(4, (index) {
                         // Get filtered orders for each tab
                         List<dynamic> filteredOrders;
                         if (index == 0) {
@@ -725,7 +725,7 @@ class OrderPageViewState extends State<OrderPageView>
           },
           tabletBuilder: (context, constraints) {
             return DefaultTabController(
-              length: 3,
+              length: 4,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1040,7 +1040,7 @@ class OrderPageViewState extends State<OrderPageView>
                     tabs: const [
                       Tab(text: "All"),
                       Tab(text: "Line"),
-                      //  Tab(text: "Parcel"),
+                      Tab(text: "Parcel"),
                       Tab(text: "AC"),
                       // Tab(text: "HD"),
                       // Tab(text: "SWIGGY"),
@@ -1050,7 +1050,7 @@ class OrderPageViewState extends State<OrderPageView>
                   Expanded(
                     child: TabBarView(
                       controller: _tabController,
-                      children: List.generate(3, (index) {
+                      children: List.generate(4, (index) {
                         // Get filtered orders for each tab
                         List<dynamic> filteredOrders;
                         if (index == 0) {
@@ -1102,11 +1102,11 @@ class OrderPageViewState extends State<OrderPageView>
                         child: Text(
                           getStockMaintanencesModel.data!.name.toString(),
                           style: size.width < 650
-                              ? MyTextStyle.f20(
+                              ? MyTextStyle.f18(
                                   appPrimaryColor,
                                   weight: FontWeight.bold,
                                 )
-                              : MyTextStyle.f30(
+                              : MyTextStyle.f28(
                                   appPrimaryColor,
                                   weight: FontWeight.bold,
                                 ),
